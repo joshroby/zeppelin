@@ -1,0 +1,18 @@
+body {
+	margin: 0;
+}
+
+#gameSVG {
+	width: 100%;
+	height: 100%;
+	border: 1px solid red;
+}
+
+#mainMenuDiv {
+	background-color: cyan;
+}
+
+svg {
+	font-family: 'Cinzel', serif;
+	font-weight: 900;
+}
