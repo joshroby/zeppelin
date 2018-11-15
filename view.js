@@ -1,6 +1,6 @@
 var view = {
 	
-	gameTitle: 'Putter Round',
+	gameTitle: 'Zeppel Endless',
 
 	options: {
 		scoreDisplay: 'VPS',
@@ -33,162 +33,96 @@ var view = {
 		defs.id = 'globalDefs';
 		svg.appendChild(defs);
 		
-		var genericPart = document.createElementNS('http://www.w3.org/2000/svg','rect');
-		genericPart.id = 'genericPart';
-		genericPart.setAttribute('x',0);
-		genericPart.setAttribute('y',0);
-		genericPart.setAttribute('width',10);
-		genericPart.setAttribute('height',10);
-		genericPart.setAttribute('fill','grey');
-		genericPart.setAttribute('stroke','black');
-		defs.appendChild(genericPart);
+		var hex = document.createElementNS('http://www.w3.org/2000/svg','polygon');
+		hex.id = 'tileHex';
+		defs.appendChild(hex);
+		hex.setAttribute('stroke','inherit');
+		hex.setAttribute('stroke-width','inherit');
+		hex.setAttribute('fill','inherit');
+		hex.setAttribute('points','0,100 87.5,50 87.5,-50 0,-100 -87.5,-50 -87.5,50');
+		hex.setAttribute('transform','scale(2.01)');
 		
-		var genericPartWheel = document.createElementNS('http://www.w3.org/2000/svg','g');
-		genericPartWheel.id = 'genericPartWheel';
-		defs.appendChild(genericPartWheel);
-		var circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
-		circle.setAttribute('cx',5);
-		circle.setAttribute('cy',5);
-		circle.setAttribute('r',3);
-		circle.setAttribute('fill','grey');
-		circle.setAttribute('stroke','black');
-		genericPartWheel.appendChild(circle);
-		var lilCircle = document.createElementNS('http://www.w3.org/2000/svg','circle');
-		lilCircle.setAttribute('cx',5);
-		lilCircle.setAttribute('cy',7);
-		lilCircle.setAttribute('r',1);
-		lilCircle.setAttribute('fill','grey');
-		lilCircle.setAttribute('stroke','black');
-		genericPartWheel.appendChild(lilCircle);
-		
-		var genericPartShoot = document.createElementNS('http://www.w3.org/2000/svg','g');
-		genericPartShoot.id = 'genericPartShoot';
-		defs.appendChild(genericPartShoot);
-		var polyline = document.createElementNS('http://www.w3.org/2000/svg','polyline');
-		polyline.setAttribute('fill','gray');
-		polyline.setAttribute('stroke','black');
-		polyline.setAttribute('points','3,0 2,9 -2,9 -3,0');
-		genericPartShoot.appendChild(polyline);
-
-		var resourceStone = document.createElementNS('http://www.w3.org/2000/svg','circle');
-		resourceStone.id = 'resourceStone';
-		resourceStone.setAttribute('cx',0);
-		resourceStone.setAttribute('cy',0);
-		resourceStone.setAttribute('r',2);
-		resourceStone.setAttribute('stroke','black');
-		defs.appendChild(resourceStone);
-		
-		var resourceIngot = document.createElementNS('http://www.w3.org/2000/svg','g');
-		resourceIngot.id = 'resourceIngot';
-		defs.appendChild(resourceIngot);
-		var polygon = document.createElementNS('http://www.w3.org/2000/svg','polygon');
-		polygon.setAttribute('points','1,2 3,0 2.5,-2 0.5,-2 -2.5,0');
-		polygon.setAttribute('stroke','black');
-		polygon.setAttribute('stroke-linejoin','round');
-		resourceIngot.appendChild(polygon);
-		var polygon = document.createElementNS('http://www.w3.org/2000/svg','polygon');
-		polygon.setAttribute('points','-3,2 -2.5,0 0.5,0 1,2 -3,2');
-		polygon.setAttribute('stroke','black');
-		polygon.setAttribute('stroke-linejoin','round');
-		resourceIngot.appendChild(polygon);
-		
-		var resourceCoin = document.createElementNS('http://www.w3.org/2000/svg','g');
-		resourceCoin.id = 'resourceCoin';
-		resourceCoin.setAttribute('stroke','black');
-		defs.appendChild(resourceCoin);
-		var ellipseHeads = document.createElementNS('http://www.w3.org/2000/svg','ellipse');
-		resourceCoin.appendChild(ellipseHeads);
-		ellipseHeads.setAttribute('cx',0.25);
-		ellipseHeads.setAttribute('cy',0);
-		ellipseHeads.setAttribute('rx',1.5);
-		ellipseHeads.setAttribute('ry',2);
-		var ellipseTails = document.createElementNS('http://www.w3.org/2000/svg','ellipse');
-		resourceCoin.appendChild(ellipseTails);
-		ellipseTails.setAttribute('cx',-0.25);
-		ellipseTails.setAttribute('cy',0);
-		ellipseTails.setAttribute('rx',1.5);
-		ellipseTails.setAttribute('ry',2);
-		
-		var resourceCrown = document.createElementNS('http://www.w3.org/2000/svg','g');
-		defs.appendChild(resourceCrown);
-		resourceCrown.id = 'resourceCrown';
-		resourceCrown.setAttribute('stroke','black');
+		var weeds = document.createElementNS('http://www.w3.org/2000/svg','g');
+		defs.appendChild(weeds);
+		weeds.id = 'weeds';
+		weeds.setAttribute('stroke','black');
 		var polygon = document.createElementNS('http://www.w3.org/2000/svg','polygon');
 		polygon.setAttribute('points','-2,2 2,2 3,-1 1,0 0,-2 -1,0 -3,-1 -2,2');
 		polygon.setAttribute('stroke','black');
 		polygon.setAttribute('stroke-linejoin','round');
-		resourceCrown.appendChild(polygon);
+		weeds.appendChild(polygon);
 		
-		var resourceShield = document.createElementNS('http://www.w3.org/2000/svg','g');
-		defs.appendChild(resourceShield);
-		resourceShield.id = 'resourceShield';
-		resourceShield.setAttribute('stroke','black');
-		var path = document.createElementNS('http://www.w3.org/2000/svg','path');
-		var d = 'M 2,0 L 0,-2 L -2,0 L 0,2';
-		d += 'C 0.5,2.5 1.5,2.5 2,2';
-		d += 'C 2.5,1.5 2.5,0.5 2,0';
-		d += ' z'
-		path.setAttribute('d',d);
-		path.setAttribute('stroke','black');
-		path.setAttribute('stroke-linejoin','round');
-		resourceShield.appendChild(path);
+		var hill = document.createElementNS('http://www.w3.org/2000/svg','g');
+		defs.appendChild(hill);
+		hill.id = 'hill';
+		var ridge = 'M -10 0 Q -8,-1 -6,0 T -3,0 T 1,0 T 5,0 T 10,0 ';
+		var shadowPath = ridge + 'C 2.5,2.5 2.5,5 0,5 S -2.5,2.5 -10,0 z';
+		var highlightPath = ridge + 'C 2.5,-2.5 2.5,-5 0,-5 S -2.5,-2.5 -10,0 z';
+		var shadow = document.createElementNS('http://www.w3.org/2000/svg','path');
+		hill.appendChild(shadow);
+		shadow.setAttribute('fill','black');
+		shadow.setAttribute('opacity',0.2);
+		shadow.setAttribute('d',shadowPath);
+		var highlight = document.createElementNS('http://www.w3.org/2000/svg','path');
+		hill.appendChild(highlight);
+		highlight.setAttribute('fill','white');
+		highlight.setAttribute('opacity',0.2);
+		highlight.setAttribute('d',highlightPath);
 		
-		var resourceSword = document.createElementNS('http://www.w3.org/2000/svg','g');
-		defs.appendChild(resourceSword);
-		resourceSword.id = 'resourceSword';
-		resourceSword.setAttribute('stroke','black');
-		var polygon = document.createElementNS('http://www.w3.org/2000/svg','polygon');
-		polygon.setAttribute('points',' -2.5,-2 -2,-2.5 2.5,1.5 2.5,2.5 1.5,2.5 -2.5,-2');
-		polygon.setAttribute('stroke','black');
-		polygon.setAttribute('stroke-linejoin','round');
-		resourceSword.appendChild(polygon);
-		var polygon = document.createElementNS('http://www.w3.org/2000/svg','polygon');
-		polygon.setAttribute('points','0,-2 1,-1 -1,1 -2,0 0,-2');
-		polygon.setAttribute('stroke','black');
-		polygon.setAttribute('stroke-linejoin','round');
-		resourceSword.appendChild(polygon);
+		var sandbar = document.createElementNS('http://www.w3.org/2000/svg','path');
+		defs.appendChild(sandbar);
+		sandbar.id = 'sandbar';
+		sandbar.setAttribute('fill','gold');
+		var d = 'M -10,0 Q -10,-2 -7,-2 T -4,-3 T 0,-1 T 3,-2 T 6,-3 T 8,-2 T 10,0';
+		d += 'T 7,3 T 5,2 T4,2 T 1,3 T -2,2 T -5,3 T -8,2 T -10,0 z';
+		sandbar.setAttribute('d',d);
 		
-		var resourceCup = document.createElementNS('http://www.w3.org/2000/svg','g');
-		defs.appendChild(resourceCup);
-		resourceCup.id = 'resourceCup';
-		resourceCup.setAttribute('stroke','black');
-		var path = document.createElementNS('http://www.w3.org/2000/svg','path');
-		var d = 'M -2,-2';
-		d += 'C -2,0 -0.75,-0.5 -0.75,0';
-		d += 'C -0.75,1.5 -1.5,2 -1.5,2';
-		d += 'L 1.5,2';
-		d += 'C 1.5,2 0.75,1.5 0.75,0';
-		d += 'C 0.75,-0.5 2,0 2,-2';
-		d += ' z'
-		path.setAttribute('d',d);
-		path.setAttribute('stroke','black');
-		path.setAttribute('stroke-linejoin','round');
-		resourceCup.appendChild(path);
+		// Ship Defs
 
-		var resourceGem = document.createElementNS('http://www.w3.org/2000/svg','g');
-		defs.appendChild(resourceGem);
-		resourceGem.id = 'resourceGem';
-		var polygon = document.createElementNS('http://www.w3.org/2000/svg','polygon');
-		polygon.setAttribute('points','-1,-2 1,-2 2,-1 2,1 1,2 -1,2 -2,1 -2,-1');
-		polygon.setAttribute('stroke','black');
-		resourceGem.appendChild(polygon);
-		var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
-		rect.setAttribute('x',-1);
-		rect.setAttribute('y',-1);
-		rect.setAttribute('width',2);
-		rect.setAttribute('height',2);
-		rect.setAttribute('stroke-width',0.25);
-		rect.setAttribute('stroke','black');
-		resourceGem.appendChild(rect);
+		var defaultShip = document.createElementNS('http://www.w3.org/2000/svg','g')
+		defs.appendChild(defaultShip);
+		defaultShip.id = 'defaultShip';
+		defaultShip.setAttribute('fill','grey');
+		defaultShip.setAttribute('stroke-width',0.5);
+		var ellipse = document.createElementNS('http://www.w3.org/2000/svg','ellipse');
+		ellipse.setAttribute('cx',0);
+		ellipse.setAttribute('cy',0);
+		ellipse.setAttribute('rx',1.5);
+		ellipse.setAttribute('ry',4);
+		ellipse.setAttribute('fill','grey');
+		ellipse.setAttribute('stroke','black');
+		defaultShip.appendChild(ellipse);
+		var tailboom = document.createElementNS('http://www.w3.org/2000/svg','polygon');
+		var points = "0,2 3.25,3 3.25,4.25 0,4 -3.25,4.25 -3.25,3";
+		tailboom.setAttribute('points',points);
+		tailboom.setAttribute('fill','grey');
+		tailboom.setAttribute('stroke','black');
+		defaultShip.appendChild(tailboom);	
+		var ellipse = document.createElementNS('http://www.w3.org/2000/svg','ellipse');
+		ellipse.setAttribute('cx',2);
+		ellipse.setAttribute('cy',3);
+		ellipse.setAttribute('rx',0.5);
+		ellipse.setAttribute('ry',1.5);
+		ellipse.setAttribute('fill','grey');
+		ellipse.setAttribute('stroke','black');
+		defaultShip.appendChild(ellipse);
+		var ellipse = document.createElementNS('http://www.w3.org/2000/svg','ellipse');
+		ellipse.setAttribute('cx',-2);
+		ellipse.setAttribute('cy',3);
+		ellipse.setAttribute('rx',0.5);
+		ellipse.setAttribute('ry',1.5);
+		ellipse.setAttribute('fill','grey');
+		ellipse.setAttribute('stroke','black');
+		defaultShip.appendChild(ellipse);
 		
-		var victoryPoint = document.createElementNS('http://www.w3.org/2000/svg','polygon');
-		defs.appendChild(victoryPoint);
-		victoryPoint.id = 'resourceVictoryPoint';
-		victoryPoint.setAttribute('fill','cyan');
-		victoryPoint.setAttribute('stroke','black');
-		victoryPoint.setAttribute('stroke-width',0.5);
-		victoryPoint.setAttribute('points','0,-2 1,-1 3,-1 2,0 3,1 1,1 0,2 -1,1 -3,1 -2,0 -3,-1 -1,-1');
-		victoryPoint.setAttribute('transform','scale(0.9,1.2)');
+		var cloud = document.createElementNS('http://www.w3.org/2000/svg','ellipse');
+		defs.appendChild(cloud);
+		cloud.id = 'cloud';
+		cloud.setAttribute('fill','white');
+		cloud.setAttribute('rx',10);
+		cloud.setAttribute('ry',14);
+		
+		// UI Defs
 
 		var eotBracket = document.createElementNS('http://www.w3.org/2000/svg','g');
 		defs.appendChild(eotBracket);
@@ -215,6 +149,7 @@ var view = {
 		shipsWheel.id = 'shipsWheel'
 		shipsWheel.setAttribute('fill','saddlebrown');
 		shipsWheel.setAttribute('stroke','black');
+		shipsWheel.setAttribute('stroke-linejoin','round');
 		var d = 'M0 0 h-1 l-1 24 '
 		d += 'q 1 0 1 1 t -1 1 q 0 4 2 4 ';
 		d += 't 2 -4 q -1 0 -1 -1 t 1 -1';
@@ -269,12 +204,31 @@ var view = {
 		return [svgDiv];
 	},
 	
-	initMap: function(map) {
+	initMap: function(maps) {
 	
 		// Clear Map
 		var landscapeGroup = document.getElementById('landscapeGroup');
 		landscapeGroup.innerHTML = '';
+		
+		for (var map of maps) {
+			map.populateClouds();
+			view.addMap(map);			
+		};
+	},
 	
+	addMap: function(map) {
+		var sectionGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+		landscapeGroup.appendChild(sectionGroup);
+		sectionGroup.id = map.id;
+	
+		// Background
+		var backgroundTile = document.createElementNS('http://www.w3.org/2000/svg','use');
+		sectionGroup.appendChild(backgroundTile);
+		backgroundTile.setAttribute('fill',map.backgroundColor);
+		backgroundTile.setAttribute('x',map.x);
+		backgroundTile.setAttribute('y',map.y);
+		view.setHref(backgroundTile,'tileHex');
+
 		// Landmarks
 		for (var landmark of map.landmarks) {
 			var landmarkUse = document.createElementNS('http://www.w3.org/2000/svg','use');
@@ -282,11 +236,13 @@ var view = {
 			landmarkUse.setAttribute('y',landmark.y);
 			landmarkUse.setAttribute('fill',landmark.fill);
 			view.setHref(landmarkUse,landmark.glyph);
-			landscapeGroup.appendChild(landmarkUse);
+			sectionGroup.appendChild(landmarkUse);
 		};
+		
+		view.updatePlayerMap(map);
 	},
 	
-	initUI: function() {
+	initUI: function(ship) {
 		var uiGroup = document.getElementById('uiGroup');
 		uiGroup.innerHTML = '';
 		
@@ -358,6 +314,7 @@ var view = {
 		wheel.id = 'uiWheel';
 		rumbleGroup.appendChild(wheel);
 		wheel.setAttribute('y',62);
+		wheel.setAttribute('transform','translate(0 62) rotate('+view.r2d(ship.rudder)+') translate(0 -62)');
 		
 		var airspeedCasingRect = document.createElementNS('http://www.w3.org/2000/svg','rect');
 		rumbleGroup.appendChild(airspeedCasingRect);
@@ -369,7 +326,6 @@ var view = {
 		airspeedCasingRect.setAttribute('height',20);
 		airspeedCasingRect.setAttribute('fill','saddlebrown');
 		airspeedCasingRect.setAttribute('stroke','black');
-		
 		var airspeedRect = document.createElementNS('http://www.w3.org/2000/svg','rect');
 		rumbleGroup.appendChild(airspeedRect);
 		airspeedRect.setAttribute('x',69);
@@ -379,7 +335,6 @@ var view = {
 		airspeedRect.setAttribute('fill','lemonchiffon');
 		airspeedRect.setAttribute('stroke','black');
 		airspeedRect.setAttribute('stroke-width',0.5);
-		
 		var airspeedText = document.createElementNS('http://www.w3.org/2000/svg','text');
 		rumbleGroup.appendChild(airspeedText);
 		airspeedText.id = 'uiAirspeed';
@@ -398,7 +353,6 @@ var view = {
 		headingCasingRect.setAttribute('height',20);
 		headingCasingRect.setAttribute('fill','saddlebrown');
 		headingCasingRect.setAttribute('stroke','black');
-		
 		var headingRect = document.createElementNS('http://www.w3.org/2000/svg','rect');
 		rumbleGroup.appendChild(headingRect);
 		headingRect.setAttribute('x',30);
@@ -408,7 +362,6 @@ var view = {
 		headingRect.setAttribute('fill','lightgoldenrodyellow');
 		headingRect.setAttribute('stroke','black');
 		headingRect.setAttribute('stroke-width',0.5);
-		
 		var headingText = document.createElementNS('http://www.w3.org/2000/svg','text');
 		rumbleGroup.appendChild(headingText);
 		headingText.id = 'uiHeadingCardinal';
@@ -416,7 +369,6 @@ var view = {
 		headingText.setAttribute('y',57);
 		headingText.setAttribute('font-size',4);
 		headingText.setAttribute('text-anchor','middle');
-		
 		var headingText = document.createElementNS('http://www.w3.org/2000/svg','text');
 		rumbleGroup.appendChild(headingText);
 		headingText.id = 'uiHeading';
@@ -424,6 +376,79 @@ var view = {
 		headingText.setAttribute('y',60);
 		headingText.setAttribute('font-size',2);
 		headingText.setAttribute('text-anchor','middle');
+		
+		var mapGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+		rumbleGroup.appendChild(mapGroup);
+		var mapBoard = document.createElementNS('http://www.w3.org/2000/svg','rect')
+		mapGroup.appendChild(mapBoard);
+		mapBoard.setAttribute('fill','saddlebrown');
+		mapBoard.setAttribute('stroke','black');
+		mapBoard.setAttribute('x',-101);
+		mapBoard.setAttribute('y',-63);
+		mapBoard.setAttribute('width',40);
+		mapBoard.setAttribute('height',40);
+		var mapBG = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		mapGroup.appendChild(mapBG);
+		mapBG.setAttribute('fill','cornsilk');
+		mapBG.setAttribute('x',-98);
+		mapBG.setAttribute('y',-60);
+		mapBG.setAttribute('width',35);
+		mapBG.setAttribute('height',35);
+		var mapSVG = document.createElementNS('http://www.w3.org/2000/svg','svg');
+		mapGroup.appendChild(mapSVG);
+		mapSVG.id = 'mapSVG';
+		mapSVG.setAttribute('x',-98);
+		mapSVG.setAttribute('y',-60);
+		mapSVG.setAttribute('width',35);
+		mapSVG.setAttribute('height',35);
+		mapSVG.setAttribute('stroke','black');
+		mapSVG.setAttribute('viewBox','-3000 -3000 6000 6000');
+		var circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+		mapGroup.appendChild(circle);
+		circle.setAttribute('cx',-98 + 35/2);
+		circle.setAttribute('cy',-60 + 35/2);
+		circle.setAttribute('r',0.25);
+		circle.setAttribute('fill','red');
+		circle.setAttribute('stroke','black');
+		circle.setAttribute('stroke-width',0.25);
+		circle.setAttribute('paint-order','stroke');
+		
+		var windSockGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+		rumbleGroup.appendChild(windSockGroup);
+		var windSockX = -92;
+		var windSockY = -55;
+		windSockGroup.setAttribute('stroke-width',0.5);
+		var circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+		windSockGroup.appendChild(circle)
+		circle.setAttribute('cx',windSockX);
+		circle.setAttribute('cy',windSockY);
+		circle.setAttribute('r',4);
+		circle.setAttribute('fill','saddlebrown');
+		circle.setAttribute('stroke','black');
+		var circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+		windSockGroup.appendChild(circle)
+		circle.setAttribute('cx',windSockX);
+		circle.setAttribute('cy',windSockY);
+		circle.setAttribute('r',3);
+		circle.setAttribute('fill','lightgoldenrodyellow');
+		circle.setAttribute('stroke','black');
+		var text = document.createElementNS('http://www.w3.org/2000/svg','text');
+		windSockGroup.appendChild(text);
+		text.setAttribute('x',windSockX);
+		text.setAttribute('y',windSockY+2);
+		text.setAttribute('text-anchor','middle');
+		text.setAttribute('font-size',1.5);
+		text.innerHTML = 'Wind';
+		var line = document.createElementNS('http://www.w3.org/2000/svg','line');
+		windSockGroup.appendChild(line);
+		line.setAttribute('stroke','red');
+		line.setAttribute('stroke-width',2);
+		line.setAttribute('x1',windSockX);
+		line.setAttribute('y1',windSockY);
+		line.setAttribute('x2',windSockX);
+		line.setAttribute('y2',windSockY-5);
+		line.setAttribute('stroke-linecap','round');
+		line.id = 'uiWindSock';
 
 	},
 	
@@ -435,6 +460,23 @@ var view = {
 		shipsGroup.appendChild(shipGroup);
 		
 		view.updateShip(ship);
+	},
+	
+	updateShip: function(ship) {
+		var shipGroup = document.getElementById('shipGroup_'+ship.id);
+		shipGroup.innerHTML = '';
+		
+		var useNode = document.createElementNS('http://www.w3.org/2000/svg','use');
+		useNode.setAttribute('x',ship.x);
+		useNode.setAttribute('y',ship.y);
+		view.setHref(useNode,ship.sprite);
+		shipGroup.appendChild(useNode);
+		
+		if (ship.opacity !== undefined) {
+			shipGroup.setAttribute('opacity',ship.opacity);
+		};
+		
+		shipGroup.setAttribute('transform','translate('+ship.x+' '+ship.y+') rotate('+(view.r2d(ship.heading))+') translate('+(-1*ship.x)+' '+(-1*ship.y)+')');
 	},
 	
 	updateEOT: function() {
@@ -479,35 +521,37 @@ var view = {
 			cardinalString = "NW";
 		};
 		uiHeadingCardinal.innerHTML = cardinalString;
+		
+		var uiWindSock = document.getElementById('uiWindSock');
+		var windDirection = game.p1ship.currentMap().wind.direction;
+		var windSpeed = game.p1ship.currentMap().wind.speed;
+		var windSockX = -92;
+		var windSockY = -55;
+		var x2 = windSockX + Math.sin(windDirection) * windSpeed * 1.5;
+		var y2 = windSockY - Math.cos(windDirection) * windSpeed * 1.5;
+		uiWindSock.setAttribute('x2',x2);
+		uiWindSock.setAttribute('y2',y2);
 	},
 	
-	updateShip: function(ship) {
-		var shipGroup = document.getElementById('shipGroup_'+ship.id);
-		shipGroup.innerHTML = '';
-		
-		var useNode = document.createElementNS('http://www.w3.org/2000/svg','use');
-		useNode.setAttribute('x',ship.x);
-		useNode.setAttribute('y',ship.y);
-		useNode.setAttribute('fill','blue');
-		view.setHref(useNode,'resourceCrown');
-		shipGroup.appendChild(useNode);
-		
-		var ellipse = document.createElementNS('http://www.w3.org/2000/svg','ellipse');
-		ellipse.setAttribute('cx',ship.x);
-		ellipse.setAttribute('cy',ship.y + 3.5);
-		ellipse.setAttribute('rx',2);
-		ellipse.setAttribute('ry',5);
-		ellipse.setAttribute('fill','blue');
-		ellipse.setAttribute('stroke','black');
-		shipGroup.appendChild(ellipse);
-		
-		shipGroup.setAttribute('transform','translate('+ship.x+' '+ship.y+') rotate('+(180+view.r2d(ship.heading))+') translate('+(-1*ship.x)+' '+(-1*ship.y)+')');
+	updatePlayerMap: function(map) {
+		var mapSVG = document.getElementById('mapSVG');
+		if (mapSVG !== null) {
+			var mapTileUse = document.createElementNS('http://www.w3.org/2000/svg','use');
+			view.setHref(mapTileUse,'tileHex');
+			mapTileUse.setAttribute('x',map.x);
+			mapTileUse.setAttribute('y',map.y);
+			mapTileUse.setAttribute('fill',map.backgroundColor);
+			mapSVG.appendChild(mapTileUse);
+		};
 	},
 	
 	recenterMap: function() {
 		var gameSVG = document.getElementById('gameSVG');
 		var center = {x:game.p1ship.x,y:game.p1ship.y};
 		gameSVG.setAttribute('viewBox',(center.x-100)+" "+(center.y-61.5)+' 200 123');
+		
+		var mapSVG = document.getElementById('mapSVG');
+		mapSVG.setAttribute('viewBox',(center.x-3000)+" "+(center.y-3000)+' 6000 6000');
 		
 		var uiGroup = document.getElementById('uiGroup');
 		uiGroup.setAttribute('transform','translate('+(center.x)+" "+(center.y)+')');
