@@ -1,9 +1,14 @@
 var view = {
 	
 	gameTitle: 'Zeppel Endless',
-
-	options: {
-		scoreDisplay: 'VPS',
+	
+	panes: {
+		minimap: 'minimized',
+		tab0: 'minimized',
+		tab1: 'minimized',
+		tab2: 'minimized',
+		tab3: 'minimized',
+		tab4: 'minimized',
 	},
 	
 	r2d: function(radians) {
@@ -42,87 +47,328 @@ var view = {
 		hex.setAttribute('points','0,100 87.5,50 87.5,-50 0,-100 -87.5,-50 -87.5,50');
 		hex.setAttribute('transform','scale(2.01)');
 		
-		var weeds = document.createElementNS('http://www.w3.org/2000/svg','g');
-		defs.appendChild(weeds);
-		weeds.id = 'weeds';
-		weeds.setAttribute('stroke','black');
-		var polygon = document.createElementNS('http://www.w3.org/2000/svg','polygon');
-		polygon.setAttribute('points','-2,2 2,2 3,-1 1,0 0,-2 -1,0 -3,-1 -2,2');
-		polygon.setAttribute('stroke','black');
-		polygon.setAttribute('stroke-linejoin','round');
-		weeds.appendChild(polygon);
-		
-		var hill = document.createElementNS('http://www.w3.org/2000/svg','g');
-		defs.appendChild(hill);
-		hill.id = 'hill';
-		var ridge = 'M -10 0 Q -8,-1 -6,0 T -3,0 T 1,0 T 5,0 T 10,0 ';
-		var shadowPath = ridge + 'C 2.5,2.5 2.5,5 0,5 S -2.5,2.5 -10,0 z';
-		var highlightPath = ridge + 'C 2.5,-2.5 2.5,-5 0,-5 S -2.5,-2.5 -10,0 z';
-		var shadow = document.createElementNS('http://www.w3.org/2000/svg','path');
-		hill.appendChild(shadow);
-		shadow.setAttribute('fill','black');
-		shadow.setAttribute('opacity',0.2);
-		shadow.setAttribute('d',shadowPath);
-		var highlight = document.createElementNS('http://www.w3.org/2000/svg','path');
-		hill.appendChild(highlight);
-		highlight.setAttribute('fill','white');
-		highlight.setAttribute('opacity',0.2);
-		highlight.setAttribute('d',highlightPath);
-		
-		var sandbar = document.createElementNS('http://www.w3.org/2000/svg','path');
-		defs.appendChild(sandbar);
-		sandbar.id = 'sandbar';
-		sandbar.setAttribute('fill','gold');
-		var d = 'M -10,0 Q -10,-2 -7,-2 T -4,-3 T 0,-1 T 3,-2 T 6,-3 T 8,-2 T 10,0';
-		d += 'T 7,3 T 5,2 T4,2 T 1,3 T -2,2 T -5,3 T -8,2 T -10,0 z';
-		sandbar.setAttribute('d',d);
-		
 		// Ship Defs
 
 		var defaultShip = document.createElementNS('http://www.w3.org/2000/svg','g')
 		defs.appendChild(defaultShip);
 		defaultShip.id = 'defaultShip';
-		defaultShip.setAttribute('fill','grey');
-		defaultShip.setAttribute('stroke-width',0.5);
+		defaultShip.setAttribute('stroke-width',0.25);
 		var ellipse = document.createElementNS('http://www.w3.org/2000/svg','ellipse');
 		ellipse.setAttribute('cx',0);
 		ellipse.setAttribute('cy',0);
-		ellipse.setAttribute('rx',1.5);
-		ellipse.setAttribute('ry',4);
-		ellipse.setAttribute('fill','grey');
+		ellipse.setAttribute('rx',0.75);
+		ellipse.setAttribute('ry',2);
+		ellipse.setAttribute('fill','inherit');
 		ellipse.setAttribute('stroke','black');
 		defaultShip.appendChild(ellipse);
 		var tailboom = document.createElementNS('http://www.w3.org/2000/svg','polygon');
-		var points = "0,2 3.25,3 3.25,4.25 0,4 -3.25,4.25 -3.25,3";
+		var points = "0,1 1.725,1.5 1.75,2.125 0,2 -1.75,2.125 -1.725,1.5";
 		tailboom.setAttribute('points',points);
-		tailboom.setAttribute('fill','grey');
+		tailboom.setAttribute('fill','inherit');
 		tailboom.setAttribute('stroke','black');
 		defaultShip.appendChild(tailboom);	
 		var ellipse = document.createElementNS('http://www.w3.org/2000/svg','ellipse');
-		ellipse.setAttribute('cx',2);
-		ellipse.setAttribute('cy',3);
-		ellipse.setAttribute('rx',0.5);
-		ellipse.setAttribute('ry',1.5);
-		ellipse.setAttribute('fill','grey');
+		ellipse.setAttribute('cx',1);
+		ellipse.setAttribute('cy',1.5);
+		ellipse.setAttribute('rx',0.25);
+		ellipse.setAttribute('ry',0.75);
+		ellipse.setAttribute('fill','inherit');
 		ellipse.setAttribute('stroke','black');
 		defaultShip.appendChild(ellipse);
 		var ellipse = document.createElementNS('http://www.w3.org/2000/svg','ellipse');
-		ellipse.setAttribute('cx',-2);
-		ellipse.setAttribute('cy',3);
-		ellipse.setAttribute('rx',0.5);
-		ellipse.setAttribute('ry',1.5);
-		ellipse.setAttribute('fill','grey');
+		ellipse.setAttribute('cx',-1);
+		ellipse.setAttribute('cy',1.5);
+		ellipse.setAttribute('rx',0.25);
+		ellipse.setAttribute('ry',0.75);
+		ellipse.setAttribute('fill','inherit');
 		ellipse.setAttribute('stroke','black');
 		defaultShip.appendChild(ellipse);
+
+		var hull = document.createElementNS('http://www.w3.org/2000/svg','ellipse');
+		hull.id = 'hull_t1';
+		hull.setAttribute('cx',0);
+		hull.setAttribute('cy',0);
+		hull.setAttribute('rx',0.75);
+		hull.setAttribute('ry',2);
+		hull.setAttribute('fill','inherit');
+		hull.setAttribute('stroke','black');
+		defaultShip.appendChild(hull);
+		
+		var stabilizer = document.createElementNS('http://www.w3.org/2000/svg','polygon');
+		stabilizer.id = 'stabilizer_t1';
+		var points = "0,-0.5 2,0.2 2,0.5 0,0.5";
+		stabilizer.setAttribute('points',points);
+		stabilizer.setAttribute('fill','inherit');
+		stabilizer.setAttribute('stroke','black');
+		defs.appendChild(stabilizer);
+		
+		var motorGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+		defs.appendChild(motorGroup);
+		motorGroup.id = 'motor_t1';
+		motorGroup.setAttribute('fill','inherit');
+		motorGroup.setAttribute('stroke','black');
+		var strut = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		motorGroup.appendChild(strut);
+		strut.setAttribute('x',0);
+		strut.setAttribute('y',-0.25);
+		strut.setAttribute('width',1.5);
+		strut.setAttribute('height',0.5);
+		var motor = document.createElementNS('http://www.w3.org/2000/svg','ellipse');
+		motorGroup.appendChild(motor);
+		motor.setAttribute('cx',1.25);
+		motor.setAttribute('cy',0);
+		motor.setAttribute('rx',0.25);
+		motor.setAttribute('ry',0.75);
+		
+		var fin = document.createElementNS('http://www.w3.org/2000/svg','line');
+		defs.appendChild(fin);
+		fin.id = 'fin_t1';
+		fin.setAttribute('x1',0);
+		fin.setAttribute('y1',0);
+		fin.setAttribute('x2',0);
+		fin.setAttribute('y2',2);
+		fin.setAttribute('fill','inherit');
+		fin.setAttribute('stroke','black');
+		
+		var topDeck = document.createElementNS('http://www.w3.org/2000/svg','ellipse');
+		defs.appendChild(topDeck);
+		topDeck.id = 'topDeck_t1';
+		topDeck.setAttribute('cx',0);
+		topDeck.setAttribute('cy',0);
+		topDeck.setAttribute('rx',0.3);
+		topDeck.setAttribute('ry',0.45);
+		topDeck.setAttribute('fill','inherit');
+		topDeck.setAttribute('stroke','black');
+		
+		var tailboom = document.createElementNS('http://www.w3.org/2000/svg','polygon');
+		tailboom.id = 'tailboom_t1';
+		var points = "0,0 1.725,1 1.75,1.625 0,1 -1.75,1.625 -1.725,1";
+		tailboom.setAttribute('points',points);
+		tailboom.setAttribute('fill','inherit');
+		tailboom.setAttribute('stroke','black');
+		defs.appendChild(tailboom);
 		
 		var cloud = document.createElementNS('http://www.w3.org/2000/svg','ellipse');
 		defs.appendChild(cloud);
 		cloud.id = 'cloud';
-		cloud.setAttribute('fill','white');
+		cloud.setAttribute('fill','url(#cloudGradient)');
 		cloud.setAttribute('rx',10);
 		cloud.setAttribute('ry',14);
 		
+		var cloudGradient = document.createElementNS('http://www.w3.org/2000/svg','radialGradient');
+		defs.appendChild(cloudGradient);
+		cloudGradient.id = 'cloudGradient';
+		var stop = document.createElementNS('http://www.w3.org/2000/svg','stop');
+		cloudGradient.appendChild(stop);
+		stop.setAttribute('offset','0%');
+		stop.setAttribute('stop-color','white');
+		stop.setAttribute('stop-opacity',0.7);
+		var stop = document.createElementNS('http://www.w3.org/2000/svg','stop');
+		cloudGradient.appendChild(stop);
+		stop.setAttribute('offset','100%');
+		stop.setAttribute('stop-color','white');
+		stop.setAttribute('stop-opacity',0);
+		
+		// Map Features
+		
+		var mooringTower = document.createElementNS('http://www.w3.org/2000/svg','g');
+		defs.appendChild(mooringTower);
+		mooringTower.id = 'mooringTower';
+		mooringTower.setAttribute('stroke','black');
+		mooringTower.setAttribute('fill','inherit');
+		mooringTower.setAttribute('stroke-width',0.25);
+		for (var i=0;i<6;i++) {
+			var girderGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+			mooringTower.appendChild(girderGroup);
+			var girder = document.createElementNS('http://www.w3.org/2000/svg','rect');
+			girderGroup.appendChild(girder);
+			girder.setAttribute('x',6);
+			girder.setAttribute('y',-0.25);
+			girder.setAttribute('width',5.5);
+			girder.setAttribute('height',0.5);
+			girder.setAttribute('stroke-width',0.25);
+			girder.setAttribute('transform','rotate(140 6 0)');
+			var girder = document.createElementNS('http://www.w3.org/2000/svg','rect');
+			girderGroup.appendChild(girder);
+			girder.setAttribute('x',6);
+			girder.setAttribute('y',-0.25);
+			girder.setAttribute('width',5.5);
+			girder.setAttribute('height',0.5);
+			girder.setAttribute('stroke-width',0.25);
+			girder.setAttribute('transform','rotate(-140 6 0)');
+			girderGroup.setAttribute('transform','rotate('+i*60+' 0 0)');
+		};
+		var footD = 'm0,-0.75 h3 l3.5,0.25 l0.5,-0.5 l0.5,0 l1,0.5 v1 l-1,0.5 l-0.5,0 l-0.5,-0.5 l-3.5,0.25 h-3 z';
+		var legD = 'm0,-0.75 h3 l3.5,0.25 h1 v1 h-1 l-3.5,0.25 h-3 z';
+		for (var i=0;i<6;i++) {
+			var legGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+			mooringTower.appendChild(legGroup);
+			var foot = document.createElementNS('http://www.w3.org/2000/svg','path');
+			legGroup.appendChild(foot);
+			foot.setAttribute('d',footD);
+			var leg = document.createElementNS('http://www.w3.org/2000/svg','path');
+			legGroup.appendChild(leg);
+			leg.setAttribute('d',legD);
+			legGroup.setAttribute('transform','rotate('+i*60+' 0 0)');
+		};
+		var circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+		mooringTower.appendChild(circle);
+		circle.setAttribute('r',3);
+		var circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+		mooringTower.appendChild(circle);
+		circle.setAttribute('r',2.5);
+		var mast = document.createElementNS('http://www.w3.org/2000/svg','circle');
+		mooringTower.appendChild(mast);
+		mast.setAttribute('r',0.25);
+		var roofDetails = document.createElementNS('http://www.w3.org/2000/svg','g');
+		mooringTower.appendChild(roofDetails);
+		roofDetails.setAttribute('stroke-width',0.125);
+		var elevator = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		roofDetails.appendChild(elevator);
+		elevator.setAttribute('x',0.675);
+		elevator.setAttribute('y',-0.675);
+		elevator.setAttribute('width',1.25);
+		elevator.setAttribute('height',1.25);
+		var elevator = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		roofDetails.appendChild(elevator);
+		elevator.setAttribute('x',0-0.675-1.25);
+		elevator.setAttribute('y',-0.675);
+		elevator.setAttribute('width',1.25);
+		elevator.setAttribute('height',1.25);
+		
+		var targetGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+		defs.appendChild(targetGroup);
+		targetGroup.id = 'mooringTarget';
+		var targetSize = 10;
+		targetGroup.setAttribute('opacity',0.5);
+		targetGroup.setAttribute('fill','none');
+		targetGroup.setAttribute('stroke','lime');
+		targetGroup.setAttribute('stroke-width',2);
+		targetGroup.setAttribute('stroke-linecap','round');
+		var targetCircle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+		targetGroup.appendChild(targetCircle);
+		targetCircle.setAttribute('r',targetSize);
+		var targetLineUp = document.createElementNS('http://www.w3.org/2000/svg','line');
+		targetGroup.appendChild(targetLineUp);
+		targetLineUp.setAttribute('x1',0);
+		targetLineUp.setAttribute('y1',targetSize);
+		targetLineUp.setAttribute('x2',0);
+		targetLineUp.setAttribute('y2',targetSize+3);
+		var targetLineDown = document.createElementNS('http://www.w3.org/2000/svg','line');
+		targetGroup.appendChild(targetLineDown);
+		targetLineDown.setAttribute('x1',0);
+		targetLineDown.setAttribute('y1',targetSize*-1);
+		targetLineDown.setAttribute('x2',0);
+		targetLineDown.setAttribute('y2',(targetSize+3)*-1);
+		var targetLineLeft = document.createElementNS('http://www.w3.org/2000/svg','line');
+		targetGroup.appendChild(targetLineLeft);
+		targetLineLeft.setAttribute('y1',0);
+		targetLineLeft.setAttribute('x1',targetSize);
+		targetLineLeft.setAttribute('y2',0);
+		targetLineLeft.setAttribute('x2',targetSize+3);
+		var targetLineRight = document.createElementNS('http://www.w3.org/2000/svg','line');
+		targetGroup.appendChild(targetLineRight);
+		targetLineRight.setAttribute('y1',0);
+		targetLineRight.setAttribute('x1',targetSize*-1);
+		targetLineRight.setAttribute('y2',0);
+		targetLineRight.setAttribute('x2',(targetSize+3)*-1);
+		var targetSpin = document.createElementNS('http://www.w3.org/2000/svg','animateTransform');
+		targetGroup.appendChild(targetSpin);
+		targetSpin.setAttribute('attributeName','transform');
+		targetSpin.setAttribute('attributeType','XML');
+		targetSpin.setAttribute('type','rotate');
+		targetSpin.setAttribute('from','0 0 0');
+		targetSpin.setAttribute('to','360 0 0');
+		targetSpin.setAttribute('dur','4s');
+		targetSpin.setAttribute('repeatCount','indefinite');
+		
+		var basicRoof = document.createElementNS('http://www.w3.org/2000/svg','g');
+		defs.appendChild(basicRoof);
+		basicRoof.id = 'basicRoof';
+		basicRoof.setAttribute('fill','darkgoldenrod');
+		basicRoof.setAttribute('stroke-width',0.25);
+		basicRoof.setAttribute('stroke','black');
+		var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		basicRoof.appendChild(rect);
+		rect.setAttribute('x',0);
+		rect.setAttribute('y',-1);
+		rect.setAttribute('width',1);
+		rect.setAttribute('height',2);
+		var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		basicRoof.appendChild(rect);
+		rect.setAttribute('x',-1);
+		rect.setAttribute('y',-1);
+		rect.setAttribute('width',1);
+		rect.setAttribute('height',2);
+		
+		var basicRoofShader = document.createElementNS('http://www.w3.org/2000/svg','g');
+		defs.appendChild(basicRoofShader);
+		basicRoofShader.id = 'basicRoofShader';
+		basicRoofShader.setAttribute('opacity','0.2');
+		basicRoofShader.setAttribute('stroke','none');
+		var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		basicRoofShader.appendChild(rect);
+		rect.setAttribute('x',0);
+		rect.setAttribute('y',-1);
+		rect.setAttribute('width',1);
+		rect.setAttribute('height',2);
+		rect.setAttribute('fill','black');
+		var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		basicRoofShader.appendChild(rect);
+		rect.setAttribute('x',-1);
+		rect.setAttribute('y',-1);
+		rect.setAttribute('width',1);
+		rect.setAttribute('height',2);
+		rect.setAttribute('fill','white');
+		
+		var longRoof = document.createElementNS('http://www.w3.org/2000/svg','g');
+		defs.appendChild(longRoof);
+		longRoof.id = 'longRoof';
+		longRoof.setAttribute('fill','darkgoldenrod');
+		longRoof.setAttribute('stroke-width',0.25);
+		longRoof.setAttribute('stroke','black');
+		var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		longRoof.appendChild(rect);
+		rect.setAttribute('x',0);
+		rect.setAttribute('y',-1);
+		rect.setAttribute('width',1);
+		rect.setAttribute('height',3);
+		var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		longRoof.appendChild(rect);
+		rect.setAttribute('x',-1);
+		rect.setAttribute('y',-1);
+		rect.setAttribute('width',1);
+		rect.setAttribute('height',3);
+		
+		var longRoofShader = document.createElementNS('http://www.w3.org/2000/svg','g');
+		defs.appendChild(longRoofShader);
+		longRoofShader.id = 'longRoofShader';
+		longRoofShader.setAttribute('opacity','0.2');
+		longRoofShader.setAttribute('stroke','none');
+		var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		longRoofShader.appendChild(rect);
+		rect.setAttribute('x',0);
+		rect.setAttribute('y',-1);
+		rect.setAttribute('width',1);
+		rect.setAttribute('height',3);
+		rect.setAttribute('fill','black');
+		var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		longRoofShader.appendChild(rect);
+		rect.setAttribute('x',-1);
+		rect.setAttribute('y',-1);
+		rect.setAttribute('width',1);
+		rect.setAttribute('height',3);
+		rect.setAttribute('fill','white');
+		
 		// UI Defs
+		
+		var navMarker = document.createElementNS('http://www.w3.org/2000/svg','g');
+		defs.appendChild(navMarker);
+		navMarker.id = 'navMarker';
+		navMarker.setAttribute('stroke-width',0.25);
+		var path = document.createElementNS('http://www.w3.org/2000/svg','path');
+		navMarker.appendChild(path);
+		path.setAttribute('d','M0,-1.25 L0.75,0.75 L-0.75,0.75 Z');
 
 		var eotBracket = document.createElementNS('http://www.w3.org/2000/svg','g');
 		defs.appendChild(eotBracket);
@@ -189,6 +435,10 @@ var view = {
 		ropeMark.setAttribute('d',d);
 
 		// Layers
+		var titleGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+		titleGroup.id = 'titleGroup';
+		svg.appendChild(titleGroup);
+		
 		var landscapeGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
 		landscapeGroup.id = 'landscapeGroup';
 		svg.appendChild(landscapeGroup);
@@ -201,7 +451,146 @@ var view = {
 		uiGroup.id = 'uiGroup';
 		svg.appendChild(uiGroup);
 		
+		// Title Screen
+		
+		var text = document.createElementNS('http://www.w3.org/2000/svg','text');
+		titleGroup.appendChild(text);
+		text.innerHTML = "Zeppel Endless";
+		text.setAttribute('text-anchor','middle');
+		
 		return [svgDiv];
+	},
+	
+	buildShipDef: function(ship) {
+		var defs = document.getElementById('globalDefs');
+		
+		var shipGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+		shipGroup.id = 'shipSprite_'+ship.id;
+		defs.appendChild(shipGroup);
+		shipGroup.setAttribute('stroke-width',0.25);
+		
+		var hullCenters;
+		var totalHulls = ship.components.keel.stats.hulls;
+		if (totalHulls == 1) {
+			hullCenters = [{x:0,y:0}];
+		} else if (totalHulls == 2) {
+			hullCenters = [
+				{x:-0.5,y:0},
+				{x:0.5,y:0},
+			];		
+
+		} else if (totalHulls == 3) {
+			hullCenters = [
+				{x:0,y:-0.75},
+				{x:-1,y:0.75},
+				{x:1,y:0.75},
+			];		
+
+		} else if (totalHulls == 4) {
+			hullCenters = [
+				{x:0,y:1},
+				{x:0.8,y:0},
+				{x:-0.8,y:0},
+				{x:0,y:-1},
+			];		
+
+		} else if (totalHulls == 5) {
+			hullCenters = [
+				{x:1.5,y:0.5},
+				{x:-1.5,y:0.5},
+				{x:1,y:0},
+				{x:-1,y:0},
+				{x:0,y:-0.5},
+			];		
+		};
+		
+		for (var i=0;i<hullCenters.length;i++) {
+			hullCenters[i].length = ship.components['hull'+i].length;
+			hullCenters[i].x *= ship.components['hull'+i].length * 0.4;
+			hullCenters[i].y *= ship.components['hull'+i].length * 0.4;
+			ship.components['hull'+i].nose = {
+				x: hullCenters[i].x,
+				y: hullCenters[i].y - hullCenters[i].length/2,
+			};
+		};
+		
+		var points, hullLength;
+		if (hullCenters.length > 1) {
+			for (var a of hullCenters) {
+				for (var b of hullCenters) {
+					if (a !== b) {
+						points = '';
+						points += a.x + ',' + (a.y+a.length/3+0.5) + ' ';
+						points += b.x + ',' + (b.y+b.length/3+0.5) + ' ';
+						points += b.x + ',' + (b.y+b.length/3-0.5) + ' ';
+						points += a.x + ',' + (a.y+a.length/3-0.5) + ' ';
+						var polygon = document.createElementNS('http://www.w3.org/2000/svg','polygon');
+						polygon.setAttribute('fill',ship.components.keel.color);
+						polygon.setAttribute('stroke','black');
+						polygon.setAttribute('points',points);
+						shipGroup.appendChild(polygon);
+						
+						points = '';
+						points += a.x + ',' + (a.y-a.length/3+0.5) + ' ';
+						points += b.x + ',' + (b.y-b.length/3+0.5) + ' ';
+						points += b.x + ',' + (b.y-b.length/3-0.5) + ' ';
+						points += a.x + ',' + (a.y-a.length/3-0.5) + ' ';
+						var polygon = document.createElementNS('http://www.w3.org/2000/svg','polygon');
+						polygon.setAttribute('fill',ship.components.keel.color);
+						polygon.setAttribute('stroke','black');
+						polygon.setAttribute('points',points);
+						shipGroup.appendChild(polygon);
+					};
+				};
+			};
+		};
+		
+		for (var h=0;h<totalHulls;h++) {
+			
+			var hullLength = ship.components['hull'+h].length, hullWidth = hullLength/3;
+			var component;
+			for (var s=0;s<ship.components['hull'+h].stats.externalSlots;s++) {
+				component = ship.components['hull'+h+'ext'+s];
+				componentX = hullWidth/4 + Math.floor(s/2)*0.2;
+				componentY = (Math.floor(s/2)+2)*(hullLength/(Math.floor(ship.components['hull'+h].stats.externalSlots/2)+2)) - hullLength/2;
+				var componentUse = document.createElementNS('http://www.w3.org/2000/svg','use');
+				componentUse.setAttribute('fill',component.color);
+				view.setHref(componentUse,component.type+'_t1');
+				componentUse.setAttribute('x',hullCenters[h].x + componentX);
+				componentUse.setAttribute('y',hullCenters[h].y + componentY);
+				if (s % 2 == 0) {
+					componentUse.setAttribute('transform','translate('+hullCenters[h].x+' '+hullCenters[h].y+') scale(-1,1) translate('+(-1*hullCenters[h].x)+' '+(-1*hullCenters[h].y)+')');
+				};
+				shipGroup.appendChild(componentUse);
+			};
+		
+			var hull = document.createElementNS('http://www.w3.org/2000/svg','rect');
+			hull.setAttribute('x',hullCenters[h].x - hullWidth/2);
+			hull.setAttribute('y',hullCenters[h].y - hullLength/2);
+			hull.setAttribute('width',hullWidth);
+			hull.setAttribute('height',hullLength);
+			hull.setAttribute('rx',hullWidth/2);
+			hull.setAttribute('ry',hullLength/3);
+			hull.setAttribute('width',hullWidth);
+			hull.setAttribute('length',hullLength);
+			hull.setAttribute('fill',ship.components['hull'+h].color);
+			hull.setAttribute('stroke','black');
+// 			view.setHref(hull,'hull_t1');
+			shipGroup.appendChild(hull);
+			
+			for (var s=0;s<ship.components['hull'+h].stats.topSlots;s++) {
+				component = ship.components['hull'+h+'top'+s];
+				componentX = 0;
+				componentY = (s+2)*(hullLength/(ship.components['hull'+h].stats.topSlots+2)) - hullLength/2;
+				var componentUse = document.createElementNS('http://www.w3.org/2000/svg','use');
+				componentUse.setAttribute('fill',component.color);
+				view.setHref(componentUse,component.type+'_t1');
+				componentUse.setAttribute('x',hullCenters[h].x + componentX);
+				componentUse.setAttribute('y',hullCenters[h].y + componentY);
+				shipGroup.appendChild(componentUse);
+			};
+			
+		}
 	},
 	
 	initMap: function(maps) {
@@ -222,22 +611,199 @@ var view = {
 		sectionGroup.id = map.id;
 	
 		// Background
-		var backgroundTile = document.createElementNS('http://www.w3.org/2000/svg','use');
-		sectionGroup.appendChild(backgroundTile);
-		backgroundTile.setAttribute('fill',map.backgroundColor);
-		backgroundTile.setAttribute('x',map.x);
-		backgroundTile.setAttribute('y',map.y);
-		view.setHref(backgroundTile,'tileHex');
+
+		var contouredHex = document.createElementNS('http://www.w3.org/2000/svg','polyline');
+		sectionGroup.appendChild(contouredHex);
+		contouredHex.setAttribute('stroke','none');
+		contouredHex.setAttribute('fill',map.backgroundColor);
+		var points = '';
+		for (var point of map.perimeter) {
+			points += point.x+','+point.y+' ';
+		};
+		contouredHex.setAttribute('points',points);
+		
+			
+		for (var slope of map.slopes) {
+			var pointsString = '';
+			for (var point of slope.points) {
+				pointsString += point.x+','+point.y+' ';
+			};
+			var polygon = document.createElementNS('http://www.w3.org/2000/svg','polygon');
+			sectionGroup.appendChild(polygon);
+			polygon.setAttribute('opacity',0.1);
+			polygon.setAttribute('fill',slope.fill);
+// 			polygon.setAttribute('stroke','red');
+// 			polygon.setAttribute('stroke-width',0.5);
+			polygon.setAttribute('points',pointsString);
+		};
+			
+// 		for (var line of map.elevationLines) {
+// 			var polyline = document.createElementNS('http://www.w3.org/2000/svg','polyline');
+// 			sectionGroup.appendChild(polyline);
+// 			var points = '';
+// 			for (var p=1;p<line.length;p++) {
+// 				var circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+// 				sectionGroup.appendChild(circle);
+// 				circle.setAttribute('cx',line[p].x);
+// 				circle.setAttribute('cy',line[p].y);
+// 				circle.setAttribute('r',0.25);
+// 				circle.setAttribute('fill','red');
+// 				var text = document.createElementNS('http://www.w3.org/2000/svg','text');
+// 				sectionGroup.appendChild(text);
+// 				text.setAttribute('x',line[p].x);
+// 				text.setAttribute('y',line[p].y+4);
+// 				text.setAttribute('text-anchor','middle');
+// 				text.setAttribute('font-size','2');
+// 				text.setAttribute('fill','red');
+// 				text.innerHTML = p;
+// 				points += line[p].x+','+line[p].y+' ';
+// 			};
+// 			polyline.setAttribute('points',points);
+// 			polyline.setAttribute('opacity',1);
+// 			polyline.setAttribute('fill','none');
+// 			polyline.setAttribute('stroke-width',0.5);
+// 			polyline.setAttribute('stroke-linejoin','round');
+// 			polyline.setAttribute('stroke-linecap','round');
+// 			if (line[1].d == 'ridge') {
+// 				polyline.setAttribute('stroke','black');
+// 			} else {
+// 				polyline.setAttribute('stroke','cyan');
+// 			};
+// 		};
+		
+// 		for (var flag of map.flags) {
+// 			var circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+// 			sectionGroup.appendChild(circle);
+// 			circle.setAttribute('cx',flag.point.x);
+// 			circle.setAttribute('cy',flag.point.y);
+// 			circle.setAttribute('r',2);
+// 			circle.setAttribute('fill','none');
+// 			circle.setAttribute('stroke','red');
+// 			var text = document.createElementNS('http://www.w3.org/2000/svg','text');
+// 			sectionGroup.appendChild(text);
+// 			text.setAttribute('x',flag.point.x);
+// 			text.setAttribute('y',flag.point.y+5);
+// 			text.setAttribute('text-anchor','middle');
+// 			text.setAttribute('font-size','4');
+// 			text.setAttribute('fill','red');
+// 			text.innerHTML = flag.legend;
+// 		};
+
+		// Interactive Features 
+// 		if (map.town !== undefined) {
+// 			var rimInsideStroke = document.createElementNS('http://www.w3.org/2000/svg','circle');
+// 			sectionGroup.appendChild(rimInsideStroke);
+// 			rimInsideStroke.setAttribute('cx',map.town.x);
+// 			rimInsideStroke.setAttribute('cy',map.town.y);
+// 			rimInsideStroke.setAttribute('r',map.town.r);
+// 			rimInsideStroke.setAttribute('fill','black');
+// 			rimInsideStroke.setAttribute('opacity',0.2);
+// 		};
+		for (var building of map.buildings) {
+// 			var foundation = document.createElementNS('http://www.w3.org/2000/svg','circle');
+// 			sectionGroup.appendChild(foundation);
+// 			foundation.setAttribute('cx',building.x);
+// 			foundation.setAttribute('cy',building.y);
+// 			foundation.setAttribute('r',building.r);
+// 			foundation.setAttribute('fill',map.backgroundColor);
+			var buildingUse = document.createElementNS('http://www.w3.org/2000/svg','use');
+			sectionGroup.appendChild(buildingUse);
+			buildingUse.setAttribute('x',building.x);
+			buildingUse.setAttribute('y',building.y);
+			buildingUse.setAttribute('transform','rotate('+view.r2d(building.rotation)+' '+building.x+' '+building.y+')');
+			view.setHref(buildingUse,building.sprite);
+			var shaderUse = document.createElementNS('http://www.w3.org/2000/svg','use');
+			sectionGroup.appendChild(shaderUse);
+			shaderUse.setAttribute('x',building.x);
+			shaderUse.setAttribute('y',building.y);
+			shaderUse.setAttribute('clip-path','url(#'+building.id+'ClipPath'+')');
+			if (building.rotation < Math.PI) {
+				shaderUse.setAttribute('transform','rotate('+view.r2d(building.rotation)+' '+building.x+' '+building.y+') translate('+building.x+' '+building.y+') translate('+(-1*building.x)+' '+(-1*building.y)+')');
+			} else {
+				shaderUse.setAttribute('transform','rotate('+view.r2d(building.rotation)+' '+building.x+' '+building.y+') translate('+building.x+' '+building.y+') scale(-1,1) translate('+(-1*building.x)+' '+(-1*building.y)+')');
+			};
+			view.setHref(shaderUse,building.sprite+'Shader');
+			var opacity = building.rotation;
+			if (building.rotation > Math.PI) {
+				opacity = building.rotation - Math.PI;
+			};
+			opacity = (Math.PI/2 - Math.abs(opacity - Math.PI/2))/(Math.PI/2);
+			shaderUse.setAttribute('opacity',opacity);
+		};
+		for (var mooringTower of map.mooringTowers) {
+			var towerGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+			sectionGroup.appendChild(towerGroup);
+			var foundation = document.createElementNS('http://www.w3.org/2000/svg','use');
+			foundation.setAttribute('x',mooringTower.x);
+			foundation.setAttribute('y',mooringTower.y);
+			foundation.setAttribute('fill',map.backgroundColor);
+			foundation.setAttribute('transform','translate('+(mooringTower.x)+' '+(mooringTower.y)+') scale(0.06) translate('+(mooringTower.x*-1)+' '+(mooringTower.y*-1)+')');
+			view.setHref(foundation,'tileHex');
+			towerGroup.appendChild(foundation);
+			var mooringUse = document.createElementNS('http://www.w3.org/2000/svg','use');
+			mooringUse.setAttribute('x',mooringTower.x);
+			mooringUse.setAttribute('y',mooringTower.y);
+			mooringUse.setAttribute('fill',mooringTower.fill);
+			view.setHref(mooringUse,'mooringTower');
+			towerGroup.appendChild(mooringUse);
+			towerGroup.setAttribute('transform','rotate('+view.r2d(mooringTower.rotation)+' '+(mooringTower.x)+','+(mooringTower.y)+')');
+			var mooringTargetUse = document.createElementNS('http://www.w3.org/2000/svg','use');
+			mooringTargetUse.setAttribute('x',mooringTower.x);
+			mooringTargetUse.setAttribute('y',mooringTower.y);
+			mooringTargetUse.setAttribute('fill',mooringTower.fill);
+			view.setHref(mooringTargetUse,'mooringTarget');
+			towerGroup.appendChild(mooringTargetUse);
+			mooringTargetUse.id = mooringTower.id+'Target';
+			var targetReveal = document.createElementNS('http://www.w3.org/2000/svg','animate');
+			targetReveal.id = 'targetReveal'+mooringTower.id;
+			targetReveal.setAttribute('attributeName','opacity');
+			targetReveal.setAttribute('attributeType','XML');
+			targetReveal.setAttribute('from','0');
+			targetReveal.setAttribute('to','1');
+			targetReveal.setAttribute('dur','0.5s');
+			targetReveal.setAttribute('begin','indefinite');
+			targetReveal.setAttribute('fill','freeze');
+			mooringTargetUse.appendChild(targetReveal);
+			var targetFade = document.createElementNS('http://www.w3.org/2000/svg','animate');
+			targetFade.id = 'targetFade'+mooringTower.id;
+			targetFade.setAttribute('attributeName','opacity');
+			targetFade.setAttribute('attributeType','XML');
+			targetFade.setAttribute('from','1');
+			targetFade.setAttribute('to','0');
+			targetFade.setAttribute('dur','0.7s');
+			targetFade.setAttribute('begin','indefinite');
+			targetFade.setAttribute('fill','freeze');
+			mooringTargetUse.appendChild(targetFade);
+		};
+		if (map.town !== undefined) {
+			var townLabelShadow = document.createElementNS('http://www.w3.org/2000/svg','text');
+			sectionGroup.appendChild(townLabelShadow);
+			townLabelShadow.setAttribute('x',map.town.x+0.75);
+			townLabelShadow.setAttribute('y',map.town.y+0.75);
+			townLabelShadow.setAttribute('text-anchor','middle');
+			townLabelShadow.setAttribute('font-size',6);
+			townLabelShadow.innerHTML = map.town.name;
+			var townLabel = document.createElementNS('http://www.w3.org/2000/svg','text');
+			sectionGroup.appendChild(townLabel);
+			townLabel.setAttribute('x',map.town.x);
+			townLabel.setAttribute('y',map.town.y);
+			townLabel.setAttribute('text-anchor','middle');
+			townLabel.setAttribute('font-size',6);
+			townLabel.setAttribute('fill','white');
+			townLabel.setAttribute('stroke','black');
+			townLabel.setAttribute('paint-order','stroke');
+			townLabel.innerHTML = map.town.name;
+		};
 
 		// Landmarks
-		for (var landmark of map.landmarks) {
-			var landmarkUse = document.createElementNS('http://www.w3.org/2000/svg','use');
-			landmarkUse.setAttribute('x',landmark.x);
-			landmarkUse.setAttribute('y',landmark.y);
-			landmarkUse.setAttribute('fill',landmark.fill);
-			view.setHref(landmarkUse,landmark.glyph);
-			sectionGroup.appendChild(landmarkUse);
-		};
+// 		for (var landmark of map.landmarks) {
+// 			var landmarkUse = document.createElementNS('http://www.w3.org/2000/svg','use');
+// 			landmarkUse.setAttribute('x',landmark.x);
+// 			landmarkUse.setAttribute('y',landmark.y);
+// 			landmarkUse.setAttribute('fill',landmark.fill);
+// 			view.setHref(landmarkUse,landmark.glyph);
+// 			sectionGroup.appendChild(landmarkUse);
+// 		};
 		
 		view.updatePlayerMap(map);
 	},
@@ -269,8 +835,38 @@ var view = {
 		rumbleAnimation.setAttribute('dur','0.01s');
 		rumbleAnimation.setAttribute('begin','rumbleAnimation.end');
 		
+		var navMarkersGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+		navMarkersGroup.id = 'navMarkersGroup';
+		rumbleGroup.appendChild(navMarkersGroup);
+		
+		var controlsGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+		controlsGroup.id = 'controlsGroup';
+		rumbleGroup.appendChild(controlsGroup);
+		var hideAnimation = document.createElementNS('http://www.w3.org/2000/svg','animateTransform');
+		controlsGroup.appendChild(hideAnimation);
+		hideAnimation.id = 'controlsHideAnimation';
+		hideAnimation.setAttribute('attributeName','transform');
+		hideAnimation.setAttribute('attributeType','XML');
+		hideAnimation.setAttribute('type','translate');
+		hideAnimation.setAttribute('from','0 0');
+		hideAnimation.setAttribute('to','0 100');
+		hideAnimation.setAttribute('dur','1s');
+		hideAnimation.setAttribute('begin','indefinite');
+		hideAnimation.setAttribute('fill','freeze');
+		var revealAnimation = document.createElementNS('http://www.w3.org/2000/svg','animateTransform');
+		controlsGroup.appendChild(revealAnimation);
+		revealAnimation.id = 'controlsRevealAnimation';
+		revealAnimation.setAttribute('attributeName','transform');
+		revealAnimation.setAttribute('attributeType','XML');
+		revealAnimation.setAttribute('type','translate');
+		revealAnimation.setAttribute('from','0 100');
+		revealAnimation.setAttribute('to','0 0');
+		revealAnimation.setAttribute('dur','1s');
+		revealAnimation.setAttribute('begin','indefinite');
+		revealAnimation.setAttribute('fill','freeze');
+		
 		var eotGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
-		rumbleGroup.appendChild(eotGroup);
+		controlsGroup.appendChild(eotGroup);
 		var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
 		rect.setAttribute('x',83.5);
 		rect.setAttribute('y',1);
@@ -312,12 +908,12 @@ var view = {
 		var wheel = document.createElementNS('http://www.w3.org/2000/svg','use');
 		view.setHref(wheel,'shipsWheel');
 		wheel.id = 'uiWheel';
-		rumbleGroup.appendChild(wheel);
+		controlsGroup.appendChild(wheel);
 		wheel.setAttribute('y',62);
 		wheel.setAttribute('transform','translate(0 62) rotate('+view.r2d(ship.rudder)+') translate(0 -62)');
 		
 		var airspeedCasingRect = document.createElementNS('http://www.w3.org/2000/svg','rect');
-		rumbleGroup.appendChild(airspeedCasingRect);
+		controlsGroup.appendChild(airspeedCasingRect);
 		airspeedCasingRect.setAttribute('x',67);
 		airspeedCasingRect.setAttribute('y',55);
 		airspeedCasingRect.setAttribute('rx',2);
@@ -327,7 +923,7 @@ var view = {
 		airspeedCasingRect.setAttribute('fill','saddlebrown');
 		airspeedCasingRect.setAttribute('stroke','black');
 		var airspeedRect = document.createElementNS('http://www.w3.org/2000/svg','rect');
-		rumbleGroup.appendChild(airspeedRect);
+		controlsGroup.appendChild(airspeedRect);
 		airspeedRect.setAttribute('x',69);
 		airspeedRect.setAttribute('y',57.5);
 		airspeedRect.setAttribute('width',16);
@@ -336,7 +932,7 @@ var view = {
 		airspeedRect.setAttribute('stroke','black');
 		airspeedRect.setAttribute('stroke-width',0.5);
 		var airspeedText = document.createElementNS('http://www.w3.org/2000/svg','text');
-		rumbleGroup.appendChild(airspeedText);
+		controlsGroup.appendChild(airspeedText);
 		airspeedText.id = 'uiAirspeed';
 		airspeedText.setAttribute('x',83);
 		airspeedText.setAttribute('y',60);
@@ -344,7 +940,7 @@ var view = {
 		airspeedText.setAttribute('text-anchor','end');
 		
 		var headingCasingRect = document.createElementNS('http://www.w3.org/2000/svg','rect');
-		rumbleGroup.appendChild(headingCasingRect);
+		controlsGroup.appendChild(headingCasingRect);
 		headingCasingRect.setAttribute('x',28);
 		headingCasingRect.setAttribute('y',50);
 		headingCasingRect.setAttribute('rx',2);
@@ -354,7 +950,7 @@ var view = {
 		headingCasingRect.setAttribute('fill','saddlebrown');
 		headingCasingRect.setAttribute('stroke','black');
 		var headingRect = document.createElementNS('http://www.w3.org/2000/svg','rect');
-		rumbleGroup.appendChild(headingRect);
+		controlsGroup.appendChild(headingRect);
 		headingRect.setAttribute('x',30);
 		headingRect.setAttribute('y',52);
 		headingRect.setAttribute('width',10);
@@ -363,14 +959,14 @@ var view = {
 		headingRect.setAttribute('stroke','black');
 		headingRect.setAttribute('stroke-width',0.5);
 		var headingText = document.createElementNS('http://www.w3.org/2000/svg','text');
-		rumbleGroup.appendChild(headingText);
+		controlsGroup.appendChild(headingText);
 		headingText.id = 'uiHeadingCardinal';
 		headingText.setAttribute('x',35);
 		headingText.setAttribute('y',57);
 		headingText.setAttribute('font-size',4);
 		headingText.setAttribute('text-anchor','middle');
 		var headingText = document.createElementNS('http://www.w3.org/2000/svg','text');
-		rumbleGroup.appendChild(headingText);
+		controlsGroup.appendChild(headingText);
 		headingText.id = 'uiHeading';
 		headingText.setAttribute('x',35);
 		headingText.setAttribute('y',60);
@@ -379,10 +975,12 @@ var view = {
 		
 		var mapGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
 		rumbleGroup.appendChild(mapGroup);
+		mapGroup.id = 'mapGroup';
 		var mapBoard = document.createElementNS('http://www.w3.org/2000/svg','rect')
 		mapGroup.appendChild(mapBoard);
 		mapBoard.setAttribute('fill','saddlebrown');
 		mapBoard.setAttribute('stroke','black');
+		mapBoard.setAttribute('stroke-width',0.5);
 		mapBoard.setAttribute('x',-101);
 		mapBoard.setAttribute('y',-63);
 		mapBoard.setAttribute('width',40);
@@ -390,6 +988,8 @@ var view = {
 		var mapBG = document.createElementNS('http://www.w3.org/2000/svg','rect');
 		mapGroup.appendChild(mapBG);
 		mapBG.setAttribute('fill','cornsilk');
+		mapBG.setAttribute('stroke','black');
+		mapBG.setAttribute('stroke-width',0.5);
 		mapBG.setAttribute('x',-98);
 		mapBG.setAttribute('y',-60);
 		mapBG.setAttribute('width',35);
@@ -403,6 +1003,13 @@ var view = {
 		mapSVG.setAttribute('height',35);
 		mapSVG.setAttribute('stroke','black');
 		mapSVG.setAttribute('viewBox','-3000 -3000 6000 6000');
+		var mapTileGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+		mapTileGroup.id = 'mapTileGroup';
+		mapSVG.appendChild(mapTileGroup);
+		var mapLegendsGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+		mapLegendsGroup.id = 'mapLegendsGroup';
+		mapLegendsGroup.setAttribute('opacity',0);
+		mapSVG.appendChild(mapLegendsGroup);
 		var circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
 		mapGroup.appendChild(circle);
 		circle.setAttribute('cx',-98 + 35/2);
@@ -412,6 +1019,69 @@ var view = {
 		circle.setAttribute('stroke','black');
 		circle.setAttribute('stroke-width',0.25);
 		circle.setAttribute('paint-order','stroke');
+		var maximizeMap = document.createElementNS('http://www.w3.org/2000/svg','animateTransform');
+		maximizeMap.id = 'maximizeMap';
+		maximizeMap.setAttribute('attributeName','transform');
+		maximizeMap.setAttribute('attributeType','XML');
+		maximizeMap.setAttribute('type','scale');
+		maximizeMap.setAttribute('from','1');
+		maximizeMap.setAttribute('to','2.5');
+		maximizeMap.setAttribute('dur','0.5s');
+		maximizeMap.setAttribute('begin','indefinite');
+		maximizeMap.setAttribute('fill','freeze');
+		maximizeMap.setAttribute('accumulate','sum');
+		maximizeMap.setAttribute('additive','sum');
+		mapGroup.appendChild(maximizeMap);
+		var maximizeMapSlide = document.createElementNS('http://www.w3.org/2000/svg','animateTransform');
+		maximizeMapSlide.id = 'maximizeMapSlide';
+		maximizeMapSlide.setAttribute('attributeName','transform');
+		maximizeMapSlide.setAttribute('attributeType','XML');
+		maximizeMapSlide.setAttribute('type','translate');
+		maximizeMapSlide.setAttribute('from','0 0');
+		maximizeMapSlide.setAttribute('to','62 39');
+		maximizeMapSlide.setAttribute('dur','0.5s');
+		maximizeMapSlide.setAttribute('begin','indefinite');
+		maximizeMapSlide.setAttribute('fill','freeze');
+		maximizeMapSlide.setAttribute('accumulate','sum');
+		maximizeMapSlide.setAttribute('additive','sum');
+		mapGroup.appendChild(maximizeMapSlide);
+		var minimizeMap = document.createElementNS('http://www.w3.org/2000/svg','animateTransform');
+		minimizeMap.id = 'minimizeMap';
+		minimizeMap.setAttribute('attributeName','transform');
+		minimizeMap.setAttribute('attributeType','XML');
+		minimizeMap.setAttribute('type','scale');
+		minimizeMap.setAttribute('from','1');
+		minimizeMap.setAttribute('to','0.4');
+		minimizeMap.setAttribute('dur','0.5s');
+		minimizeMap.setAttribute('begin','indefinite');
+		minimizeMap.setAttribute('fill','freeze');
+		minimizeMap.setAttribute('accumulate','sum');
+		minimizeMap.setAttribute('additive','sum');
+		mapGroup.appendChild(minimizeMap);
+		var minimizeMapSlide = document.createElementNS('http://www.w3.org/2000/svg','animateTransform');
+		minimizeMapSlide.id = 'minimizeMapSlide';
+		minimizeMapSlide.setAttribute('attributeName','transform');
+		minimizeMapSlide.setAttribute('attributeType','XML');
+		minimizeMapSlide.setAttribute('type','translate');
+		minimizeMapSlide.setAttribute('from','0 0');
+		minimizeMapSlide.setAttribute('to','-155 -97.5');
+		minimizeMapSlide.setAttribute('dur','0.5s');
+		minimizeMapSlide.setAttribute('begin','indefinite');
+		minimizeMapSlide.setAttribute('fill','freeze');
+		minimizeMapSlide.setAttribute('accumulate','sum');
+		minimizeMapSlide.setAttribute('additive','sum');
+		mapGroup.appendChild(minimizeMapSlide);
+		var clearMapTransforms = document.createElementNS('http://www.w3.org/2000/svg','animateTransform');
+		clearMapTransforms.id = 'clearMapTransforms';
+		clearMapTransforms.setAttribute('attributeName','transform');
+		clearMapTransforms.setAttribute('attributeType','XML');
+		clearMapTransforms.setAttribute('type','translate');
+		clearMapTransforms.setAttribute('from','0 0');
+		clearMapTransforms.setAttribute('to','0 0');
+		clearMapTransforms.setAttribute('dur','0.1s');
+		clearMapTransforms.setAttribute('begin','minimizeMapSlide.end');
+		clearMapTransforms.setAttribute('fill','freeze');
+		mapGroup.appendChild(clearMapTransforms);
 		
 		var windSockGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
 		rumbleGroup.appendChild(windSockGroup);
@@ -449,7 +1119,273 @@ var view = {
 		line.setAttribute('y2',windSockY-5);
 		line.setAttribute('stroke-linecap','round');
 		line.id = 'uiWindSock';
-
+		
+		var soundGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+		rumbleGroup.appendChild(soundGroup);
+		soundGroup.addEventListener('mouseenter',view.revealSoundControls);
+		soundGroup.addEventListener('mouseleave',view.hideSoundControls);
+		
+		var soundControls = document.createElementNS('http://www.w3.org/2000/svg','g');
+		soundGroup.appendChild(soundControls);
+		var soundControlsReveal = document.createElementNS('http://www.w3.org/2000/svg','animateTransform');
+		soundControls.appendChild(soundControlsReveal);
+		soundControlsReveal.id = 'soundControlsReveal';
+		soundControlsReveal.setAttribute('attributeName','transform');
+		soundControlsReveal.setAttribute('attributeType','XML');
+		soundControlsReveal.setAttribute('type','translate');
+		soundControlsReveal.setAttribute('from','0');
+		soundControlsReveal.setAttribute('to','-50');
+		soundControlsReveal.setAttribute('dur','0.2s');
+		soundControlsReveal.setAttribute('begin','indefinite');
+		soundControlsReveal.setAttribute('fill','freeze');
+		var soundControlsHide = document.createElementNS('http://www.w3.org/2000/svg','animateTransform');
+		soundControls.appendChild(soundControlsHide);
+		soundControlsHide.id = 'soundControlsHide';
+		soundControlsHide.setAttribute('attributeName','transform');
+		soundControlsHide.setAttribute('attributeType','XML');
+		soundControlsHide.setAttribute('type','translate');
+		soundControlsHide.setAttribute('from','-50');
+		soundControlsHide.setAttribute('to','0');
+		soundControlsHide.setAttribute('dur','0.2s');
+		soundControlsHide.setAttribute('begin','indefinite');
+		soundControlsHide.setAttribute('fill','freeze');
+		var soundPanel = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		soundControls.appendChild(soundPanel);
+		soundPanel.setAttribute('x',106);
+		soundPanel.setAttribute('y',-57);
+		soundPanel.setAttribute('width',55);
+		soundPanel.setAttribute('height',10);
+		soundPanel.setAttribute('fill','saddlebrown');
+		soundPanel.setAttribute('stroke','black');
+		soundPanel.setAttribute('stroke-width',0.5);
+		var soundButtonLabels = ['Go','Sk','+','-','X'];
+		var soundButtonsArray = [];
+		for (var i=0;i<5;i++) {
+			var buttonGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+			soundControls.appendChild(buttonGroup);
+			soundButtonsArray.push(buttonGroup);
+			var button = document.createElementNS('http://www.w3.org/2000/svg','rect');
+			buttonGroup.appendChild(button);
+			button.setAttribute('x',109 + i * 8);
+			button.setAttribute('y',-55);
+			button.setAttribute('width',6);
+			button.setAttribute('height',6);
+			button.setAttribute('fill','gainsboro');
+			button.setAttribute('stroke','black');
+			button.setAttribute('stroke-width',0.5);
+		}
+		soundButtonsArray[0].addEventListener('click',handlers.soundtrackPlayPause);
+		soundButtonsArray[1].addEventListener('click',handlers.soundtrackSkip);
+		soundButtonsArray[2].addEventListener('click',handlers.soundtrackVolumeUp);
+		soundButtonsArray[3].addEventListener('click',handlers.soundtrackVolumeDown);
+		soundButtonsArray[4].addEventListener('click',handlers.soundtrackMute);
+		
+		var playShape = document.createElementNS('http://www.w3.org/2000/svg','path');
+		soundButtonsArray[0].appendChild(playShape);
+		playShape.setAttribute('d','M111,-54 v4 l2 -2 l-2 -2');
+		playShape.setAttribute('opacity',0);
+		playShape.id = 'soundControlsPlayShape';
+		
+		var pauseShape = document.createElementNS('http://www.w3.org/2000/svg','path');
+		soundButtonsArray[0].appendChild(pauseShape);
+		pauseShape.setAttribute('d','M110.5,-54 v4 h1 v-4 h-1 m2 0 v4 h1 v-4 h-1');
+		pauseShape.id = 'soundControlsPauseShape';
+		
+		var skipShape = document.createElementNS('http://www.w3.org/2000/svg','path');
+		soundButtonsArray[1].appendChild(skipShape);
+		skipShape.setAttribute('d','M118,-54 v4 l2 -2 v2 h1 v-4 h-1 v2 l-2 -2');
+		
+		var volumeUpText = document.createElementNS('http://www.w3.org/2000/svg','text');
+		soundButtonsArray[2].appendChild(volumeUpText);
+		volumeUpText.innerHTML = "+";
+		volumeUpText.setAttribute('x',128);
+		volumeUpText.setAttribute('y',-50);
+		volumeUpText.setAttribute('text-anchor','middle');
+		volumeUpText.setAttribute('font-size',6);
+		
+		var volumeDownText = document.createElementNS('http://www.w3.org/2000/svg','text');
+		soundButtonsArray[3].appendChild(volumeDownText);
+		volumeDownText.innerHTML = "-";
+		volumeDownText.setAttribute('x',136);
+		volumeDownText.setAttribute('y',-50);
+		volumeDownText.setAttribute('text-anchor','middle');
+		volumeDownText.setAttribute('font-size',6);
+		
+		var volumeMuteText = document.createElementNS('http://www.w3.org/2000/svg','text');
+		soundButtonsArray[4].appendChild(volumeMuteText);
+		volumeMuteText.innerHTML = "&#215; ";
+		volumeMuteText.setAttribute('x',144);
+		volumeMuteText.setAttribute('y',-50);
+		volumeMuteText.setAttribute('text-anchor','middle');
+		volumeMuteText.setAttribute('font-size',6);
+		volumeMuteText.setAttribute('fill','darkred');
+		
+		var voicepipe = document.createElementNS('http://www.w3.org/2000/svg','path');
+		soundGroup.appendChild(voicepipe);
+		voicepipe.setAttribute('fill','grey');
+		voicepipe.setAttribute('stroke','black');
+		voicepipe.setAttribute('stroke-width',0.5);
+		voicepipe.setAttribute('stroke-linejoin','round');
+		var d = 'M93.5,-61 h1 l2,2 ';
+		d += 'h0.25 q 1,0 1,-1 v-10 h2 v11 q 0 2 -2 2 h-1.25';
+		d += ' l-2,2 h-1 z';
+		voicepipe.setAttribute('d',d);
+		var funnel = document.createElementNS('http://www.w3.org/2000/svg','ellipse');
+		soundGroup.appendChild(funnel);
+		funnel.setAttribute('cx',93.5);
+		funnel.setAttribute('cy',-58);
+		funnel.setAttribute('rx',1.5);
+		funnel.setAttribute('ry',3);
+		funnel.setAttribute('stroke','black');
+		funnel.setAttribute('stroke-width',0.5);
+		funnel.setAttribute('fill','#444');
+		var songCreditLink = document.createElementNS('http://www.w3.org/2000/svg','a');
+		soundGroup.appendChild(songCreditLink);
+		songCreditLink.id = 'songCreditLink';
+		songCreditLink.setAttribute('target','songcredit');
+		songCreditLink.setAttribute('href','http://google.com');
+		songCreditLink.setAttribute('opacity',0);
+		var songNameText = document.createElementNS('http://www.w3.org/2000/svg','text');
+		songCreditLink.appendChild(songNameText);
+		songNameText.id = 'songNameText';
+		songNameText.setAttribute('x',91);
+		songNameText.setAttribute('y',-58);
+		songNameText.setAttribute('text-anchor','end');
+		songNameText.setAttribute('font-size',2.5);
+		songNameText.setAttribute('stroke','white');
+		songNameText.setAttribute('stroke-width',0.5);
+		songNameText.setAttribute('paint-order','stroke');
+		songNameText.innerHTML = 'Test Value Song Name';
+		var songCreditText = document.createElementNS('http://www.w3.org/2000/svg','text');
+		songCreditLink.appendChild(songCreditText);
+		songCreditText.id = 'songCreditText';
+		songCreditText.setAttribute('x',91);
+		songCreditText.setAttribute('y',-56.25);
+		songCreditText.setAttribute('text-anchor','end');
+		songCreditText.setAttribute('font-size',1.75);
+		songCreditText.setAttribute('stroke','white');
+		songCreditText.setAttribute('stroke-width',0.5);
+		songCreditText.setAttribute('paint-order','stroke');
+		songCreditText.innerHTML = 'Test Value Song Credit';
+		var songReveal = document.createElementNS('http://www.w3.org/2000/svg','animate');
+		songCreditLink.appendChild(songReveal);
+		songReveal.id = 'songReveal';
+		songReveal.setAttribute('attributeName','opacity');
+		songReveal.setAttribute('attributeType','XML');
+		songReveal.setAttribute('from','0');
+		songReveal.setAttribute('to','1');
+		songReveal.setAttribute('dur','0.2s');
+		songReveal.setAttribute('begin','indefinite');
+		songReveal.setAttribute('fill','freeze');
+		var songFade = document.createElementNS('http://www.w3.org/2000/svg','animate');
+		songCreditLink.appendChild(songFade);
+		songFade.id = 'songFade';
+		songFade.setAttribute('attributeName','opacity');
+		songFade.setAttribute('attributeType','XML');
+		songFade.setAttribute('from','1');
+		songFade.setAttribute('to','0');
+		songFade.setAttribute('dur','5s');
+		songFade.setAttribute('begin','indefinite');
+		songFade.setAttribute('fill','freeze');
+		
+		var townGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+		townGroup.id = 'townGroup';
+		rumbleGroup.appendChild(townGroup);
+		var tabsGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+		tabsGroup.id = 'tabsGroup';
+		townGroup.appendChild(tabsGroup);
+		townGroup.setAttribute('transform','translate(0,100)');
+		var hideAnimation = document.createElementNS('http://www.w3.org/2000/svg','animateTransform');
+		hideAnimation.id = 'townHideAnimation';
+		hideAnimation.setAttribute('attributeName','transform');
+		hideAnimation.setAttribute('attributeType','XML');
+		hideAnimation.setAttribute('type','translate');
+		hideAnimation.setAttribute('from','0 0');
+		hideAnimation.setAttribute('to','0 100');
+		hideAnimation.setAttribute('dur','1s');
+		hideAnimation.setAttribute('begin','indefinite');
+		hideAnimation.setAttribute('fill','freeze');
+		townGroup.appendChild(hideAnimation);
+		var revealAnimation = document.createElementNS('http://www.w3.org/2000/svg','animateTransform');
+		revealAnimation.id = 'townRevealAnimation';
+		revealAnimation.setAttribute('attributeName','transform');
+		revealAnimation.setAttribute('attributeType','XML');
+		revealAnimation.setAttribute('type','translate');
+		revealAnimation.setAttribute('from','0 100');
+		revealAnimation.setAttribute('to','0 0');
+		revealAnimation.setAttribute('dur','1s');
+		revealAnimation.setAttribute('begin','indefinite');
+		revealAnimation.setAttribute('fill','freeze');
+		townGroup.appendChild(revealAnimation);
+		
+		var alertsGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+		rumbleGroup.appendChild(alertsGroup);
+		alertsGroup.id = 'alertsGroup';
+	},
+	
+	buildTownUI: function(town) {
+		var tabsGroup = document.getElementById('tabsGroup');
+		tabsGroup.innerHTML = '';
+		var tabs = town.amenities;
+		var tabMargin = 5;
+		var tabWidth = (180 - tabMargin*(tabs.length-1))/tabs.length;
+		var tabNodes = [];
+		for (var b in tabs) {
+			var tabGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+			tabsGroup.appendChild(tabGroup);
+			tabGroup.id = 'townTab'+b;
+			var tabTopGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+			tabGroup.appendChild(tabTopGroup);
+			tabTopGroup.addEventListener('click',view.toggleTownTab.bind(this,b));
+			var tab = document.createElementNS('http://www.w3.org/2000/svg','rect');
+			tabTopGroup.appendChild(tab);
+			tab.setAttribute('x',-90 + b * (tabWidth+tabMargin));
+			tab.setAttribute('width',tabWidth);
+			tab.setAttribute('y',50);
+			tab.setAttribute('height',60);
+			tab.setAttribute('rx',3);
+			tab.setAttribute('ry',3);
+			tab.setAttribute('fill','goldenrod');
+			tab.setAttribute('stroke','darkgoldenrod');
+			var text = document.createElementNS('http://www.w3.org/2000/svg','text');
+			tabTopGroup.appendChild(text);
+			text.setAttribute('x',-90 + b * (tabWidth+tabMargin) + tabWidth/2);
+			text.setAttribute('y',57);
+			text.setAttribute('text-anchor','middle');
+			text.setAttribute('font-size',5);
+			text.innerHTML = tabs[b].name;
+			var pane = document.createElementNS('http://www.w3.org/2000/svg','rect');
+			tabGroup.appendChild(pane);
+			pane.setAttribute('x',-90);
+			pane.setAttribute('width',180);
+			pane.setAttribute('y',62);
+			pane.setAttribute('height',100);
+			pane.setAttribute('stroke','darkgoldenrod');
+			pane.setAttribute('fill','goldenrod');
+			var hideAnimation = document.createElementNS('http://www.w3.org/2000/svg','animateTransform');
+			hideAnimation.id = 'townTab'+b+'HideAnimation';
+			hideAnimation.setAttribute('attributeName','transform');
+			hideAnimation.setAttribute('attributeType','XML');
+			hideAnimation.setAttribute('type','translate');
+			hideAnimation.setAttribute('from','0 -100');
+			hideAnimation.setAttribute('to','0 0');
+			hideAnimation.setAttribute('dur','0.3s');
+			hideAnimation.setAttribute('begin','indefinite');
+			hideAnimation.setAttribute('fill','freeze');
+			tabGroup.appendChild(hideAnimation);
+			var revealAnimation = document.createElementNS('http://www.w3.org/2000/svg','animateTransform');
+			revealAnimation.id = 'townTab'+b+'RevealAnimation';
+			revealAnimation.setAttribute('attributeName','transform');
+			revealAnimation.setAttribute('attributeType','XML');
+			revealAnimation.setAttribute('type','translate');
+			revealAnimation.setAttribute('from','0 0');
+			revealAnimation.setAttribute('to','0 -100');
+			revealAnimation.setAttribute('dur','0.3s');
+			revealAnimation.setAttribute('begin','indefinite');
+			revealAnimation.setAttribute('fill','freeze');
+			tabGroup.appendChild(revealAnimation);
+		};
+		
 	},
 	
 	addShip: function(ship) {
@@ -466,17 +1402,34 @@ var view = {
 		var shipGroup = document.getElementById('shipGroup_'+ship.id);
 		shipGroup.innerHTML = '';
 		
+		if (ship.moored) {
+			var mooringNose = ship.mooringNose();
+			var mooringLine = document.createElementNS('http://www.w3.org/2000/svg','line');
+			shipGroup.appendChild(mooringLine);
+			mooringLine.setAttribute('stroke','black');
+			mooringLine.setAttribute('stroke-width',0.25);
+			mooringLine.setAttribute('x1',ship.anchor.x);
+			mooringLine.setAttribute('y1',ship.anchor.y);
+// 			mooringLine.setAttribute('x2',ship.x + Math.sin(ship.heading) * ship.length()/2);
+// 			mooringLine.setAttribute('y2',ship.y - Math.cos(ship.heading) * ship.length()/2);
+			mooringLine.setAttribute('x2',mooringNose.x);
+			mooringLine.setAttribute('y2',mooringNose.y);
+		};
+		
 		var useNode = document.createElementNS('http://www.w3.org/2000/svg','use');
 		useNode.setAttribute('x',ship.x);
 		useNode.setAttribute('y',ship.y);
 		view.setHref(useNode,ship.sprite);
+		if (ship.components.hull0 !== undefined) {
+			useNode.setAttribute('fill',ship.components.hull0.color);
+		};
 		shipGroup.appendChild(useNode);
 		
 		if (ship.opacity !== undefined) {
 			shipGroup.setAttribute('opacity',ship.opacity);
 		};
 		
-		shipGroup.setAttribute('transform','translate('+ship.x+' '+ship.y+') rotate('+(view.r2d(ship.heading))+') translate('+(-1*ship.x)+' '+(-1*ship.y)+')');
+		useNode.setAttribute('transform','translate('+ship.x+' '+ship.y+') rotate('+(view.r2d(ship.heading))+') translate('+(-1*ship.x)+' '+(-1*ship.y)+')');
 	},
 	
 	updateEOT: function() {
@@ -493,7 +1446,7 @@ var view = {
 	
 	updateHeadingAndSpeed: function() {
 		var uiAirspeed = document.getElementById('uiAirspeed');
-		uiAirspeed.innerHTML = Math.round(game.p1ship.velocity.speed*100)/100 + " knots";
+		uiAirspeed.innerHTML = Math.round(game.p1ship.airspeed.speed*100)/100 + " knots";
 		
 		var uiHeading = document.getElementById('uiHeading');
 		headingString = view.r2d(game.p1ship.heading);
@@ -533,15 +1486,75 @@ var view = {
 		uiWindSock.setAttribute('y2',y2);
 	},
 	
+	updateNavMarkers: function() {
+		var navMarkersGroup = document.getElementById('navMarkersGroup');
+		navMarkersGroup.innerHTML = '';
+		var markers = [];
+		for (var town of game.townList) {
+			dist = Math.pow(Math.pow(game.p1ship.x - town.x,2)+Math.pow(game.p1ship.y - town.y,2),0.5);
+			if (dist < 500 && dist > 55) {
+				markers.push(town);
+			};
+		};
+		var direction, dist, x, y;
+		for (var marker of markers) {
+			direction = Math.atan2(marker.x-game.p1ship.x,game.p1ship.y-marker.y);
+			dist = Math.pow(Math.pow(marker.x - game.p1ship.x,2)+Math.pow(marker.y - game.p1ship.y,2),0.5);
+			x = Math.sin(direction) * 55 * 1.2;
+			y = Math.cos(direction) * - 55;
+			var markerGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+			navMarkersGroup.appendChild(markerGroup);
+			var markerUse = document.createElementNS('http://www.w3.org/2000/svg','use');
+			markerGroup.appendChild(markerUse);
+			markerUse.setAttribute('x',x);
+			markerUse.setAttribute('y',y);
+			markerUse.setAttribute('transform','rotate('+view.r2d(direction)+' '+x+' '+y+')');
+			markerUse.setAttribute('stroke','black');
+			view.setHref(markerUse,'navMarker');
+			var text = document.createElementNS('http://www.w3.org/2000/svg','text');
+			markerGroup.appendChild(text);
+			text.setAttribute('x',x);
+			text.setAttribute('y',y-2);
+			text.setAttribute('font-size',1.7);
+			text.setAttribute('text-anchor','middle');
+			text.innerHTML = marker.name;
+			if (marker.type == undefined) {
+				markerUse.setAttribute('fill','silver');
+				var opacity = (500 - dist)/500;
+				markerGroup.setAttribute('opacity',opacity);
+			};
+		};
+	},
+	
 	updatePlayerMap: function(map) {
-		var mapSVG = document.getElementById('mapSVG');
-		if (mapSVG !== null) {
-			var mapTileUse = document.createElementNS('http://www.w3.org/2000/svg','use');
-			view.setHref(mapTileUse,'tileHex');
-			mapTileUse.setAttribute('x',map.x);
-			mapTileUse.setAttribute('y',map.y);
-			mapTileUse.setAttribute('fill',map.backgroundColor);
-			mapSVG.appendChild(mapTileUse);
+		if (document.getElementById('mapTile'+map.id) == null) {
+			var mapSVG = document.getElementById('mapSVG');
+			var mapTileGroup = document.getElementById('mapTileGroup');
+			var mapLegendsGroup = document.getElementById('mapLegendsGroup');
+			if (mapSVG !== null) {
+				var mapTileUse = document.createElementNS('http://www.w3.org/2000/svg','use');
+				mapTileUse.id = 'mapTile'+map.id;
+				view.setHref(mapTileUse,'tileHex');
+				mapTileUse.setAttribute('x',map.x);
+				mapTileUse.setAttribute('y',map.y);
+				mapTileUse.setAttribute('fill',map.backgroundColor);
+				mapTileUse.setAttribute('stroke','none');
+				mapTileGroup.appendChild(mapTileUse);
+				if (map.town !== undefined) {
+					var circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+					mapLegendsGroup.appendChild(circle);
+					circle.setAttribute('cx',map.town.x);
+					circle.setAttribute('cy',map.town.y);
+					circle.setAttribute('r',20);
+					var text = document.createElementNS('http://www.w3.org/2000/svg','text');
+					mapLegendsGroup.appendChild(text);
+					text.setAttribute('x',map.town.x);
+					text.setAttribute('y',map.town.y+80);
+					text.setAttribute('font-size',80);
+					text.setAttribute('text-anchor','middle');
+					text.innerHTML = map.town.name;
+				};
+			};
 		};
 	},
 	
@@ -549,6 +1562,7 @@ var view = {
 		var gameSVG = document.getElementById('gameSVG');
 		var center = {x:game.p1ship.x,y:game.p1ship.y};
 		gameSVG.setAttribute('viewBox',(center.x-100)+" "+(center.y-61.5)+' 200 123');
+// 		gameSVG.setAttribute('viewBox',(center.x-200)+" "+(center.y-123)+' 400 246');
 		
 		var mapSVG = document.getElementById('mapSVG');
 		mapSVG.setAttribute('viewBox',(center.x-3000)+" "+(center.y-3000)+' 6000 6000');
@@ -557,8 +1571,246 @@ var view = {
 		uiGroup.setAttribute('transform','translate('+(center.x)+" "+(center.y)+')');
 	},
 	
+	displayMooring: function(tower) {
+		var towerUse = document.getElementById('targetFade'+tower.id);
+		if (towerUse !== null) {
+			towerUse.beginElement();
+		};
+	},
+	
+	displayUnmooring: function(tower) {
+		var towerUse = document.getElementById('targetReveal'+tower.id);
+		if (towerUse !== null) {
+			towerUse.beginElement();
+		};
+	},
+	
+	// Music UI
+	
+	updateMusic: function(soundtrack) {
+		document.getElementById('songNameText').innerHTML = soundtrack.currentTrackMetadata.name;
+		document.getElementById('songCreditText').innerHTML = 'by ' + soundtrack.currentTrackMetadata.credit;
+		document.getElementById('songCreditLink').setAttribute('href',soundtrack.currentTrackMetadata.creditLink);
+		view.revealSong();
+		view.fadeSong();
+	},
+	
+	revealSong: function() {
+		document.getElementById('songReveal').beginElement();
+	},
+	
+	fadeSong: function() {
+		document.getElementById('songFade').beginElement();
+	},
+	
+	revealSoundControls: function() {
+		document.getElementById('soundControlsReveal').beginElement();
+		view.revealSong();
+	},
+	
+	hideSoundControls: function() {
+		document.getElementById('soundControlsHide').beginElement();
+		view.fadeSong();
+	},
+	
+	toggleSoundPlayPause: function() {
+		if (game.soundtrack.paused) {
+			document.getElementById('soundControlsPauseShape').setAttribute('opacity',0);
+			document.getElementById('soundControlsPlayShape').setAttribute('opacity',1);
+		} else {
+			document.getElementById('soundControlsPauseShape').setAttribute('opacity',1);
+			document.getElementById('soundControlsPlayShape').setAttribute('opacity',0);
+		};
+	},
+	
+	// UI Panes
+	
+	toggleMapPane: function() {
+		if (view.panes.minimap == 'minimized') {
+			view.maximizeMapPane();
+		} else if (view.panes.minimap == 'maximized') {
+			view.minimizeMapPane();
+		} else {
+			view.panes.minimap = 'minimized';
+			view.fadeMapPane();
+		};
+	},
+	
+	maximizeMapPane: function() {
+			document.getElementById('mapLegendsGroup').setAttribute('opacity',1);
+			document.getElementById('maximizeMap').beginElement();
+			document.getElementById('maximizeMapSlide').beginElement();
+			view.panes.minimap = 'maximized';
+	},
+	
+	minimizeMapPane: function() {
+			document.getElementById('mapLegendsGroup').setAttribute('opacity',0);
+			document.getElementById('minimizeMap').beginElement();
+			document.getElementById('minimizeMapSlide').beginElement();
+			view.panes.minimap = 'minimized';
+	},
+	
+	fadeMapPane: function() {
+	},
+	
+	revealMapPane: function() {
+	},
+	
+	shipToTown: function(town) {
+		view.buildTownUI(town);
+		document.getElementById('controlsHideAnimation').beginElement();
+		document.getElementById('townRevealAnimation').beginElement();
+	},
+	
+	townToShip: function() {
+		for (var i=0;i<5;i++) {
+			if (view.panes['tab'+i] == 'maximized') {
+				view.toggleTownTab(i);
+			};
+		};
+		document.getElementById('controlsRevealAnimation').beginElement();
+		document.getElementById('townHideAnimation').beginElement();
+	},
+	
+	toggleTownTab: function(tabIndex) {
+		if (view.panes['tab'+tabIndex] == 'maximized') {
+			document.getElementById('townTab'+tabIndex+'HideAnimation').beginElement();
+			view.panes['tab'+tabIndex] = 'minimized';
+		} else {
+			document.getElementById('townTab'+tabIndex+'RevealAnimation').beginElement();
+			view.panes['tab'+tabIndex] = 'maximized';
+		};
+	},
+	
 	rumble: function() {
 		document.getElementById('rumbleAnimation').beginElement();
+	},
+	
+	displayAlert: function(alert) {
+		var alertsGroup = document.getElementById('alertsGroup');
+		alertsGroup.innerHTML = '';
+		var alertText = document.createElementNS('http://www.w3.org/2000/svg','text');
+		alertText.setAttribute('x',0);
+		alertText.setAttribute('y',-50);
+		alertText.setAttribute('text-anchor','middle');
+		alertText.setAttribute('font-size',3);
+		alertText.innerHTML = alert;
+		alertText.setAttribute('class','alert');
+		alertText.setAttribute('fill','red');
+		alertText.setAttribute('stroke','black');
+		alertText.setAttribute('paint-order','stroke');
+		alertsGroup.appendChild(alertText);
+		var alertFade = document.createElementNS('http://www.w3.org/2000/svg','animate');
+		alertFade.setAttribute('attributeName','opacity');
+		alertFade.setAttribute('attributeType','XML');
+		alertFade.setAttribute('from','1');
+		alertFade.setAttribute('to','0');
+		alertFade.setAttribute('dur','5s');
+		alertFade.setAttribute('begin','indefinite');
+		alertFade.setAttribute('fill','freeze');
+		alertText.appendChild(alertFade);
+		alertFade.beginElement();
+	},
+	
+	displayComponent: function(component,cost) {
+		var componentGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+		
+		var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		componentGroup.appendChild(rect);
+		rect.setAttribute('x',-15);
+		rect.setAttribute('y',-7.5);
+		rect.setAttribute('width',30);
+		rect.setAttribute('height',15);
+		rect.setAttribute('fill','white');
+		rect.setAttribute('stroke','black');
+		rect.setAttribute('stroke-width',0.5);
+		
+		var nameText = document.createElementNS('http://www.w3.org/2000/svg','text');
+		componentGroup.appendChild(nameText);
+		nameText.setAttribute('x',-14);
+		nameText.setAttribute('y',-4.25);
+		nameText.setAttribute('font-size',2.25);
+		nameText.innerHTML = component.name;
+		
+		var i=2;
+		var prettyNames = {
+			lift: 'lift',
+			turn: 'turn',
+			thrust: 'thrust',
+			stability: 'stability',
+			drag: 'drag',
+			power: 'power',
+			cargo: 'cargo',
+			loadTime: 'load speed',
+			sight: 'sight',
+			weight: 'weight',
+			chargeCapacity: 'capacity',
+			fuelCapacity:'fuel tank',
+			fuelConsumption: 'efficiency',
+			internalSlots: 'bays',
+			externalSlots: 'pylons',
+			topSlots: 'top points',
+		};
+		for (var statName in component.stats) {
+			var statText = document.createElementNS('http://www.w3.org/2000/svg','text');
+			componentGroup.appendChild(statText);
+			statText.setAttribute('x',-2);
+			statText.setAttribute('y',-5.5 + i * 2);
+			statText.setAttribute('font-size',1.8);
+			statText.innerHTML = Math.floor(component.stats[statName]*100)/100;
+			statName = prettyNames[statName];
+			var statText = document.createElementNS('http://www.w3.org/2000/svg','text');
+			componentGroup.appendChild(statText);
+			statText.setAttribute('x',-3);
+			statText.setAttribute('y',-5.5 + i * 2);
+			statText.setAttribute('font-size',1.8);
+			statText.setAttribute('text-anchor','end');
+			statText.innerHTML = statName + ":";
+			i++;
+		};
+
+		var statText = document.createElementNS('http://www.w3.org/2000/svg','text');
+		componentGroup.appendChild(statText);
+		statText.setAttribute('x',13);
+		statText.setAttribute('y',-1.5);
+		statText.setAttribute('font-size',1.8);
+		statText.setAttribute('text-anchor','end');
+		statText.innerHTML = component.type;
+		
+		var statText = document.createElementNS('http://www.w3.org/2000/svg','text');
+		componentGroup.appendChild(statText);
+		statText.setAttribute('x',13);
+		statText.setAttribute('y',0.5);
+		statText.setAttribute('font-size',1.8);
+		statText.setAttribute('text-anchor','end');
+		statText.innerHTML = Math.floor(component.condition*100) + "%";
+		
+		if (cost==undefined) {cost = '1723'};
+		
+		var statText = document.createElementNS('http://www.w3.org/2000/svg','text');
+		componentGroup.appendChild(statText);
+		statText.setAttribute('x',13);
+		statText.setAttribute('y',6.5);
+		statText.setAttribute('font-size',1.8);
+		statText.setAttribute('text-anchor','end');
+		statText.innerHTML = "$" + cost;
+
+		
+		document.getElementById('uiGroup').appendChild(componentGroup);
+		
+		return componentGroup
+	},
+	
+	toggleInventoryPane: function() {
+		console.log('Inventory and Cargo!');
+	},
+	
+	toggleOutfittingPane: function() {
+		console.log('Outfitting and Ship Guts!');
+	},
+	
+	togglePersonnelPane: function() {
+		console.log('Personnel and Crew!');
 	},
 
 };
