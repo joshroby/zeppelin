@@ -57,7 +57,24 @@ function Game() {
 		this.clock.pauseUnpause();
 	};
 	
+	this.localPrice = function(commodityKey) {
+		return Math.floor(this.commodities[commodityKey].cost * this.p1ship.currentMap().town.amenities[1].localWares[commodityKey].demand);
+	};
+	
 	// construction
+	
+	this.commodities = {};
+	var commodity;
+	var commodityNames = ['food','cotton','fuel','aluminum','rum','rubber','copper','silk','magnesium','manganese'];
+	for (var i=0;i<commodityNames.length;i++) {
+		commodity = {
+			key: commodityNames[i],
+			displayName: view.capitalize(commodityNames[i]),
+			weight: (i+1) * 10,
+			cost: 10 + Math.pow(2,i),
+		};
+		this.commodities[commodity.key] = commodity;
+	};
 
 	this.clock = new Clock();
 	this.clock.tick = 100;
@@ -79,18 +96,32 @@ function Game() {
 	this.maps.push(new SectionMap(-0.5,1,this));
 	view.initMap(this.maps);
 	
-	this.p1ship = new Ship('p1');
+	this.p1ship = new Ship('p1',1);
 	this.maps[0].ships.push(this.p1ship);
 // 	this.p1ship.rudder = 1.2;
 // 	this.p1ship.airspeed.speed = 1;
 	view.addShip(this.p1ship);
 	view.initUI(this.p1ship);
+	view.updatePurse(this);
 	
 	for (var map of this.maps) {
 		view.updatePlayerMap(map);
 	};
 	
-	this.soundtrack = new Soundtrack();
+	this.soundtrack = new GamenSoundtrack();
+	this.soundtrack.playlist = [
+		{path:'bensound-birthofahero.mp3',name:'Birth of a Hero',credit:'Bensound',creditLink:'http://bensound.com/royalty-free-music/track/birth-of-a-hero'},
+// 		{path:'bensound-littleplanet.mp3',name:'Little Planet',credit:'Bensound',creditLink:'http://bensound.com/royalty-free-music/track/little-planet'},
+		{path:'bensound-newdawn.mp3',name:'New Dawn',credit:'Bensound',creditLink:'http://bensound.com/royalty-free-music/track/new-dawn'},
+		{path:'bensound-relaxing.mp3',name:'Relaxing',credit:'Bensound',creditLink:'http://bensound.com/royalty-free-music/track/relaxing'},
+		{path:'Purple Planet Music - Atmospheric - The Big Sky.mp3',name:'The Big Sky',credit:'Purple Planet',creditLink:'http://www.purple-planet.com'},
+		{path:'Purple Planet Music - Cinematic - Sierra Nevada.mp3',name:'Sierra Nevada',credit:'Purple Planet',creditLink:'http://www.purple-planet.com'},
+		{path:'Purple Planet Music - Cinematic - The Fellowship.mp3',name:'The Fellowship',credit:'Purple Planet',creditLink:'http://www.purple-planet.com'},
+		{path:'Purple Planet Music - Cinematic - The New Dawn.mp3',name:'The New Dawn',credit:'Purple Planet',creditLink:'http://www.purple-planet.com'},
+		{path:'Purple Planet Music - Dreamy - Biosphere.mp3',name:'Biosphere',credit:'Purple Planet',creditLink:'http://www.purple-planet.com'},
+		{path:'Purple Planet Music - Dreamy - Shifting Sands.mp3',name:'Shifting Sands',credit:'Purple Planet',creditLink:'http://www.purple-planet.com'},
+	];
+	this.soundtrack.play();
 	
 	this.constants = {
 		topMooringSpeed: 3,
@@ -242,6 +273,7 @@ function SectionMap(x,y,game) {
 		speed: Math.random() * Math.random() * Math.random() * 3,
 	};
 	this.wind = wind;
+	if (x==0&&y==0) {this.wind.speed = 0.1};
 	
 	// Ridges and Valleys
 	
@@ -375,7 +407,7 @@ function SectionMap(x,y,game) {
 	this.mooringTowers = [];
 	
 	// Settlements
-	if (Math.random() < 0.33 && this.backgroundColor !== 'blue') { // A Settlement!
+	if (Math.random() < 0.33 && this.backgroundColor !== 'blue' || (x==0&&y==0)) { // A Settlement!
 		var angle = Math.random() * Math.PI * 2;
 		var dist = Math.random() * 125;
 		var townCenter = {
@@ -436,13 +468,28 @@ function SectionMap(x,y,game) {
 			name: 'Tavern',
 		};
 		this.town.amenities.push(tavern);
+		
 		var wharf = {
 			name: 'Wharf',
+			localWares: {},
+		};
+		var ware, inStock = 0;
+		for (var commodityKey in game.commodities) {
+			ware = {key:commodityKey,demand:Math.random() + 0.5};
+			if (ware.demand < 1 && inStock < 6 || (commodityKey == 'food' || commodityKey == 'fuel')) {
+				ware.available = Math.random() * Math.random() * 100 << 0;
+				inStock++;
+			} else {
+				ware.available = 0;
+			};
+			wharf.localWares[commodityKey] = ware;
 		};
 		this.town.amenities.push(wharf);
+		
 		var amenity = {
 			name: ['Shipyard','Temple','Hospital'][Math.random() * 3 << 0],
 		};
+		amenity.name = 'Shipyard';
 		this.town.amenities.push(amenity);
 		var adjectives = ['Little','Big','Great','Friendly','Prudence','Percival','Gas','Alum'];
 		var townNouns = [' Town',' City','ville','ton','burgh',' Station',' Towers'];
@@ -553,8 +600,77 @@ function Ship(id,tier) {
 	};
 	this.groundspeed = {};
 	
+	this.cargo = {
+		fuel: 1,
+		food: 1,
+	};
+	this.coin = 1000;
 	this.components = {};
-	if (id.indexOf('cloud') == -1) {
+	if (id == 'p1') {
+		this.components.keel = new Component('keel',1);
+		this.components.keel.stats.hulls = 1;
+		this.components.keel.stats.drag = 0.2;
+		this.components.keel.stats.weight = 0.5;
+		
+		this.components.hull0 = new Component('hull',1);
+		this.components.hull0.stats.internalSlots = 4;
+		this.components.hull0.stats.externalSlots = 4;
+		this.components.hull0.stats.topSlots = 1;
+		this.components.hull0.stats.drag = 0.2;
+		this.components.hull0.stats.weight = 0.75;
+		
+		this.components.hull0int0 = new Component('engine',1);
+		this.components.hull0int0.stats.fuelCapacity = 0.5;
+		this.components.hull0int0.stats.fuelConsumption = 0.5;
+		this.components.hull0int0.stats.thrust = 0.5;
+		this.components.hull0int0.stats.weight = 0.5;
+		
+		this.components.hull0int1 = new Component('gasbag',1);
+		this.components.hull0int1.stats.lift = 0.5;
+		this.components.hull0int1.stats.weight = 0.05;
+		
+		this.components.hull0int2 = new Component('cargoBay',1);
+		this.components.hull0int2.stats.cargo = 0.5;
+		this.components.hull0int2.stats.loadTime = 0.5;
+		this.components.hull0int2.stats.weight = 0.05;
+		
+		this.components.hull0int3 = new Component('gasbag',1);
+		this.components.hull0int3.stats.lift = 0.5;
+		this.components.hull0int3.stats.weight = 0.05;
+		
+		this.components.hull0ext0 = new Component('motor',1);
+		this.components.hull0ext0.stats.thrust = 0.5;
+		this.components.hull0ext0.stats.lift = 0.5;
+		this.components.hull0ext0.stats.turn = 0.5;
+		this.components.hull0ext0.stats.drag = 0.2;
+		this.components.hull0ext0.stats.weight = 0.4;
+		this.components.hull0ext1 = new Component('motor',1);
+		this.components.hull0ext1.stats.thrust = 0.5;
+		this.components.hull0ext1.stats.lift = 0.5;
+		this.components.hull0ext1.stats.turn = 0.5;
+		this.components.hull0ext1.stats.drag = 0.2;
+		this.components.hull0ext1.stats.weight = 0.4;
+		
+		this.components.hull0ext2 = new Component('stabilizer',1);
+		this.components.hull0ext2.stats.stability = 0.5;
+		this.components.hull0ext2.stats.drag = 0.2;
+		this.components.hull0ext2.stats.weight = 0.1;
+		this.components.hull0ext3 = new Component('stabilizer',1);
+		this.components.hull0ext3.stats.stability = 0.5;
+		this.components.hull0ext3.stats.drag = 0.2;
+		this.components.hull0ext3.stats.weight = 0.1;
+		
+		this.components.hull0top0 = new Component('tailboom',1);
+		this.components.hull0top0.stats.stability = 0.5;
+		this.components.hull0top0.stats.lift = 0.5;
+		this.components.hull0top0.stats.drag = 0.2;
+		this.components.hull0top0.stats.weight = 0.15;
+		
+		
+		view.buildShipDef(this);
+		this.sprite = 'shipSprite_'+this.id;
+	
+	} else if (id.indexOf('cloud') == -1) {
 	
 // 		this.sprite = 'defaultShip';
 		this.sprite = 'shipSprite_'+this.id;
@@ -595,6 +711,9 @@ function Ship(id,tier) {
 			for (c=0;c<hull.stats.topSlots;c++) {
 				if (c == hull.stats.topSlots-1) {
 					componentTypes = ['tailboom','fin','topDeck'];
+					if (powerSystem == 'battery') {
+						componentTypes.push('solarPanels');
+					};
 				} else {
 					componentTypes = ['fin','topDeck'];
 				};
@@ -604,10 +723,6 @@ function Ship(id,tier) {
 		};
 		view.buildShipDef(this);
 		
-	};
-	
-	this.length = function() {
-		return 4;
 	};
 	
 	this.getThrust = function() {return this.getStat('thrust')};
@@ -622,11 +737,33 @@ function Ship(id,tier) {
 			};
 			if (statName == 'thrust' && this.components[slot].stats.drag !== undefined) {
 				total = Math.max(total - this.components[slot].stats.drag,0);
+			} else if (statName == 'turn' && this.components[slot].stats.drag !== undefined) {
+				total = Math.max(total - this.components[slot].stats.drag*0.5,0);
 			} else if (statName == 'lift' && this.components[slot].stats.weight !== undefined) {
 				total = Math.max(total - this.components[slot].stats.weight,0);
 			};
 		};
 		return total;
+	};
+	
+	this.availableCargoSpace = function() {
+		var space = this.getStat('cargo') * 10;
+		var cargoCrates = 0;
+		for (var commodityKey in this.cargo) {
+			cargoCrates += this.cargo[commodityKey];
+		};
+		
+		return Math.floor(space - cargoCrates);
+	};
+	
+	this.availableCargoLift = function() {
+		var lift = this.getStat('lift') * 100;
+		var cargoWeight = 0;
+		for (var commodityKey in this.cargo) {
+			cargoWeight += this.cargo[commodityKey] * game.commodities[commodityKey].weight;
+		};
+		
+		return Math.floor((lift - cargoWeight)*10)/10;
 	};
 	
 	this.destroy = function() {
@@ -764,7 +901,7 @@ function Ship(id,tier) {
 		};
 		
 		// Telemetry
-		this.heading += this.getTurn() * this.rudder * 0.2;
+		this.heading += this.getTurn() * this.rudder * 0.1;
 		if (this.heading >= Math.PI * 2) {
 			this.heading -= Math.PI * 2;
 		} else if (this.heading < 0) {
@@ -905,6 +1042,28 @@ function Ship(id,tier) {
 		return closestMap;
 	};
 	
+	this.buyCommodity = function(commodityKey) {
+		var current = this.cargo[commodityKey];
+		if (current == undefined) {current = 0};
+		this.cargo[commodityKey] = current + 1;
+		
+		this.coin -= game.localPrice(commodityKey);
+		
+		view.updateWharfUI();
+		view.updatePurse(game);
+	};
+	
+	this.sellCommodity = function(commodityKey) {
+		var current = this.cargo[commodityKey];
+		if (current == undefined) {current = 0};
+		this.cargo[commodityKey] = current - 1;
+		
+		this.coin += game.localPrice(commodityKey);
+		
+		view.updateWharfUI();
+		view.updatePurse(game);
+	};
+	
 	// AI
 	
 	this.ai = function() {
@@ -1016,56 +1175,72 @@ function Component(type,tier) {
 	
 	var stats = [];
 	var weight = 1;
+	var nouns = ['component'];
 	this.stats = {};
 	if (type == 'keel') {
 		stats.push('hulls','drag');
 		weight = 1;
+		nouns = ['Aluminum Keel','Duralumin Keel','Aerogel Keel','Graphene Hull','Aerographite Keel','Carbon Nanotube Keel','Diamond Nanothread Keel'];
 	} else if (type == 'hull') {
 		stats.push('internalSlots','externalSlots','topSlots','drag');
 		weight = 1.5;
+		nouns = ['Courier Hull','Ultralight Hull','Yacht Hull','Corvette Hull','Akron Hull','Argosy Hull','Workhorse Hull','Thunderhead Hull','Titan Hull','Colossus Hull'];
 	} else if (type == 'engine') {
 		stats.push('thrust','fuelCapacity','fuelConsumption');
 		weight = 1;
+		nouns = ['Two-Piston Engine','Four-Piston Engine','Six-Piston Engine','Eight-Piston Engine','Rotary Engine'];
 	} else if (type == 'battery') {
 		stats.push('thrust','chargeCapacity');
 		weight = 1;
+		nouns = ['Nickel-Cadmium Battery','Lithium Ion Battery','Dual Carbon Battery','Germanium Air Battery','Molten Salt Battery','Polymer Battery','Flow Battery','Organic Radical Battery','Fuel Cell','Ultrabattery'];
 	} else if (type == 'motor') {
 		stats.push('thrust','turn','lift','drag');
 		weight = 0.8;
+		nouns = ['Prop','Contraprop','Proprotor','Ducted Fan','Turboprop','Turbojet','Turbofan','Propfan','Ramjet','Scramjet'];
 	} else if (type == 'gasbag') {
 		stats.push('lift');
 		weight = 0.1;
+		nouns = ['Tarbag','Rubberbag','Silk Bag','Spidersilk Bag'];
 	} else if (type == 'stabilizer') {
 		stats.push('drag','stability');
 		weight = 0.2;
+		nouns = ['Stabilizer','Trimfin','Canard'];
 	} else if (type == 'solarPanels') {
 		stats.push('power');
 		weight = 0.2;
+		nouns = ['Charge Panels','Solar Collectors','Solar Plant'];
 	} else if (type == 'topDeck') {
 		stats.push('sight');
 		weight = 0.1;
+		nouns = ['Deck','Dome'];
 	} else if (type == 'fin') {
 		stats.push('drag','stability');
 		weight = 0.2;
+		nouns = ['Fin','Rudder','Dorsal'];
 	} else if (type == 'tailboom') {
 		stats.push('drag','lift','stability');
 		weight = 0.3;
+		nouns = ['Tailboom'];
 	} else if (type == 'cargoBay') {
 		stats.push('cargo','loadTime');
 		weight = 0.1;
+		nouns = ['Cargo Bay'];
 	} else if (type == 'cargoCrane') {
-		stats.push('cargo');
+		stats.push('cargo','loadTime');
 		weight = 0.1;
+		nouns = ['Winch','Crane'];
 	};
 	stats.push('weight');
 	for (var statName of stats) {
 		this.stats[statName] = 0;
 		for (var i=0;i<tier;i++) {
-			this.stats[statName] += Math.random();
+			this.stats[statName] += Math.random()*0.9+0.1;
 		};
 		if (statName == 'hulls') {
 			this.stats[statName] = Math.ceil(this.stats[statName]);
-		} else if (statName == 'internalSlots' || statName == 'externalSlots') {
+		} else if (statName == 'internalSlots') {
+			this.stats[statName] = 1 + Math.ceil(this.stats[statName] * 2) * 2;
+		} else if (statName == 'externalSlots') {
 			this.stats[statName] = Math.ceil(this.stats[statName] * 2) * 2;
 		} else if (statName == 'topSlots') {
 			this.stats[statName] = 1 + Math.floor(this.stats[statName]);
@@ -1080,75 +1255,9 @@ function Component(type,tier) {
 	} else if (type == 'hull') {
 		this.length = (this.stats.internalSlots+this.stats.externalSlots+this.stats.topSlots);
 	};
-}
-
-function Soundtrack() {
-
-	this.playlist = [
-		{path:'bensound-birthofahero.mp3',name:'Birth of a Hero',credit:'Bensound',creditLink:'http://bensound.com/royalty-free-music/track/birth-of-a-hero'},
-// 		{path:'bensound-littleplanet.mp3',name:'Little Planet',credit:'Bensound',creditLink:'http://bensound.com/royalty-free-music/track/little-planet'},
-		{path:'bensound-newdawn.mp3',name:'New Dawn',credit:'Bensound',creditLink:'http://bensound.com/royalty-free-music/track/new-dawn'},
-		{path:'bensound-relaxing.mp3',name:'Relaxing',credit:'Bensound',creditLink:'http://bensound.com/royalty-free-music/track/relaxing'},
-		{path:'Purple Planet Music - Atmospheric - The Big Sky.mp3',name:'The Big Sky',credit:'Purple Planet',creditLink:'http://www.purple-planet.com'},
-		{path:'Purple Planet Music - Cinematic - Sierra Nevada.mp3',name:'Sierra Nevada',credit:'Purple Planet',creditLink:'http://www.purple-planet.com'},
-		{path:'Purple Planet Music - Cinematic - The Fellowship.mp3',name:'The Fellowship',credit:'Purple Planet',creditLink:'http://www.purple-planet.com'},
-		{path:'Purple Planet Music - Cinematic - The New Dawn.mp3',name:'The New Dawn',credit:'Purple Planet',creditLink:'http://www.purple-planet.com'},
-		{path:'Purple Planet Music - Dreamy - Biosphere.mp3',name:'Biosphere',credit:'Purple Planet',creditLink:'http://www.purple-planet.com'},
-		{path:'Purple Planet Music - Dreamy - Shifting Sands.mp3',name:'Shifting Sands',credit:'Purple Planet',creditLink:'http://www.purple-planet.com'},
-	];
-	
-	this.prefix = 'audio/';
-	
-	this.currentTrack = undefined;
-	this.currentTrackMetadata = undefined;
-	this.paused = true;
-	this.volume = 1;
-	
-	this.selectTrack = function(trackIndex) {
-		if (trackIndex == undefined) {
-			trackIndex = this.playlist.length * Math.random() << 0;
-		};
-		if (this.paused == false && this.currentTrack !== undefined && this.currentTrack.paused == false) {
-			this.currentTrack.pause();
-		};
-		this.currentTrack = new Audio(this.prefix+this.playlist[trackIndex].path);
-		this.currentTrackMetadata = this.playlist[trackIndex];
-		this.currentTrack.volume = this.volume;
-		view.updateMusic(this);
-	};
-	
-	this.play = function() {
-		if (this.currentTrack == undefined) {this.selectTrack()};
-		this.currentTrack.play();
-		this.paused = false;
-	};
-	
-	this.pause = function() {
-		this.currentTrack.pause();
-		this.paused = true;
-	};
-	
-	this.skip = function() {
-		this.currentTrack.pause();
-		this.selectTrack();
-		this.play();
-	};
-	
-	this.tick = function() {
-		if (this.paused == false && this.currentTrack.paused == true) {
-			this.selectTrack();
-			this.play();
-		};
-	};
-	
-	this.setVolume = function(num) {
-		if (num >= 0 && num <= 1) {
-			this.volume = num;
-			this.currentTrack.volume = num;
-		};
-	};
-	
-	this.play();
+	this.name = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.charAt((tier-1)*2.6+Math.random()*2.6 << 0);
+	this.name += '-'+Math.ceil(Math.random()*100)+' ';
+	this.name += nouns[nouns.length*(tier-1)/10];
 }
 
 var gamenEventPointers = {

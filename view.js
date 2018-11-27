@@ -24,6 +24,10 @@ var view = {
 		element.setAttributeNS('http://www.w3.org/1999/xlink','xlink:href',string);
 	},
 
+	capitalize: function(string) {
+    	return string.charAt(0).toUpperCase() + string.slice(1);
+	},
+
 	gameDivContents: function() {
 		
 		var svgDiv = document.createElement('div');
@@ -140,9 +144,29 @@ var view = {
 		topDeck.setAttribute('fill','inherit');
 		topDeck.setAttribute('stroke','black');
 		
+		var solarPanels = document.createElementNS('http://www.w3.org/2000/svg','g');
+		defs.appendChild(solarPanels);
+		solarPanels.id = 'solarPanels_t1';
+		var panel1 = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		solarPanels.appendChild(panel1);
+		panel1.setAttribute('x',0);
+		panel1.setAttribute('y',-1);
+		panel1.setAttribute('width',1);
+		panel1.setAttribute('height',2);
+		panel1.setAttribute('fill','cadetblue');
+		panel1.setAttribute('stroke','black');
+		var panel2 = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		solarPanels.appendChild(panel2);
+		panel2.setAttribute('x',-1);
+		panel2.setAttribute('y',-1);
+		panel2.setAttribute('width',1);
+		panel2.setAttribute('height',2);
+		panel2.setAttribute('fill','cadetblue');
+		panel2.setAttribute('stroke','black');
+		
 		var tailboom = document.createElementNS('http://www.w3.org/2000/svg','polygon');
 		tailboom.id = 'tailboom_t1';
-		var points = "0,0 1.725,1 1.75,1.625 0,1 -1.75,1.625 -1.725,1";
+		var points = "0,1 1.725,2 1.75,2.625 0,2 -1.75,2.625 -1.725,2";
 		tailboom.setAttribute('points',points);
 		tailboom.setAttribute('fill','inherit');
 		tailboom.setAttribute('stroke','black');
@@ -1318,6 +1342,50 @@ var view = {
 		revealAnimation.setAttribute('fill','freeze');
 		townGroup.appendChild(revealAnimation);
 		
+		var purseGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+		townGroup.appendChild(purseGroup);
+		purseGroup.id = 'purseGroup';
+		purseGroup.setAttribute('stroke-width',0.5);
+		purseGroup.setAttribute('stroke','black');
+		var ellipse = document.createElementNS('http://www.w3.org/2000/svg','ellipse');
+		ellipse.setAttribute('cx',95.5);
+		ellipse.setAttribute('cy',55);
+		ellipse.setAttribute('rx',4);
+		ellipse.setAttribute('ry',5);
+		ellipse.setAttribute('fill','gold');
+		purseGroup.appendChild(ellipse);
+		var ellipse = document.createElementNS('http://www.w3.org/2000/svg','ellipse');
+		ellipse.setAttribute('cx',94);
+		ellipse.setAttribute('cy',55);
+		ellipse.setAttribute('rx',4);
+		ellipse.setAttribute('ry',5);
+		ellipse.setAttribute('fill','gold');
+		purseGroup.appendChild(ellipse);
+		var line = document.createElementNS('http://www.w3.org/2000/svg','line');
+		line.setAttribute('x1',94);
+		line.setAttribute('y1',50);
+		line.setAttribute('x2',95.5);
+		line.setAttribute('y2',50);
+		line.setAttribute('fill','gold');
+		purseGroup.appendChild(line);
+		var line = document.createElementNS('http://www.w3.org/2000/svg','line');
+		line.setAttribute('x1',94);
+		line.setAttribute('y1',60);
+		line.setAttribute('x2',95.5);
+		line.setAttribute('y2',60);
+		line.setAttribute('fill','gold');
+		purseGroup.appendChild(line);
+		var text = document.createElementNS('http://www.w3.org/2000/svg','text');
+		text.setAttribute('x',94);
+		text.setAttribute('y',55.5);
+		text.setAttribute('text-anchor','middle');
+		text.setAttribute('font-size',2);
+		text.setAttribute('fill','black');
+		text.setAttribute('stroke','gold');
+		text.setAttribute('paint-order','stroke');
+		purseGroup.appendChild(text);
+		text.id = 'purseText';
+		
 		var alertsGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
 		rumbleGroup.appendChild(alertsGroup);
 		alertsGroup.id = 'alertsGroup';
@@ -1384,8 +1452,497 @@ var view = {
 			revealAnimation.setAttribute('begin','indefinite');
 			revealAnimation.setAttribute('fill','freeze');
 			tabGroup.appendChild(revealAnimation);
+		
+			var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+			rect.setAttribute('x',-87.5);
+			rect.setAttribute('y',65);
+			rect.setAttribute('width',175);
+			rect.setAttribute('height',90);
+			rect.setAttribute('fill','lemonchiffon');
+			rect.setAttribute('stroke','black');
+			tabGroup.appendChild(rect);
+			
+			var contentGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+			tabGroup.appendChild(contentGroup);
+			contentGroup.id = 'townTab'+b+'Content';
+			
+			if (tabs[b].name == 'Tavern') {
+				contentGroup.appendChild(view.buildTavernUI(tabs[b]));
+			} else if (tabs[b].name == 'Wharf') {
+				contentGroup.appendChild(view.buildWharfUI(tabs[b]));
+			} else if (tabs[b].name == 'Shipyard') {
+				contentGroup.appendChild(view.buildShipyardUI(tabs[b]));
+			} else if (tabs[b].name == 'Hopsital') {
+				contentGroup.appendChild(view.buildHospitalUI(tabs[b]));
+			} else if (tabs[b].name == 'Temple') {
+				contentGroup.appendChild(view.buildTempleUI(tabs[b]));
+			};
 		};
 		
+	},
+	
+	buildTavernUI: function(tavern) {
+		var paneGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+		paneGroup.setAttribute('transform','translate(0,100)');
+		
+		// Pane Bounds: x -85 to 85, y -33 to 50 (corrected)
+		
+		var buyRoundButton = document.createElementNS('http://www.w3.org/2000/svg','g');
+		paneGroup.appendChild(buyRoundButton);
+		var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		buyRoundButton.appendChild(rect);
+		rect.setAttribute('x',-80);
+		rect.setAttribute('y',38);
+		rect.setAttribute('rx',5);
+		rect.setAttribute('ry',5);
+		rect.setAttribute('width',80);
+		rect.setAttribute('height',10);
+		rect.setAttribute('fill','goldenrod');
+		rect.setAttribute('stroke','black');
+		var text = document.createElementNS('http://www.w3.org/2000/svg','text');
+		buyRoundButton.appendChild(text);
+		text.setAttribute('x',-65);
+		text.setAttribute('y',44);
+		text.setAttribute('font-size',3.5);
+		text.innerHTML = "First Round's On Me, 'Mateys!";
+		
+		var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		paneGroup.appendChild(rect);
+		rect.setAttribute('x',8);
+		rect.setAttribute('y',-30);
+		rect.setAttribute('width',74);
+		rect.setAttribute('height',75);
+		rect.setAttribute('fill','none');
+		rect.setAttribute('stroke','goldenrod');
+		
+		var text = document.createElementNS('http://www.w3.org/2000/svg','text');
+		paneGroup.appendChild(text);
+		text.setAttribute('x',45);
+		text.setAttribute('y',-20);
+		text.setAttribute('font-size',2);
+		text.setAttribute('text-anchor','middle');
+		text.innerHTML = "A strange and unimplemented figure.";
+		
+		var buyDrinkButton = view.buildButton('Buy Drink',10,38);
+		paneGroup.appendChild(buyDrinkButton);
+		
+		var recruitButton = view.buildButton('Recruit',50,38);
+		paneGroup.appendChild(recruitButton);
+		
+		return paneGroup;
+	},
+	
+	buildWharfUI: function(wharf) {
+		var paneGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+		paneGroup.setAttribute('transform','translate(0,100)');
+		
+		// Pane Bounds: x -85 to 85, y -33 to 50 (corrected)
+		
+		// Local Wares
+		var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		paneGroup.appendChild(rect);
+		rect.setAttribute('x',-82);
+		rect.setAttribute('y',-30);
+		rect.setAttribute('width',74);
+		rect.setAttribute('height',75);
+		rect.setAttribute('fill','none');
+		rect.setAttribute('stroke','goldenrod');
+		
+		var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		paneGroup.appendChild(rect);
+		rect.setAttribute('x',-82);
+		rect.setAttribute('y',-30);
+		rect.setAttribute('width',74);
+		rect.setAttribute('height',5);
+		rect.setAttribute('fill','goldenrod');
+		rect.setAttribute('stroke','goldenrod');
+		
+		var text = document.createElementNS('http://www.w3.org/2000/svg','text');
+		paneGroup.appendChild(text);
+		text.setAttribute('x',-80);
+		text.setAttribute('y',-26.5);
+		text.setAttribute('font-size',3);
+		text.innerHTML = "Local Wares";
+		
+		var row = -1;
+		for (var commodityKey in wharf.localWares) {
+			commodity = wharf.localWares[commodityKey];
+			if (commodity.available > 0) {
+			
+				var canLoad = game.p1ship.availableCargoSpace() >= 1 && game.p1ship.availableCargoLift() >= game.commodities[commodityKey].weight;
+			
+				row++;
+				var wareGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+				paneGroup.appendChild(wareGroup);
+		
+				var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+				wareGroup.appendChild(rect);
+				rect.setAttribute('x',-82);
+				rect.setAttribute('y',-30 + 5 + row * 10);
+				rect.setAttribute('width',74);
+				rect.setAttribute('height',10);
+				rect.setAttribute('fill','lemonchiffon');
+				rect.setAttribute('stroke','goldenrod');
+		
+				var text = document.createElementNS('http://www.w3.org/2000/svg','text');
+				wareGroup.appendChild(text);
+				text.setAttribute('x',-80);
+				text.setAttribute('y',-26.5 + 6 + row * 10);
+				text.setAttribute('font-size',4);
+				text.innerHTML = game.commodities[commodity.key].displayName;
+		
+				var text = document.createElementNS('http://www.w3.org/2000/svg','text');
+				wareGroup.appendChild(text);
+				text.setAttribute('x',-75);
+				text.setAttribute('y',-26.5 + 9 + row * 10);
+				text.setAttribute('font-size',2.5);
+				text.innerHTML = "in " + game.commodities[commodity.key].weight + "-ton crates";
+		
+				var text = document.createElementNS('http://www.w3.org/2000/svg','text');
+				wareGroup.appendChild(text);
+				text.setAttribute('x',-40);
+				text.setAttribute('y',-26.5 + 7 + row * 10);
+				text.setAttribute('font-size',2);
+				text.setAttribute('text-anchor','middle');
+				text.innerHTML = ['Incredible','Excellent','Good','Fair','Unfortunate','Bad','Terrible'][7 * (commodity.demand - 0.5) << 0];
+		
+				var text = document.createElementNS('http://www.w3.org/2000/svg','text');
+				wareGroup.appendChild(text);
+				text.setAttribute('x',-40);
+				text.setAttribute('y',-26.5 + 9 + row * 10);
+				text.setAttribute('font-size',2);
+				text.setAttribute('text-anchor','middle');
+				text.innerHTML = "Price";
+				
+				var cost = game.localPrice(commodityKey);
+				var canAfford = game.p1ship.coin > cost;
+				var buyButton = view.buildButton('Buy for $'+cost,-28,-30 + 7.5 + row * 10,30,0.5);
+				wareGroup.appendChild(buyButton);
+				if (canLoad && canAfford) {
+					buyButton.addEventListener('click',handlers.buyCommodity.bind(this,commodityKey));
+				} else {
+					buyButton.setAttribute('opacity',0.2);
+				};
+			};
+		};
+		
+		
+		// Cargo
+		
+		var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		paneGroup.appendChild(rect);
+		rect.setAttribute('x',8);
+		rect.setAttribute('y',-30);
+		rect.setAttribute('width',74);
+		rect.setAttribute('height',75);
+		rect.setAttribute('fill','none');
+		rect.setAttribute('stroke','goldenrod');
+		
+		var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		paneGroup.appendChild(rect);
+		rect.setAttribute('x',8);
+		rect.setAttribute('y',-30);
+		rect.setAttribute('width',74);
+		rect.setAttribute('height',5);
+		rect.setAttribute('fill','goldenrod');
+		rect.setAttribute('stroke','goldenrod');
+		
+		var text = document.createElementNS('http://www.w3.org/2000/svg','text');
+		paneGroup.appendChild(text);
+		text.setAttribute('x',10);
+		text.setAttribute('y',-26.5);
+		text.setAttribute('font-size',3);
+		text.innerHTML = "Your Cargo";
+		
+		var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		paneGroup.appendChild(rect);
+		rect.setAttribute('x',8);
+		rect.setAttribute('y',40);
+		rect.setAttribute('width',74);
+		rect.setAttribute('height',5);
+		rect.setAttribute('fill','goldenrod');
+		rect.setAttribute('stroke','goldenrod');
+		
+		var text = document.createElementNS('http://www.w3.org/2000/svg','text');
+		paneGroup.appendChild(text);
+		text.setAttribute('x',80);
+		text.setAttribute('y',44);
+		text.setAttribute('font-size',3);
+		text.setAttribute('text-anchor','end');
+		var berth = 'berth';
+		if (game.p1ship.availableCargoSpace()>1) {berths = 'berths'};
+		text.innerHTML = game.p1ship.availableCargoLift()+" tons and "+game.p1ship.availableCargoSpace()+" "+berth+" available";
+		
+		var row = -1;
+		for (var commodityKey in game.p1ship.cargo) {
+			if (game.p1ship.cargo[commodityKey] >= 1) {
+				row++;
+				var wareGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+				paneGroup.appendChild(wareGroup);
+		
+				var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+				wareGroup.appendChild(rect);
+				rect.setAttribute('x',8);
+				rect.setAttribute('y',-30 + 5 + row * 10);
+				rect.setAttribute('width',74);
+				rect.setAttribute('height',10);
+				rect.setAttribute('fill','lemonchiffon');
+				rect.setAttribute('stroke','goldenrod');
+		
+				var text = document.createElementNS('http://www.w3.org/2000/svg','text');
+				wareGroup.appendChild(text);
+				text.setAttribute('x',10);
+				text.setAttribute('y',-26.5 + 6 + row * 10);
+				text.setAttribute('font-size',4);
+				text.innerHTML = game.commodities[commodityKey].displayName;
+		
+				var text = document.createElementNS('http://www.w3.org/2000/svg','text');
+				wareGroup.appendChild(text);
+				text.setAttribute('x',15);
+				text.setAttribute('y',-26.5 + 9 + row * 10);
+				text.setAttribute('font-size',2.5);
+				text.innerHTML = Math.floor(game.p1ship.cargo[commodityKey]) + " " + game.commodities[commodityKey].weight + "-ton crates";
+		
+				var text = document.createElementNS('http://www.w3.org/2000/svg','text');
+				wareGroup.appendChild(text);
+				text.setAttribute('x',50);
+				text.setAttribute('y',-26.5 + 7 + row * 10);
+				text.setAttribute('font-size',2);
+				text.setAttribute('text-anchor','middle');
+				text.innerHTML = ['Incredible','Excellent','Good','Fair','Unfortunate','Bad','Terrible'][7 * (1 - wharf.localWares[commodityKey].demand + 0.5) << 0];
+		
+				var text = document.createElementNS('http://www.w3.org/2000/svg','text');
+				wareGroup.appendChild(text);
+				text.setAttribute('x',50);
+				text.setAttribute('y',-26.5 + 9 + row * 10);
+				text.setAttribute('font-size',2);
+				text.setAttribute('text-anchor','middle');
+				text.innerHTML = "Price";
+				
+				var cost = game.localPrice(commodityKey);
+				var sellButton = view.buildButton('Sell for $'+cost,62,-30 + 7.5 + row * 10,30,0.5);
+				wareGroup.appendChild(sellButton);
+				sellButton.addEventListener('click',handlers.sellCommodity.bind(this,commodityKey));
+			};
+		};
+		
+		return paneGroup;
+	},
+	
+	updateWharfUI: function() {
+		if (game.p1ship.currentMap().town !== undefined) {
+			var wharfTab = document.getElementById('townTab1Content');
+			wharfTab.innerHTML = '';
+			wharfTab.appendChild(view.buildWharfUI(game.p1ship.currentMap().town.amenities[1]));
+		};
+	},
+	
+	buildShipyardUI: function(town) {
+		var ship = game.p1ship;
+		var paneGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+		paneGroup.setAttribute('transform','translate(0,100)');
+		
+		// Pane Bounds: x -85 to 85, y -33 to 50 (corrected)
+	
+		var shipUse = document.createElementNS('http://www.w3.org/2000/svg','use');
+		shipUse.setAttribute('transform','scale(2)');
+		shipUse.setAttribute('x',0);
+		shipUse.setAttribute('y',0);
+		view.setHref(shipUse,game.p1ship.sprite);
+		paneGroup.appendChild(shipUse);
+		
+		for (var h=0;h<ship.components.keel.stats.hulls;h++) {
+			var hullGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+			paneGroup.appendChild(hullGroup);
+			hullGroup.id = 'hullGroup'+h;
+			hullGroup.setAttribute('font-size',2);
+			if (ship.components.keel.stats.hulls>1) {
+				var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+				hullGroup.appendChild(rect);
+				rect.setAttribute('x',-83 + h*9);
+				rect.setAttribute('y',-33);
+				rect.setAttribute('rx',1.5);
+				rect.setAttribute('ry',1.5);
+				rect.setAttribute('width',10);
+				rect.setAttribute('height',10);
+				rect.setAttribute('fill','lemonchiffon');
+				rect.setAttribute('stroke','saddlebrown');
+				rect.setAttribute('stroke-width',0.5);
+				var text = document.createElementNS('http://www.w3.org/2000/svg','text');
+				hullGroup.appendChild(text);
+				text.setAttribute('x',-83 + h*9 + 1);
+				text.setAttribute('y',-29.5);
+				text.setAttribute('font-size',2);
+				text.innerHTML = "Hull #"+(h+1);
+			} else {
+				var text = document.createElementNS('http://www.w3.org/2000/svg','text');
+				hullGroup.appendChild(text);
+				text.setAttribute('x',-83 + h*9 + 1);
+				text.setAttribute('y',-29);
+				text.setAttribute('font-size',3);
+				text.innerHTML = "Components";
+			};
+			var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+			hullGroup.appendChild(rect);
+			rect.setAttribute('x',-83);
+			rect.setAttribute('y',-28);
+			rect.setAttribute('width',50);
+			rect.setAttribute('height',75);
+			rect.setAttribute('fill','lemonchiffon');
+			rect.setAttribute('stroke','saddlebrown');
+			rect.setAttribute('stroke-width',0.5);
+			var keys = Object.keys(ship.components);
+			var componentArray = [];
+			for (var key of keys) {
+				if (key.indexOf('hull'+h) !== -1) {
+					componentArray.push(key);
+				};
+			};
+			var row = 0;
+			var rowHeight = 75 / componentArray.length;
+			for (var key of componentArray) {
+				var componentGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+				hullGroup.appendChild(componentGroup);
+				componentGroup.addEventListener('mouseenter',view.displayComponent.bind(this,key));
+				componentGroup.addEventListener('mouseleave',view.clearComponentDisplay);
+				var componentBox = document.createElementNS('http://www.w3.org/2000/svg','rect');
+				hullGroup.appendChild(componentBox);
+				componentBox.setAttribute('x',-83);
+				componentBox.setAttribute('y',-28 + row*rowHeight);
+				componentBox.setAttribute('width',50);
+				componentBox.setAttribute('height',rowHeight);
+				componentBox.setAttribute('stroke','saddlebrown');
+				componentBox.setAttribute('stroke-width',0.5);
+				componentBox.setAttribute('fill',ship.components[key].color);
+				var componentLabel = document.createElementNS('http://www.w3.org/2000/svg','text');
+				hullGroup.appendChild(componentLabel);
+				componentLabel.setAttribute('x',-80);
+				componentLabel.setAttribute('y',-28 + (row+0.6)*rowHeight);
+				componentLabel.innerHTML = ship.components[key].name;
+				row++;
+			};
+		};
+		
+		var readoutGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+		paneGroup.appendChild(readoutGroup);
+		readoutGroup.setAttribute('paint-order','stroke');
+		readoutGroup.setAttribute('fill','black');
+		readoutGroup.setAttribute('stroke','lemonchiffon');
+		readoutGroup.setAttribute('stroke-width',2);
+		readoutGroup.setAttribute('font-size',2);
+		
+		var thrustLabel = document.createElementNS('http://www.w3.org/2000/svg','text');
+		readoutGroup.appendChild(thrustLabel);
+		thrustLabel.setAttribute('x',-7);
+		thrustLabel.setAttribute('y',40);
+		thrustLabel.setAttribute('text-anchor','end');
+		thrustLabel.innerHTML = "Total Thrust: ";
+		
+		var thrustReadout = document.createElementNS('http://www.w3.org/2000/svg','text');
+		readoutGroup.appendChild(thrustReadout);
+		thrustReadout.setAttribute('x',-5);
+		thrustReadout.setAttribute('y',40);
+		thrustReadout.innerHTML = Math.floor(100*ship.getStat('thrust'))/100 + " (" + Math.floor(100*(ship.getStat('thrust')+ship.getStat('drag')))/100 + " thrust - "+Math.floor(100*ship.getStat('drag'))/100+" drag )";
+		
+		var turnLabel = document.createElementNS('http://www.w3.org/2000/svg','text');
+		readoutGroup.appendChild(turnLabel);
+		turnLabel.setAttribute('x',-7);
+		turnLabel.setAttribute('y',43);
+		turnLabel.setAttribute('text-anchor','end');
+		turnLabel.innerHTML = "Total Turn: ";
+		
+		var turnReadout = document.createElementNS('http://www.w3.org/2000/svg','text');
+		readoutGroup.appendChild(turnReadout);
+		turnReadout.setAttribute('x',-5);
+		turnReadout.setAttribute('y',43);
+		turnReadout.innerHTML = Math.floor(100*ship.getStat('turn'))/100 + " (" + Math.floor(100*(ship.getStat('turn')+ship.getStat('drag')))/100 + " turn - "+Math.floor(100*ship.getStat('drag'))/100+" drag )";
+		
+		var liftLabel = document.createElementNS('http://www.w3.org/2000/svg','text');
+		readoutGroup.appendChild(liftLabel);
+		liftLabel.setAttribute('x',-7);
+		liftLabel.setAttribute('y',46);
+		liftLabel.setAttribute('text-anchor','end');
+		liftLabel.innerHTML = "Total Lift: ";
+		
+		var liftReadout = document.createElementNS('http://www.w3.org/2000/svg','text');
+		readoutGroup.appendChild(liftReadout);
+		liftReadout.setAttribute('x',-5);
+		liftReadout.setAttribute('y',46);
+		liftReadout.innerHTML = Math.floor(100*ship.getStat('lift'))/100 + " (" + Math.floor(100*(ship.getStat('lift')+ship.getStat('weight')))/100 + " lift - "+Math.floor(100*ship.getStat('weight'))/100+" weight )";
+		
+		var stabilityLabel = document.createElementNS('http://www.w3.org/2000/svg','text');
+		readoutGroup.appendChild(stabilityLabel);
+		stabilityLabel.setAttribute('x',-7);
+		stabilityLabel.setAttribute('y',49);
+		stabilityLabel.setAttribute('text-anchor','end');
+		stabilityLabel.innerHTML = "Stability: ";
+		
+		var stabilityReadout = document.createElementNS('http://www.w3.org/2000/svg','text');
+		readoutGroup.appendChild(stabilityReadout);
+		stabilityReadout.setAttribute('x',-5);
+		stabilityReadout.setAttribute('y',49);
+		stabilityReadout.innerHTML = Math.floor(100*ship.getStat('stability'))/100;
+		
+		return paneGroup;
+	},
+	
+	displayComponent: function(positionKey) {
+		console.log(positionKey);
+	},
+	
+	clearComponentDisplay: function() {
+	},
+	
+	buildHospitalUI: function(town) {
+		var paneGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+		paneGroup.setAttribute('transform','translate(0,100)');
+		
+		// Pane Bounds: x -85 to 85, y -33 to 50 (corrected)
+		
+		return paneGroup;
+	},
+	
+	buildTempleUI: function(town) {
+		var paneGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+		paneGroup.setAttribute('transform','translate(0,100)');
+		
+		// Pane Bounds: x -85 to 85, y -33 to 50 (corrected)
+		
+		return paneGroup;
+	},
+	
+	buildButton: function(label,x,y,width,size) {
+		if (x==undefined) {x=0};
+		if (y==undefined) {y=0};
+		if (width==undefined) {width=30};
+		var buttonGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+		var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		buttonGroup.appendChild(rect);
+		rect.setAttribute('x',x);
+		rect.setAttribute('y',y);
+		rect.setAttribute('rx',5);
+		rect.setAttribute('ry',5);
+		rect.setAttribute('width',width);
+		rect.setAttribute('height',10);
+		rect.setAttribute('fill','goldenrod');
+		rect.setAttribute('stroke','black');
+		var text = document.createElementNS('http://www.w3.org/2000/svg','text');
+		buttonGroup.appendChild(text);
+		text.setAttribute('x',x+width/2);
+		text.setAttribute('y',y+6);
+		text.setAttribute('font-size',3.5);
+		text.setAttribute('text-anchor','middle');
+		text.innerHTML = label;
+		if (size !== undefined) {
+			buttonGroup.setAttribute('transform','translate('+x+' '+y+') scale('+size+') translate('+(x*-1)+' '+(y*-1)+')');
+		};
+		
+		return buttonGroup;
+	},
+	
+	updatePurse: function(game) {
+		var purseText = document.getElementById('purseText');
+		purseText.innerHTML = "$"+game.p1ship.coin;
 	},
 	
 	addShip: function(ship) {
@@ -1410,8 +1967,6 @@ var view = {
 			mooringLine.setAttribute('stroke-width',0.25);
 			mooringLine.setAttribute('x1',ship.anchor.x);
 			mooringLine.setAttribute('y1',ship.anchor.y);
-// 			mooringLine.setAttribute('x2',ship.x + Math.sin(ship.heading) * ship.length()/2);
-// 			mooringLine.setAttribute('y2',ship.y - Math.cos(ship.heading) * ship.length()/2);
 			mooringLine.setAttribute('x2',mooringNose.x);
 			mooringLine.setAttribute('y2',mooringNose.y);
 		};

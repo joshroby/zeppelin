@@ -75,6 +75,14 @@ var handlers = {
 			game.pauseUnpauseGame();
 		};
 	},
+	
+	buyCommodity: function(commodityKey) {
+		game.p1ship.buyCommodity(commodityKey);
+	},
+	
+	sellCommodity: function(commodityKey) {
+		game.p1ship.sellCommodity(commodityKey);
+	},
 
 }
 
