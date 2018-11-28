@@ -9,6 +9,7 @@ var view = {
 		tab2: 'minimized',
 		tab3: 'minimized',
 		tab4: 'minimized',
+		selectedComponent: undefined,
 	},
 	
 	r2d: function(radians) {
@@ -147,22 +148,18 @@ var view = {
 		var solarPanels = document.createElementNS('http://www.w3.org/2000/svg','g');
 		defs.appendChild(solarPanels);
 		solarPanels.id = 'solarPanels_t1';
+		solarPanels.setAttribute('width',1);
+		solarPanels.setAttribute('height',2);
+		solarPanels.setAttribute('fill','cadetblue');
+		solarPanels.setAttribute('stroke','black');
 		var panel1 = document.createElementNS('http://www.w3.org/2000/svg','rect');
 		solarPanels.appendChild(panel1);
 		panel1.setAttribute('x',0);
 		panel1.setAttribute('y',-1);
-		panel1.setAttribute('width',1);
-		panel1.setAttribute('height',2);
-		panel1.setAttribute('fill','cadetblue');
-		panel1.setAttribute('stroke','black');
 		var panel2 = document.createElementNS('http://www.w3.org/2000/svg','rect');
 		solarPanels.appendChild(panel2);
 		panel2.setAttribute('x',-1);
 		panel2.setAttribute('y',-1);
-		panel2.setAttribute('width',1);
-		panel2.setAttribute('height',2);
-		panel2.setAttribute('fill','cadetblue');
-		panel2.setAttribute('stroke','black');
 		
 		var tailboom = document.createElementNS('http://www.w3.org/2000/svg','polygon');
 		tailboom.id = 'tailboom_t1';
@@ -296,6 +293,58 @@ var view = {
 		targetLineRight.setAttribute('x1',targetSize*-1);
 		targetLineRight.setAttribute('y2',0);
 		targetLineRight.setAttribute('x2',(targetSize+3)*-1);
+		var targetSpin = document.createElementNS('http://www.w3.org/2000/svg','animateTransform');
+		targetGroup.appendChild(targetSpin);
+		targetSpin.setAttribute('attributeName','transform');
+		targetSpin.setAttribute('attributeType','XML');
+		targetSpin.setAttribute('type','rotate');
+		targetSpin.setAttribute('from','0 0 0');
+		targetSpin.setAttribute('to','360 0 0');
+		targetSpin.setAttribute('dur','4s');
+		targetSpin.setAttribute('repeatCount','indefinite');
+		
+		var targetGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+		defs.appendChild(targetGroup);
+		targetGroup.id = 'componentTarget';
+		var targetSize = 0.75;
+		targetGroup.setAttribute('opacity',0.75);
+		targetGroup.setAttribute('fill','none');
+// 		targetGroup.setAttribute('stroke','cyan');
+		targetGroup.setAttribute('stroke-width',0.25);
+		targetGroup.setAttribute('stroke-linecap','round');
+		var backingCircle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+		targetGroup.appendChild(backingCircle);
+		backingCircle.setAttribute('r',targetSize+0.25);
+		backingCircle.setAttribute('fill','white');
+		backingCircle.setAttribute('stroke','none');
+		backingCircle.setAttribute('opacity',0.01);
+		var targetCircle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+		targetGroup.appendChild(targetCircle);
+		targetCircle.setAttribute('r',targetSize);
+		var targetLineUp = document.createElementNS('http://www.w3.org/2000/svg','line');
+		targetGroup.appendChild(targetLineUp);
+		targetLineUp.setAttribute('x1',0);
+		targetLineUp.setAttribute('y1',targetSize);
+		targetLineUp.setAttribute('x2',0);
+		targetLineUp.setAttribute('y2',targetSize+0.25);
+		var targetLineDown = document.createElementNS('http://www.w3.org/2000/svg','line');
+		targetGroup.appendChild(targetLineDown);
+		targetLineDown.setAttribute('x1',0);
+		targetLineDown.setAttribute('y1',targetSize*-1);
+		targetLineDown.setAttribute('x2',0);
+		targetLineDown.setAttribute('y2',(targetSize+0.25)*-1);
+		var targetLineLeft = document.createElementNS('http://www.w3.org/2000/svg','line');
+		targetGroup.appendChild(targetLineLeft);
+		targetLineLeft.setAttribute('y1',0);
+		targetLineLeft.setAttribute('x1',targetSize);
+		targetLineLeft.setAttribute('y2',0);
+		targetLineLeft.setAttribute('x2',targetSize+0.25);
+		var targetLineRight = document.createElementNS('http://www.w3.org/2000/svg','line');
+		targetGroup.appendChild(targetLineRight);
+		targetLineRight.setAttribute('y1',0);
+		targetLineRight.setAttribute('x1',targetSize*-1);
+		targetLineRight.setAttribute('y2',0);
+		targetLineRight.setAttribute('x2',(targetSize+0.25)*-1);
 		var targetSpin = document.createElementNS('http://www.w3.org/2000/svg','animateTransform');
 		targetGroup.appendChild(targetSpin);
 		targetSpin.setAttribute('attributeName','transform');
@@ -485,14 +534,7 @@ var view = {
 		return [svgDiv];
 	},
 	
-	buildShipDef: function(ship) {
-		var defs = document.getElementById('globalDefs');
-		
-		var shipGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
-		shipGroup.id = 'shipSprite_'+ship.id;
-		defs.appendChild(shipGroup);
-		shipGroup.setAttribute('stroke-width',0.25);
-		
+	getHullCenters: function(ship) {
 		var hullCenters;
 		var totalHulls = ship.components.keel.stats.hulls;
 		if (totalHulls == 1) {
@@ -528,93 +570,157 @@ var view = {
 			];		
 		};
 		
-		for (var i=0;i<hullCenters.length;i++) {
-			hullCenters[i].length = ship.components['hull'+i].length;
-			hullCenters[i].x *= ship.components['hull'+i].length * 0.4;
-			hullCenters[i].y *= ship.components['hull'+i].length * 0.4;
-			ship.components['hull'+i].nose = {
-				x: hullCenters[i].x,
-				y: hullCenters[i].y - hullCenters[i].length/2,
+		return hullCenters;
+
+	},
+	
+	getComponentPosition: function(ship,hull,slotType,slotNum) {
+		var hullLength = ship.components['hull'+hull].length, hullWidth = hullLength/3;
+		var hullCenters = view.getHullCenters(ship);
+		
+		var x = hullCenters[hull].x;
+		var y = hullCenters[hull].y;
+		
+		if (slotType == 'external') {
+			var xOffset = hullWidth/4 + Math.floor(slotNum/2)*0.2;
+			if (true) {xOffset *= 2.5};
+			if (slotNum % 2 == 0) {
+				x -= xOffset;
+			} else {
+				x += xOffset;
 			};
+			y += (Math.floor(slotNum/2)+2)*(hullLength/(Math.floor(ship.components['hull'+hull].stats.externalSlots/2)+2)) - hullLength/2;
+		} else if (slotType == 'top') {
+			y += (slotNum+2)*(hullLength/(ship.components['hull'+hull].stats.topSlots+2)) - hullLength/2;
 		};
 		
-		var points, hullLength;
-		if (hullCenters.length > 1) {
-			for (var a of hullCenters) {
-				for (var b of hullCenters) {
-					if (a !== b) {
-						points = '';
-						points += a.x + ',' + (a.y+a.length/3+0.5) + ' ';
-						points += b.x + ',' + (b.y+b.length/3+0.5) + ' ';
-						points += b.x + ',' + (b.y+b.length/3-0.5) + ' ';
-						points += a.x + ',' + (a.y+a.length/3-0.5) + ' ';
-						var polygon = document.createElementNS('http://www.w3.org/2000/svg','polygon');
-						polygon.setAttribute('fill',ship.components.keel.color);
-						polygon.setAttribute('stroke','black');
-						polygon.setAttribute('points',points);
-						shipGroup.appendChild(polygon);
+		return {x,y};
+	},
+	
+	buildHull: function(hull) {
+		var hullRect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		if (hull) {
+			var hullLength = hull.length, hullWidth = hullLength/3;
+			hullRect.setAttribute('width',hullWidth);
+			hullRect.setAttribute('height',hullLength);
+			hullRect.setAttribute('rx',hullWidth/2);
+			hullRect.setAttribute('ry',hullLength/3);
+			hullRect.setAttribute('width',hullWidth);
+			hullRect.setAttribute('length',hullLength);
+			hullRect.setAttribute('fill',hull.color);
+			hullRect.setAttribute('stroke','black');
+			hullRect.setAttribute('stroke-width',0.25);
+			hullRect.setAttribute('transform','translate('+(hullWidth/-2)+' '+(hullLength/-2)+')');
+		};
+		return hullRect;
+	},
+	
+	buildShipDef: function(ship) {
+		var defs = document.getElementById('globalDefs');
+		
+		var shipGroup = document.getElementById('shipSprite_'+ship.id);
+		if (shipGroup == null) {
+			var shipGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+			shipGroup.id = 'shipSprite_'+ship.id;
+			defs.appendChild(shipGroup);
+		};
+		shipGroup.innerHTML = '';
+		shipGroup.setAttribute('stroke-width',0.25);
+		
+		if (ship.components.keel) {
+		
+			var hullCenters = view.getHullCenters(ship);
+		
+			for (var i=0;i<hullCenters.length;i++) {
+				var hullLength
+				if (ship.components['hull'+i]) {
+					hullLength = ship.components['hull'+i].length;
+					ship.components['hull'+i].nose = {
+						x: hullCenters[i].x,
+						y: hullCenters[i].y - hullLength/2,
+					};
+				} else {
+					hullLength = 10;
+				};
+				hullCenters[i].length = hullLength;
+				hullCenters[i].x *= hullLength * 0.4;
+				hullCenters[i].y *= hullLength * 0.4;
+			};
+		
+			var points, hullLength;
+			if (hullCenters.length > 1) {
+				for (var a of hullCenters) {
+					for (var b of hullCenters) {
+						if (a !== b) {
+							points = '';
+							points += a.x + ',' + (a.y+a.length/3+0.5) + ' ';
+							points += b.x + ',' + (b.y+b.length/3+0.5) + ' ';
+							points += b.x + ',' + (b.y+b.length/3-0.5) + ' ';
+							points += a.x + ',' + (a.y+a.length/3-0.5) + ' ';
+							var polygon = document.createElementNS('http://www.w3.org/2000/svg','polygon');
+							polygon.setAttribute('fill',ship.components.keel.color);
+							polygon.setAttribute('stroke','black');
+							polygon.setAttribute('points',points);
+							shipGroup.appendChild(polygon);
 						
-						points = '';
-						points += a.x + ',' + (a.y-a.length/3+0.5) + ' ';
-						points += b.x + ',' + (b.y-b.length/3+0.5) + ' ';
-						points += b.x + ',' + (b.y-b.length/3-0.5) + ' ';
-						points += a.x + ',' + (a.y-a.length/3-0.5) + ' ';
-						var polygon = document.createElementNS('http://www.w3.org/2000/svg','polygon');
-						polygon.setAttribute('fill',ship.components.keel.color);
-						polygon.setAttribute('stroke','black');
-						polygon.setAttribute('points',points);
-						shipGroup.appendChild(polygon);
+							points = '';
+							points += a.x + ',' + (a.y-a.length/3+0.5) + ' ';
+							points += b.x + ',' + (b.y-b.length/3+0.5) + ' ';
+							points += b.x + ',' + (b.y-b.length/3-0.5) + ' ';
+							points += a.x + ',' + (a.y-a.length/3-0.5) + ' ';
+							var polygon = document.createElementNS('http://www.w3.org/2000/svg','polygon');
+							polygon.setAttribute('fill',ship.components.keel.color);
+							polygon.setAttribute('stroke','black');
+							polygon.setAttribute('points',points);
+							shipGroup.appendChild(polygon);
+						};
 					};
 				};
 			};
+		
+			for (var h=0;h<ship.components.keel.stats.hulls;h++) {
+				if (ship.components['hull'+h]) {
+					var hullLength = ship.components['hull'+h].length;
+					var hullWidth = hullLength/3;
+					var component;
+					for (var s=0;s<ship.components['hull'+h].stats.externalSlots;s++) {
+						component = ship.components['hull'+h+'ext'+s];
+						if (component) {
+							componentX = hullWidth/4 + Math.floor(s/2)*0.2;
+							componentY = (Math.floor(s/2)+2)*(hullLength/(Math.floor(ship.components['hull'+h].stats.externalSlots/2)+2)) - hullLength/2;
+							var componentUse = document.createElementNS('http://www.w3.org/2000/svg','use');
+							componentUse.setAttribute('fill',component.color);
+							view.setHref(componentUse,component.type+'_t1');
+							componentUse.setAttribute('x',hullCenters[h].x + componentX);
+							componentUse.setAttribute('y',hullCenters[h].y + componentY);
+							if (s % 2 == 0) {
+								componentUse.setAttribute('transform','translate('+hullCenters[h].x+' '+hullCenters[h].y+') scale(-1,1) translate('+(-1*hullCenters[h].x)+' '+(-1*hullCenters[h].y)+')');
+							};
+							shipGroup.appendChild(componentUse);
+						};
+					};
+			
+					var hull = view.buildHull(ship.components['hull'+h]);
+					hull.setAttribute('x',hullCenters[h].x);
+					hull.setAttribute('y',hullCenters[h].y);
+					shipGroup.appendChild(hull);
+			
+					for (var s=0;s<ship.components['hull'+h].stats.topSlots;s++) {
+						component = ship.components['hull'+h+'top'+s];
+						if (component) {
+							componentX = 0;
+							componentY = (s+2)*(hullLength/(ship.components['hull'+h].stats.topSlots+2)) - hullLength/2;
+							var componentUse = document.createElementNS('http://www.w3.org/2000/svg','use');
+							componentUse.setAttribute('fill',component.color);
+							view.setHref(componentUse,component.type+'_t1');
+							componentUse.setAttribute('x',hullCenters[h].x + componentX);
+							componentUse.setAttribute('y',hullCenters[h].y + componentY);
+							shipGroup.appendChild(componentUse);
+						};
+					};
+				};	
+			};
 		};
-		
-		for (var h=0;h<totalHulls;h++) {
-			
-			var hullLength = ship.components['hull'+h].length, hullWidth = hullLength/3;
-			var component;
-			for (var s=0;s<ship.components['hull'+h].stats.externalSlots;s++) {
-				component = ship.components['hull'+h+'ext'+s];
-				componentX = hullWidth/4 + Math.floor(s/2)*0.2;
-				componentY = (Math.floor(s/2)+2)*(hullLength/(Math.floor(ship.components['hull'+h].stats.externalSlots/2)+2)) - hullLength/2;
-				var componentUse = document.createElementNS('http://www.w3.org/2000/svg','use');
-				componentUse.setAttribute('fill',component.color);
-				view.setHref(componentUse,component.type+'_t1');
-				componentUse.setAttribute('x',hullCenters[h].x + componentX);
-				componentUse.setAttribute('y',hullCenters[h].y + componentY);
-				if (s % 2 == 0) {
-					componentUse.setAttribute('transform','translate('+hullCenters[h].x+' '+hullCenters[h].y+') scale(-1,1) translate('+(-1*hullCenters[h].x)+' '+(-1*hullCenters[h].y)+')');
-				};
-				shipGroup.appendChild(componentUse);
-			};
-		
-			var hull = document.createElementNS('http://www.w3.org/2000/svg','rect');
-			hull.setAttribute('x',hullCenters[h].x - hullWidth/2);
-			hull.setAttribute('y',hullCenters[h].y - hullLength/2);
-			hull.setAttribute('width',hullWidth);
-			hull.setAttribute('height',hullLength);
-			hull.setAttribute('rx',hullWidth/2);
-			hull.setAttribute('ry',hullLength/3);
-			hull.setAttribute('width',hullWidth);
-			hull.setAttribute('length',hullLength);
-			hull.setAttribute('fill',ship.components['hull'+h].color);
-			hull.setAttribute('stroke','black');
-// 			view.setHref(hull,'hull_t1');
-			shipGroup.appendChild(hull);
-			
-			for (var s=0;s<ship.components['hull'+h].stats.topSlots;s++) {
-				component = ship.components['hull'+h+'top'+s];
-				componentX = 0;
-				componentY = (s+2)*(hullLength/(ship.components['hull'+h].stats.topSlots+2)) - hullLength/2;
-				var componentUse = document.createElementNS('http://www.w3.org/2000/svg','use');
-				componentUse.setAttribute('fill',component.color);
-				view.setHref(componentUse,component.type+'_t1');
-				componentUse.setAttribute('x',hullCenters[h].x + componentX);
-				componentUse.setAttribute('y',hullCenters[h].y + componentY);
-				shipGroup.appendChild(componentUse);
-			};
-			
-		}
 	},
 	
 	initMap: function(maps) {
@@ -1737,90 +1843,261 @@ var view = {
 		};
 	},
 	
-	buildShipyardUI: function(town) {
+	buildShipyardUI: function(shipyard) {
 		var ship = game.p1ship;
 		var paneGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
 		paneGroup.setAttribute('transform','translate(0,100)');
 		
 		// Pane Bounds: x -85 to 85, y -33 to 50 (corrected)
+		
+		var schematicScale = 4;
+		
+		var topViewGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+		paneGroup.appendChild(topViewGroup);
+		topViewGroup.setAttribute('transform','scale('+schematicScale+')');
 	
 		var shipUse = document.createElementNS('http://www.w3.org/2000/svg','use');
-		shipUse.setAttribute('transform','scale(2)');
 		shipUse.setAttribute('x',0);
 		shipUse.setAttribute('y',0);
-		view.setHref(shipUse,game.p1ship.sprite);
-		paneGroup.appendChild(shipUse);
+		view.setHref(shipUse,ship.sprite);
+		topViewGroup.appendChild(shipUse);
 		
-		for (var h=0;h<ship.components.keel.stats.hulls;h++) {
-			var hullGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
-			paneGroup.appendChild(hullGroup);
-			hullGroup.id = 'hullGroup'+h;
-			hullGroup.setAttribute('font-size',2);
-			if (ship.components.keel.stats.hulls>1) {
-				var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
-				hullGroup.appendChild(rect);
-				rect.setAttribute('x',-83 + h*9);
-				rect.setAttribute('y',-33);
-				rect.setAttribute('rx',1.5);
-				rect.setAttribute('ry',1.5);
-				rect.setAttribute('width',10);
-				rect.setAttribute('height',10);
-				rect.setAttribute('fill','lemonchiffon');
-				rect.setAttribute('stroke','saddlebrown');
-				rect.setAttribute('stroke-width',0.5);
-				var text = document.createElementNS('http://www.w3.org/2000/svg','text');
-				hullGroup.appendChild(text);
-				text.setAttribute('x',-83 + h*9 + 1);
-				text.setAttribute('y',-29.5);
-				text.setAttribute('font-size',2);
-				text.innerHTML = "Hull #"+(h+1);
-			} else {
-				var text = document.createElementNS('http://www.w3.org/2000/svg','text');
-				hullGroup.appendChild(text);
-				text.setAttribute('x',-83 + h*9 + 1);
-				text.setAttribute('y',-29);
-				text.setAttribute('font-size',3);
-				text.innerHTML = "Components";
-			};
-			var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
-			hullGroup.appendChild(rect);
-			rect.setAttribute('x',-83);
-			rect.setAttribute('y',-28);
-			rect.setAttribute('width',50);
-			rect.setAttribute('height',75);
-			rect.setAttribute('fill','lemonchiffon');
-			rect.setAttribute('stroke','saddlebrown');
-			rect.setAttribute('stroke-width',0.5);
-			var keys = Object.keys(ship.components);
-			var componentArray = [];
-			for (var key of keys) {
-				if (key.indexOf('hull'+h) !== -1) {
-					componentArray.push(key);
+		var interfaceArray = {};
+		
+		if (ship.components.keel) {
+			var hullCenters = view.getHullCenters(ship);
+			for (var h=0;h<ship.components.keel.stats.hulls;h++) {
+				if (ship.components['hull'+h]) {
+					var targetUse = document.createElementNS('http://www.w3.org/2000/svg','use');
+					targetUse.setAttribute('x',hullCenters[h].x);
+					targetUse.setAttribute('y',hullCenters[h].y - game.p1ship.components['hull'+h].length/2);
+					view.setHref(targetUse,'componentTarget');
+					topViewGroup.appendChild(targetUse);
+					targetUse.id = 'componentTarget_hull'+h;
+					interfaceArray['hull'+h] = targetUse;
+					for (var e=0;e<ship.components['hull'+h].stats.externalSlots;e++) {
+						var targetUse = document.createElementNS('http://www.w3.org/2000/svg','use');
+						var componentPosition = view.getComponentPosition(ship,h,'external',e);
+						targetUse.setAttribute('x',componentPosition.x);
+						targetUse.setAttribute('y',componentPosition.y);
+						view.setHref(targetUse,'componentTarget');
+						topViewGroup.appendChild(targetUse);
+						targetUse.id = 'componentTarget_hull'+h+'ext'+e;
+						interfaceArray['hull'+h+'ext'+e] = targetUse;
+					};
+					for (var t=0;t<ship.components['hull'+h].stats.topSlots;t++) {
+						var targetUse = document.createElementNS('http://www.w3.org/2000/svg','use');
+						var componentPosition = view.getComponentPosition(ship,h,'top',t);
+						targetUse.setAttribute('x',componentPosition.x);
+						targetUse.setAttribute('y',componentPosition.y);
+						view.setHref(targetUse,'componentTarget');
+						topViewGroup.appendChild(targetUse);
+						targetUse.id = 'componentTarget_hull'+h+'top'+t;
+						interfaceArray['hull'+h+'top'+t] = targetUse;
+					};
+				} else {
+					var point = {x:-25,y:(h+1)*10};
+					var text = document.createElementNS('http://www.w3.org/2000/svg','text');
+					paneGroup.appendChild(text);
+					text.setAttribute('x',point.x);
+					text.setAttribute('y',point.y);
+					text.setAttribute('font-size',2);
+					text.setAttribute('text-anchor','middle');
+					text.setAttribute('stroke-width',1);
+					text.setAttribute('stroke','lemonchiffon');
+					text.setAttribute('paint-order','stroke');
+					text.innerHTML = 'Hull';
+					var text = document.createElementNS('http://www.w3.org/2000/svg','text');
+					paneGroup.appendChild(text);
+					text.setAttribute('x',point.x);
+					text.setAttribute('y',point.y+2);
+					text.setAttribute('font-size',2);
+					text.setAttribute('text-anchor','middle');
+					text.setAttribute('stroke-width',1);
+					text.setAttribute('stroke','lemonchiffon');
+					text.setAttribute('paint-order','stroke');
+					text.innerHTML = '#'+(h+1);
+					var targetUse = document.createElementNS('http://www.w3.org/2000/svg','use');
+					targetUse.setAttribute('x',point.x);
+					targetUse.setAttribute('y',point.y);
+					targetUse.setAttribute('transform','translate('+point.x+' '+point.y+') scale('+schematicScale+') translate('+(-1*point.x)+' '+(-1*point.y)+')');
+					view.setHref(targetUse,'componentTarget');
+					paneGroup.appendChild(targetUse);
+					targetUse.id = 'componentTarget_hull'+h;
+					interfaceArray['hull'+h] = targetUse;
 				};
 			};
-			var row = 0;
-			var rowHeight = 75 / componentArray.length;
-			for (var key of componentArray) {
-				var componentGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
-				hullGroup.appendChild(componentGroup);
-				componentGroup.addEventListener('mouseenter',view.displayComponent.bind(this,key));
-				componentGroup.addEventListener('mouseleave',view.clearComponentDisplay);
-				var componentBox = document.createElementNS('http://www.w3.org/2000/svg','rect');
-				hullGroup.appendChild(componentBox);
-				componentBox.setAttribute('x',-83);
-				componentBox.setAttribute('y',-28 + row*rowHeight);
-				componentBox.setAttribute('width',50);
-				componentBox.setAttribute('height',rowHeight);
-				componentBox.setAttribute('stroke','saddlebrown');
-				componentBox.setAttribute('stroke-width',0.5);
-				componentBox.setAttribute('fill',ship.components[key].color);
-				var componentLabel = document.createElementNS('http://www.w3.org/2000/svg','text');
-				hullGroup.appendChild(componentLabel);
-				componentLabel.setAttribute('x',-80);
-				componentLabel.setAttribute('y',-28 + (row+0.6)*rowHeight);
-				componentLabel.innerHTML = ship.components[key].name;
-				row++;
+		
+			var internalViewGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+			paneGroup.appendChild(internalViewGroup);
+			internalViewGroup.setAttribute('transform','translate(-50) scale('+schematicScale+')');
+		
+			for (var h=0;h<ship.components.keel.stats.hulls;h++) {
+				if (ship.components['hull'+h]) {
+					var x = hullCenters[h].x;
+					var y = hullCenters[h].y;
+					var hullGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+					internalViewGroup.appendChild(hullGroup);
+					var hullShape = view.buildHull(ship.components['hull'+h]);
+					hullShape.setAttribute('x',x);
+					hullShape.setAttribute('y',y);
+					hullGroup.appendChild(hullShape);
+					for (var i=0;i<ship.components['hull'+h].stats.internalSlots;i++) {
+						var hullLength = ship.components['hull'+h].length;
+						var targetUse = document.createElementNS('http://www.w3.org/2000/svg','use');
+						targetUse.setAttribute('x',x);
+						targetUse.setAttribute('y',y - hullLength/2 + (i+0.5)*(hullLength / ship.components['hull'+h].stats.internalSlots));
+						view.setHref(targetUse,'componentTarget');
+						hullGroup.appendChild(targetUse);
+						targetUse.id = 'componentTarget_hull'+h+'int'+i;
+						interfaceArray['hull'+h+'int'+i] = targetUse;
+					};
+				};
 			};
+		};
+		
+		var keelCoords = {x:-25,y:0};
+		var text = document.createElementNS('http://www.w3.org/2000/svg','text');
+		paneGroup.appendChild(text);
+		text.setAttribute('x',keelCoords.x);
+		text.setAttribute('y',keelCoords.y+1);
+		text.setAttribute('font-size',2);
+		text.setAttribute('text-anchor','middle');
+		text.setAttribute('stroke-width',1);
+		text.setAttribute('stroke','lemonchiffon');
+		text.setAttribute('paint-order','stroke');
+		text.innerHTML = 'Keel';
+		var targetUse = document.createElementNS('http://www.w3.org/2000/svg','use');
+		targetUse.setAttribute('x',keelCoords.x);
+		targetUse.setAttribute('y',keelCoords.y);
+		targetUse.setAttribute('transform','translate('+keelCoords.x+' '+keelCoords.y+') scale('+schematicScale+') translate('+(-1*keelCoords.x)+' '+(-1*keelCoords.y)+')');
+		view.setHref(targetUse,'componentTarget');
+		paneGroup.appendChild(targetUse);
+		targetUse.id = 'componentTarget_keel';
+		interfaceArray.keel = targetUse;
+		
+		for (var slot in interfaceArray) {
+			interfaceArray[slot].setAttribute('stroke','cyan');
+			interfaceArray[slot].addEventListener('mouseenter',handlers.slotHover.bind(this,slot));
+			interfaceArray[slot].addEventListener('mouseleave',view.clearComponentDisplay);
+			interfaceArray[slot].addEventListener('click',handlers.slotClick.bind(this,slot));
+		};
+		view.panes.shipyardTargets = interfaceArray;
+		
+		// Buttons
+		var buttonGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+		paneGroup.appendChild(buttonGroup);
+		buttonGroup.id = 'shipyardButtonGroup';
+		var repairButton = view.buildButton('Repair',34,-13,20,0.5);
+		buttonGroup.appendChild(repairButton);
+		repairButton.addEventListener('click',handlers.repairComponent);
+		var moveButton = view.buildButton('Move',46,-13,20,0.5);
+		buttonGroup.appendChild(moveButton);
+		moveButton.addEventListener('click',handlers.moveComponent);
+		var paintButton = view.buildButton('Paint',58,-13,20,0.5);
+		buttonGroup.appendChild(paintButton);
+		paintButton.addEventListener('click',handlers.paintComponent);
+		var sellButton = view.buildButton('Sell',70,-13,20,0.5);
+		buttonGroup.appendChild(sellButton);
+		sellButton.addEventListener('click',handlers.sellComponent);
+		
+		var buttonCover = document.createElementNS('http://www.w3.org/2000/svg','g');
+		buttonGroup.appendChild(buttonCover);
+		var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		buttonCover.appendChild(rect);
+		rect.setAttribute('x',33)
+		rect.setAttribute('y',-15);
+		rect.setAttribute('width',50);
+		rect.setAttribute('height',8);
+		rect.setAttribute('fill','lemonchiffon');
+		rect.setAttribute('stroke','saddlebrown');
+		rect.setAttribute('stroke-width',0.25);
+		
+		var buttonCoverLift = document.createElementNS('http://www.w3.org/2000/svg','animateTransform');
+		buttonCoverLift.id = 'buttonCoverLift';
+		buttonCoverLift.setAttribute('attributeName','transform');
+		buttonCoverLift.setAttribute('attributeType','XML');
+		buttonCoverLift.setAttribute('type','translate');
+		buttonCoverLift.setAttribute('from','0 0');
+		buttonCoverLift.setAttribute('to','0 -8');
+		buttonCoverLift.setAttribute('dur','0.5s');
+		buttonCoverLift.setAttribute('begin','indefinite');
+		buttonCoverLift.setAttribute('fill','freeze');
+		buttonCover.appendChild(buttonCoverLift);
+		var buttonCoverLower = document.createElementNS('http://www.w3.org/2000/svg','animateTransform');
+		buttonCoverLower.id = 'buttonCoverLower';
+		buttonCoverLower.setAttribute('attributeName','transform');
+		buttonCoverLower.setAttribute('attributeType','XML');
+		buttonCoverLower.setAttribute('type','translate');
+		buttonCoverLower.setAttribute('from','0 -8');
+		buttonCoverLower.setAttribute('to','0 0');
+		buttonCoverLower.setAttribute('dur','0.5s');
+		buttonCoverLower.setAttribute('begin','indefinite');
+		buttonCoverLower.setAttribute('fill','freeze');
+		buttonCover.appendChild(buttonCoverLower);
+
+		// Selected Component
+		var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		paneGroup.appendChild(rect);
+		rect.setAttribute('x',33)
+		rect.setAttribute('y',-33);
+		rect.setAttribute('width',50);
+		rect.setAttribute('height',19);
+		rect.setAttribute('fill','lemonchiffon');
+		rect.setAttribute('stroke','saddlebrown');
+		rect.setAttribute('stroke-width',0.25);
+		
+		var selectedComponentGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+		paneGroup.appendChild(selectedComponentGroup);
+		selectedComponentGroup.id = 'selectedComponentGroup';
+				
+		// For Sale
+		var text = document.createElementNS('http://www.w3.org/2000/svg','text');
+		paneGroup.appendChild(text);
+		text.setAttribute('x',33);
+		text.setAttribute('y',-4);
+		text.setAttribute('font-size',3);
+		text.innerHTML = 'Components For Sale';
+		var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		paneGroup.appendChild(rect);
+		rect.setAttribute('x',33);
+		rect.setAttribute('y',-3);
+		rect.setAttribute('width',50);
+		rect.setAttribute('height',50);
+		rect.setAttribute('fill','lemonchiffon');
+		rect.setAttribute('stroke','saddlebrown');
+		rect.setAttribute('stroke-width',0.5);
+		row = 0;
+		var rowHeight = 50 / shipyard.stock.length;
+		for (var component of shipyard.stock) {
+			var componentGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+			paneGroup.appendChild(componentGroup);
+			componentGroup.addEventListener('mouseenter',view.displayComponent.bind(this,component,67,-30));
+			componentGroup.addEventListener('mouseleave',view.clearComponentDisplay);
+			var componentBox = document.createElementNS('http://www.w3.org/2000/svg','rect');
+			componentGroup.appendChild(componentBox);
+			componentBox.setAttribute('x',33);
+			componentBox.setAttribute('y',-28 + 25 + row*rowHeight);
+			componentBox.setAttribute('width',50);
+			componentBox.setAttribute('height',rowHeight);
+			componentBox.setAttribute('stroke','saddlebrown');
+			componentBox.setAttribute('stroke-width',0.5);
+			componentBox.setAttribute('fill',component.color);
+			var componentLabel = document.createElementNS('http://www.w3.org/2000/svg','text');
+			componentGroup.appendChild(componentLabel);
+			componentLabel.setAttribute('x',35);
+			componentLabel.setAttribute('y',-28 + 25 + (row+0.6)*rowHeight);
+			componentLabel.setAttribute('font-size',2);
+			componentLabel.innerHTML = component.name;
+			var buyPrice = Math.floor(component.cost);
+			var buyButton = view.buildButton('Buy for $'+buyPrice,65,-28 + 25 - 4 + (row+0.6)*rowHeight,30,0.5);
+			componentGroup.appendChild(buyButton);
+			if (buyPrice > game.p1ship.coin) {
+				buyButton.setAttribute('opacity',0.5);
+			} else {
+				buyButton.addEventListener('click',handlers.buyComponent.bind(this,component));
+			};
+			row++;
 		};
 		
 		var readoutGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
@@ -1830,7 +2107,48 @@ var view = {
 		readoutGroup.setAttribute('stroke','lemonchiffon');
 		readoutGroup.setAttribute('stroke-width',2);
 		readoutGroup.setAttribute('font-size',2);
+
+		// Left Column
+		var liftLabel = document.createElementNS('http://www.w3.org/2000/svg','text');
+		readoutGroup.appendChild(liftLabel);
+		liftLabel.setAttribute('x',-62);
+		liftLabel.setAttribute('y',40);
+		liftLabel.setAttribute('text-anchor','end');
+		liftLabel.innerHTML = "Total Lift: ";
 		
+		var liftReadout = document.createElementNS('http://www.w3.org/2000/svg','text');
+		readoutGroup.appendChild(liftReadout);
+		liftReadout.setAttribute('x',-60);
+		liftReadout.setAttribute('y',40);
+		liftReadout.innerHTML = Math.floor(100*ship.getStat('lift'))/100 + " (" + Math.floor(100*(ship.getStat('lift')+ship.getStat('weight')))/100 + " lift - "+Math.floor(100*ship.getStat('weight'))/100+" weight )";
+		
+		var spaceLabel = document.createElementNS('http://www.w3.org/2000/svg','text');
+		readoutGroup.appendChild(spaceLabel);
+		spaceLabel.setAttribute('x',-62);
+		spaceLabel.setAttribute('y',43);
+		spaceLabel.setAttribute('text-anchor','end');
+		spaceLabel.innerHTML = "Cargo Space: ";
+		
+		var spaceReadout = document.createElementNS('http://www.w3.org/2000/svg','text');
+		readoutGroup.appendChild(spaceReadout);
+		spaceReadout.setAttribute('x',-60);
+		spaceReadout.setAttribute('y',43);
+		spaceReadout.innerHTML = Math.floor(ship.getStat('cargo')*10*100)/100 + ' Crates';
+		
+		var amenitiesLabel = document.createElementNS('http://www.w3.org/2000/svg','text');
+		readoutGroup.appendChild(amenitiesLabel);
+		amenitiesLabel.setAttribute('x',-62);
+		amenitiesLabel.setAttribute('y',46);
+		amenitiesLabel.setAttribute('text-anchor','end');
+		amenitiesLabel.innerHTML = "Amenities: ";
+		
+		var amenitiesReadout = document.createElementNS('http://www.w3.org/2000/svg','text');
+		readoutGroup.appendChild(amenitiesReadout);
+		amenitiesReadout.setAttribute('x',-60);
+		amenitiesReadout.setAttribute('y',46);
+		amenitiesReadout.innerHTML = Math.floor(ship.getStat('amenities')*10*100)/100 + ' Stars';
+		
+		// Right Column
 		var thrustLabel = document.createElementNS('http://www.w3.org/2000/svg','text');
 		readoutGroup.appendChild(thrustLabel);
 		thrustLabel.setAttribute('x',-7);
@@ -1857,40 +2175,89 @@ var view = {
 		turnReadout.setAttribute('y',43);
 		turnReadout.innerHTML = Math.floor(100*ship.getStat('turn'))/100 + " (" + Math.floor(100*(ship.getStat('turn')+ship.getStat('drag')))/100 + " turn - "+Math.floor(100*ship.getStat('drag'))/100+" drag )";
 		
-		var liftLabel = document.createElementNS('http://www.w3.org/2000/svg','text');
-		readoutGroup.appendChild(liftLabel);
-		liftLabel.setAttribute('x',-7);
-		liftLabel.setAttribute('y',46);
-		liftLabel.setAttribute('text-anchor','end');
-		liftLabel.innerHTML = "Total Lift: ";
-		
-		var liftReadout = document.createElementNS('http://www.w3.org/2000/svg','text');
-		readoutGroup.appendChild(liftReadout);
-		liftReadout.setAttribute('x',-5);
-		liftReadout.setAttribute('y',46);
-		liftReadout.innerHTML = Math.floor(100*ship.getStat('lift'))/100 + " (" + Math.floor(100*(ship.getStat('lift')+ship.getStat('weight')))/100 + " lift - "+Math.floor(100*ship.getStat('weight'))/100+" weight )";
-		
 		var stabilityLabel = document.createElementNS('http://www.w3.org/2000/svg','text');
 		readoutGroup.appendChild(stabilityLabel);
 		stabilityLabel.setAttribute('x',-7);
-		stabilityLabel.setAttribute('y',49);
+		stabilityLabel.setAttribute('y',46);
 		stabilityLabel.setAttribute('text-anchor','end');
 		stabilityLabel.innerHTML = "Stability: ";
 		
 		var stabilityReadout = document.createElementNS('http://www.w3.org/2000/svg','text');
 		readoutGroup.appendChild(stabilityReadout);
 		stabilityReadout.setAttribute('x',-5);
-		stabilityReadout.setAttribute('y',49);
+		stabilityReadout.setAttribute('y',46);
 		stabilityReadout.innerHTML = Math.floor(100*ship.getStat('stability'))/100;
+
+		var floatGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+		floatGroup.id = 'shipyardFloatGroup';
+		paneGroup.appendChild(floatGroup);
 		
 		return paneGroup;
 	},
 	
-	displayComponent: function(positionKey) {
-		console.log(positionKey);
+	refreshShipyardUI: function() {
+		view.panes.selectedComponent = undefined;
+		var townTab2Content = document.getElementById('townTab2Content');
+		townTab2Content.innerHTML = '';
+		townTab2Content.appendChild(view.buildShipyardUI(game.p1ship.currentMap().town.amenities[2]));
+	},
+	
+	displayComponent: function(component,x,y) {
+		var shipyardFloatGroup = document.getElementById('shipyardFloatGroup');
+		shipyardFloatGroup.innerHTML = '';
+		var componentDisplay = view.buildComponentDisplay(component);
+		componentDisplay.setAttribute('transform','translate('+x+' '+(y+7.5)+')');
+		shipyardFloatGroup.appendChild(componentDisplay);
 	},
 	
 	clearComponentDisplay: function() {
+		var shipyardFloatGroup = document.getElementById('shipyardFloatGroup');
+		shipyardFloatGroup.innerHTML = '';
+	},
+	
+	selectComponent: function(component) {
+		var selectedComponentGroup = document.getElementById('selectedComponentGroup');
+		selectedComponentGroup.innerHTML = '';
+		if (component) {
+			if (view.panes.selectedComponent == undefined) {
+				document.getElementById('buttonCoverLift').beginElement();
+			};
+			view.panes.selectedComponent = component;
+			var componentDisplay = view.buildComponentDisplay(component);
+			componentDisplay.setAttribute('transform','translate(49 -23.5)');
+			selectedComponentGroup.appendChild(componentDisplay);
+		};
+	},
+	
+	coverShipyardButtons: function() {
+		document.getElementById('buttonCoverLower').beginElement();
+	},
+	
+	filterShipyardTargets: function(type) {
+		if (type == undefined) {
+			for (var slot in view.panes.shipyardTargets) {
+				view.panes.shipyardTargets[slot].setAttribute('stroke','cyan');
+				view.panes.shipyardTargets[slot].setAttribute('visibility','visible');
+			};
+		} else if (type == 'hull') {
+			for (var slot in view.panes.shipyardTargets) {
+				if (slot.length !== 5) {
+					view.panes.shipyardTargets[slot].setAttribute('visibility','hidden');
+				} else {
+					view.panes.shipyardTargets[slot].setAttribute('stroke','lime');
+					view.panes.shipyardTargets[slot].setAttribute('visibility','visible');
+				};
+			};
+		} else {
+			for (var slot in view.panes.shipyardTargets) {
+				if (slot.indexOf(type) == -1) {
+					view.panes.shipyardTargets[slot].setAttribute('visibility','hidden');
+				} else {
+					view.panes.shipyardTargets[slot].setAttribute('stroke','lime');
+					view.panes.shipyardTargets[slot].setAttribute('visibility','visible');
+				};
+			};
+		};
 	},
 	
 	buildHospitalUI: function(town) {
@@ -2127,16 +2494,16 @@ var view = {
 	},
 	
 	displayMooring: function(tower) {
-		var towerUse = document.getElementById('targetFade'+tower.id);
-		if (towerUse !== null) {
-			towerUse.beginElement();
+		var animation = document.getElementById('targetFade'+tower.id);
+		if (animation !== null) {
+			animation.beginElement();
 		};
 	},
 	
 	displayUnmooring: function(tower) {
-		var towerUse = document.getElementById('targetReveal'+tower.id);
-		if (towerUse !== null) {
-			towerUse.beginElement();
+		var animation = document.getElementById('targetReveal'+tower.id);
+		if (animation !== null) {
+			animation.beginElement();
 		};
 	},
 	
@@ -2267,7 +2634,7 @@ var view = {
 		alertFade.beginElement();
 	},
 	
-	displayComponent: function(component,cost) {
+	buildComponentDisplay: function(component) {
 		var componentGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
 		
 		var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
@@ -2297,7 +2664,7 @@ var view = {
 			power: 'power',
 			cargo: 'cargo',
 			loadTime: 'load speed',
-			sight: 'sight',
+			amenities: 'amenities',
 			weight: 'weight',
 			chargeCapacity: 'capacity',
 			fuelCapacity:'fuel tank',
@@ -2305,6 +2672,7 @@ var view = {
 			internalSlots: 'bays',
 			externalSlots: 'pylons',
 			topSlots: 'top points',
+			hulls: 'hulls',
 		};
 		for (var statName in component.stats) {
 			var statText = document.createElementNS('http://www.w3.org/2000/svg','text');
@@ -2339,20 +2707,15 @@ var view = {
 		statText.setAttribute('font-size',1.8);
 		statText.setAttribute('text-anchor','end');
 		statText.innerHTML = Math.floor(component.condition*100) + "%";
-		
-		if (cost==undefined) {cost = '1723'};
-		
+				
 		var statText = document.createElementNS('http://www.w3.org/2000/svg','text');
 		componentGroup.appendChild(statText);
 		statText.setAttribute('x',13);
 		statText.setAttribute('y',6.5);
 		statText.setAttribute('font-size',1.8);
 		statText.setAttribute('text-anchor','end');
-		statText.innerHTML = "$" + cost;
-
-		
-		document.getElementById('uiGroup').appendChild(componentGroup);
-		
+		statText.innerHTML = "$" + component.cost;
+				
 		return componentGroup
 	},
 	

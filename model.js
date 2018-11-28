@@ -97,9 +97,8 @@ function Game() {
 	view.initMap(this.maps);
 	
 	this.p1ship = new Ship('p1',1);
+// 	this.p1ship = new Ship('p1x',5);
 	this.maps[0].ships.push(this.p1ship);
-// 	this.p1ship.rudder = 1.2;
-// 	this.p1ship.airspeed.speed = 1;
 	view.addShip(this.p1ship);
 	view.initUI(this.p1ship);
 	view.updatePurse(this);
@@ -487,9 +486,19 @@ function SectionMap(x,y,game) {
 		this.town.amenities.push(wharf);
 		
 		var amenity = {
-			name: ['Shipyard','Temple','Hospital'][Math.random() * 3 << 0],
+			name: 'Temple',
 		};
-		amenity.name = 'Shipyard';
+		if (true) {
+			amenity.name = 'Shipyard';
+			amenity.stock = [];
+			for (var i=0;i<5;i++) {
+				amenity.stock.push(new Component(undefined,1+Math.random() * 10 << 0));
+			};
+		} else if (false) {
+			amenity.name = 'Temple';
+		} else if (false) {
+			amenity.name = 'Hospital';
+		};
 		this.town.amenities.push(amenity);
 		var adjectives = ['Little','Big','Great','Friendly','Prudence','Percival','Gas','Alum'];
 		var townNouns = [' Town',' City','ville','ton','burgh',' Station',' Towers'];
@@ -619,17 +628,17 @@ function Ship(id,tier) {
 		this.components.hull0.stats.drag = 0.2;
 		this.components.hull0.stats.weight = 0.75;
 		
-		this.components.hull0int0 = new Component('engine',1);
-		this.components.hull0int0.stats.fuelCapacity = 0.5;
-		this.components.hull0int0.stats.fuelConsumption = 0.5;
-		this.components.hull0int0.stats.thrust = 0.5;
-		this.components.hull0int0.stats.weight = 0.5;
+		this.components.hull0int0 = new Component('gasbag',1);
+		this.components.hull0int0.stats.lift = 0.5;
+		this.components.hull0int0.stats.weight = 0.05;
 		
-		this.components.hull0int1 = new Component('gasbag',1);
-		this.components.hull0int1.stats.lift = 0.5;
-		this.components.hull0int1.stats.weight = 0.05;
+		this.components.hull0int1 = new Component('engine',1);
+		this.components.hull0int1.stats.fuelCapacity = 0.5;
+		this.components.hull0int1.stats.fuelConsumption = 0.5;
+		this.components.hull0int1.stats.thrust = 0.5;
+		this.components.hull0int1.stats.weight = 0.5;
 		
-		this.components.hull0int2 = new Component('cargoBay',1);
+		this.components.hull0int2 = new Component('cargobay',1);
 		this.components.hull0int2.stats.cargo = 0.5;
 		this.components.hull0int2.stats.loadTime = 0.5;
 		this.components.hull0int2.stats.weight = 0.05;
@@ -703,7 +712,7 @@ function Ship(id,tier) {
 			this.components['hull'+h+'int0'] = new Component(powerSystem,tier);
 			this.components['hull'+h+'int1'] = new Component('gasbag',tier);
 			if (hull.stats.internalSlots > 2) {
-				this.components['hull'+h+'int3'] = new Component('cargoBay',tier);
+				this.components['hull'+h+'int3'] = new Component('cargobay',tier);
 			};
 			for (c=4;c<=hull.stats.internalSlots;c++) {
 				this.components['hull'+h+'int'+c] = new Component('gasbag',tier);
@@ -725,6 +734,36 @@ function Ship(id,tier) {
 		
 	};
 	
+	this.install = function(component,slot) {
+		for (var oldSlot in this.components) {
+			if (this.components[oldSlot] == component) {
+				this.components[oldSlot] = undefined;
+			};
+		};
+		this.components[slot] = component;
+		view.refreshShipyardUI();
+	};
+	
+	this.sellComponent = function(component) {
+		var slotKey;
+		var price = component.cost;
+		this.confirmedSellComponent(component,price);
+	};
+	
+	this.confirmedSellComponent = function(component,price) {
+		for (var slot in this.components) {
+			if (this.components[slot] == component) {
+				this.components[slot] = undefined;
+			};
+		};
+		view.displayAlert('You sell the '+component.name+' for $'+price+'.');
+		this.coin += price;
+		this.currentMap().town.amenities[2].stock.push(component);
+		view.buildShipDef(this);
+		view.refreshShipyardUI();
+		view.updatePurse(game);
+	};
+	
 	this.getThrust = function() {return this.getStat('thrust')};
 	this.getTurn = function() {return this.getStat('turn')};
 	this.getTopSpeed = function() {return 5};
@@ -732,15 +771,17 @@ function Ship(id,tier) {
 	this.getStat = function(statName) {
 		var total = 0;
 		for (var slot in this.components) {
-			if (this.components[slot].stats[statName] !== undefined) {
-				total += this.components[slot].stats[statName];
-			};
-			if (statName == 'thrust' && this.components[slot].stats.drag !== undefined) {
-				total = Math.max(total - this.components[slot].stats.drag,0);
-			} else if (statName == 'turn' && this.components[slot].stats.drag !== undefined) {
-				total = Math.max(total - this.components[slot].stats.drag*0.5,0);
-			} else if (statName == 'lift' && this.components[slot].stats.weight !== undefined) {
-				total = Math.max(total - this.components[slot].stats.weight,0);
+			if (this.components[slot]) {
+				if (this.components[slot].stats[statName] !== undefined) {
+					total += this.components[slot].stats[statName];
+				};
+				if (statName == 'thrust' && this.components[slot].stats.drag !== undefined) {
+					total = Math.max(total - this.components[slot].stats.drag,0);
+				} else if (statName == 'turn' && this.components[slot].stats.drag !== undefined) {
+					total = Math.max(total - this.components[slot].stats.drag*0.5,0);
+				} else if (statName == 'lift' && this.components[slot].stats.weight !== undefined) {
+					total = Math.max(total - this.components[slot].stats.weight,0);
+				};
 			};
 		};
 		return total;
@@ -802,10 +843,13 @@ function Ship(id,tier) {
 	this.mooringNose = function() {
 		var lowestY = Infinity, leadNose;
 		for (var h=0;h<this.components.keel.stats.hulls;h++) {
-			if (this.components['hull'+h].nose.y < lowestY) {
+			if (this.components['hull'+h] && this.components['hull'+h].nose.y < lowestY) {
 				lowestY = this.components['hull'+h].nose.y;
 				leadNose = this.components['hull'+h].nose;
 			};
+		};
+		if (leadNose == undefined) {
+			leadNose = {x:0,y:0};
 		};
 		var nosePoint = {
 			x:this.x + Math.sin(this.heading) * leadNose.y * -1,
@@ -1147,10 +1191,27 @@ function Ship(id,tier) {
 }
 
 function Crewmate() {
-	this.name = "Jo Placeholder";
+	
+	var firstbits = ['jon','tom','will','rich','rick','rob','edw','hen','jame','fran','nich','mat','christ','anton','sam','an','liz','beth','jo','al','marg','ell','isa','mar'];
+	var lastbits = ['bell','bella','bello','ice','en','aret','as','iam','ard','ert','in','ry','rietta','son','dottir','skid','cis','las','thew','ia','uel','iel','ael','und','rew','a','beth','bett','betta','ann','anna','et','ette','etta','ta','tha','ua'];
+	var prefices = ['sher','cald','col','blake','til','grant','lang','blan','nor','north','rad','rud','south','su','sut','somer','wes','west','whit','guil','brew','church','cros','bran','brand','brin','haw','hay','kings','mel','mil','pres','gar','strat','sedg','stock','wain','wal','war','ash','bere','bark','birk','elm','farn','oak','ry','rye','saf','sal','salf','sel','wil','will','willough','york','ive','cov','dig','how','law','hol','mar','wad','sea','ather','car','fen','bever','bor','ever','cran','buck','swin','har','ram','shep','ship','wether','hart','sted','newt','ald','cad','ed','eld','ew','fitz','hal']
+	var suffices = ['castle','cott','croft','court','by','worth','ham','ford','shire','bury','ton','vell','berry','hurst','bert','olf','et','don','tle','ey','key','sey','more','land','wood','ell','man','mon','ond','rich','rick','son','und','web','wright','son','dottir','skid']
+	var middles = ['by','rock','rox','stan','cam','brad','bridg','bridge','brig','chester','kirk','burg','wick','bed','swain','well','thorn','thorne','drake','cok','bram','bain','water','beck','borne','burn','clay','cliff','burl','dun','hill','lake','ley','mont','brent','lin','ridge','ridg','dale','del','den','fisk','hund','hard','ward','win']
+	prefices = prefices.concat(middles);
+	suffices = suffices.concat(suffices);
+	
+	this.name = '';
+	this.name += view.capitalize(firstbits[firstbits.length * Math.random() << 0]);
+	this.name += lastbits[lastbits.length * Math.random() << 0];
+	this.name += ' ';
+	this.name += view.capitalize(prefices[prefices.length * Math.random() << 0]);
+	if (Math.random() > 0.5) {
+		this.name += middles[middles.length * Math.random() << 0];
+	};
+	this.name += suffices[suffices.length * Math.random() << 0];
 	
 	this.stats = {};
-	for (var statName of ['piloting','engineering','gunnery','quartermaster']) {
+	for (var statName of ['piloting','engineering','quartermaster']) {
 		this.stats[statName] = Math.random();
 	};
 	var total = 0;
@@ -1163,8 +1224,11 @@ function Crewmate() {
 }
 
 function Component(type,tier) {
-	if (type == undefined) {type = 'engine'};
-	if (tier == undefined) {tier = 1};
+	if (type == undefined) {
+		var types = ['keel','hull','engine','battery','motor','gasbag','quarters','stabilizer','solarPanels','topDeck','fin','tailboom','cargobay','loader'];
+		type = types[types.length * Math.random() << 0];
+	};
+	if (tier == undefined) {tier = 1 + Math.random() * 10 << 0};
 	this.name = 'Placeholder';
 	this.type = type;
 	this.tier = tier;
@@ -1178,66 +1242,105 @@ function Component(type,tier) {
 	var nouns = ['component'];
 	this.stats = {};
 	if (type == 'keel') {
+		this.slotType = 'keel';
 		stats.push('hulls','drag');
 		weight = 1;
-		nouns = ['Aluminum Keel','Duralumin Keel','Aerogel Keel','Graphene Hull','Aerographite Keel','Carbon Nanotube Keel','Diamond Nanothread Keel'];
+		cost = 1000;
+		nouns = ['Aluminum Keel','Duralumin Keel','Aerogel Keel','Graphene Keel','Aerographite Keel','Carbon Nanotube Keel','Diamond Nanothread Keel'];
 	} else if (type == 'hull') {
+		this.slotType = 'hull';
 		stats.push('internalSlots','externalSlots','topSlots','drag');
 		weight = 1.5;
+		cost = 1000;
 		nouns = ['Courier Hull','Ultralight Hull','Yacht Hull','Corvette Hull','Akron Hull','Argosy Hull','Workhorse Hull','Thunderhead Hull','Titan Hull','Colossus Hull'];
 	} else if (type == 'engine') {
+		this.slotType = 'int';
 		stats.push('thrust','fuelCapacity','fuelConsumption');
 		weight = 1;
+		cost = 500;
 		nouns = ['Two-Piston Engine','Four-Piston Engine','Six-Piston Engine','Eight-Piston Engine','Rotary Engine'];
 	} else if (type == 'battery') {
+		this.slotType = 'int';
 		stats.push('thrust','chargeCapacity');
 		weight = 1;
+		cost = 500;
 		nouns = ['Nickel-Cadmium Battery','Lithium Ion Battery','Dual Carbon Battery','Germanium Air Battery','Molten Salt Battery','Polymer Battery','Flow Battery','Organic Radical Battery','Fuel Cell','Ultrabattery'];
 	} else if (type == 'motor') {
+		this.slotType = 'ext';
 		stats.push('thrust','turn','lift','drag');
 		weight = 0.8;
+		cost = 150;
 		nouns = ['Prop','Contraprop','Proprotor','Ducted Fan','Turboprop','Turbojet','Turbofan','Propfan','Ramjet','Scramjet'];
 	} else if (type == 'gasbag') {
+		this.slotType = 'int';
 		stats.push('lift');
 		weight = 0.1;
+		cost = 100;
 		nouns = ['Tarbag','Rubberbag','Silk Bag','Spidersilk Bag'];
+	} else if (type == 'quarters') {
+		this.slotType = 'int';
+		stats.push('amenities');
+		weight = 0.5;
+		cost = 1000;
+		nouns = ['Bunks','Cells','Cabins','Suites'];
 	} else if (type == 'stabilizer') {
-		stats.push('drag','stability');
+		this.slotType = 'ext';
+		stats.push('stability','drag');
 		weight = 0.2;
+		cost = 50;
 		nouns = ['Stabilizer','Trimfin','Canard'];
 	} else if (type == 'solarPanels') {
+		this.slotType = 'top';
 		stats.push('power');
 		weight = 0.2;
+		cost = 1000;
 		nouns = ['Charge Panels','Solar Collectors','Solar Plant'];
 	} else if (type == 'topDeck') {
-		stats.push('sight');
+		this.slotType = 'top';
+		stats.push('amenities');
 		weight = 0.1;
-		nouns = ['Deck','Dome'];
+		cost = 100;
+		nouns = ['Deck','Observation Dome'];
 	} else if (type == 'fin') {
-		stats.push('drag','stability');
+		this.slotType = 'top';
+		stats.push('stability','drag');
 		weight = 0.2;
+		cost = 50;
 		nouns = ['Fin','Rudder','Dorsal'];
 	} else if (type == 'tailboom') {
-		stats.push('drag','lift','stability');
+		this.slotType = 'top';
+		stats.push('lift','stability','drag');
 		weight = 0.3;
+		cost = 150;
 		nouns = ['Tailboom'];
-	} else if (type == 'cargoBay') {
+	} else if (type == 'cargobay') {
+		this.slotType = 'int';
 		stats.push('cargo','loadTime');
 		weight = 0.1;
+		cost = 100;
 		nouns = ['Cargo Bay'];
-	} else if (type == 'cargoCrane') {
+	} else if (type == 'loader') {
+		this.slotType = 'int';
 		stats.push('cargo','loadTime');
 		weight = 0.1;
+		cost = 50;
 		nouns = ['Winch','Crane'];
 	};
 	stats.push('weight');
+	var value = 0;
 	for (var statName of stats) {
 		this.stats[statName] = 0;
 		for (var i=0;i<tier;i++) {
 			this.stats[statName] += Math.random()*0.9+0.1;
 		};
+		if (statName == 'weight' || statName == 'drag') {
+			value += tier - this.stats[statName];
+		} else {
+			value += this.stats[statName];
+		};
 		if (statName == 'hulls') {
 			this.stats[statName] = Math.ceil(this.stats[statName]);
+			this.stats[statName] = Math.min(this.stats[statName],5);
 		} else if (statName == 'internalSlots') {
 			this.stats[statName] = 1 + Math.ceil(this.stats[statName] * 2) * 2;
 		} else if (statName == 'externalSlots') {
@@ -1257,7 +1360,11 @@ function Component(type,tier) {
 	};
 	this.name = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.charAt((tier-1)*2.6+Math.random()*2.6 << 0);
 	this.name += '-'+Math.ceil(Math.random()*100)+' ';
-	this.name += nouns[nouns.length*(tier-1)/10];
+	this.name += nouns[nouns.length*(tier-1)/10 << 0];
+	
+	value /= stats.length;
+	value /= tier;
+	this.cost = Math.floor(cost * tier * value);
 }
 
 var gamenEventPointers = {

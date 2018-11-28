@@ -83,6 +83,64 @@ var handlers = {
 	sellCommodity: function(commodityKey) {
 		game.p1ship.sellCommodity(commodityKey);
 	},
+	
+	slotHover: function(slotKey) {
+		if (game.p1ship.components[slotKey] && game.p1ship.components[slotKey] !== view.panes.selectedComponent) {
+			view.displayComponent(game.p1ship.components[slotKey],67,-30);
+		};
+	},
+	
+	slotClick: function(slotKey) {
+		if (view.panes.moving) {
+			var component = view.panes.selectedComponent;
+			if (game.p1ship.components[slotKey]) {
+				view.selectComponent(game.p1ship.components[slotKey]);
+			} else {
+				view.panes.moving = false;
+				view.panes.selectedComponent = undefined;
+				view.filterShipyardTargets();
+				view.selectComponent();
+				view.coverShipyardButtons();
+			};
+			game.p1ship.install(component,slotKey);
+			view.buildShipDef(game.p1ship);
+		} else if (game.p1ship.components[slotKey]) {
+			view.selectComponent(game.p1ship.components[slotKey]);
+		};
+		view.clearComponentDisplay();
+	},
+	
+	repairComponent: function() {
+		view.filterShipyardTargets();
+		view.displayAlert("This component is already at 100% condition.");
+	},
+	
+	moveComponent: function() {
+		var component = view.panes.selectedComponent;
+		view.filterShipyardTargets(component.slotType);
+		view.panes.moving = true;
+	},
+	
+	paintComponent: function() {
+		view.filterShipyardTargets();
+		view.displayAlert("Coming soon to a browser game near you!.");
+	},
+	
+	sellComponent: function() {
+		view.filterShipyardTargets();
+		var component = view.panes.selectedComponent;
+		game.p1ship.sellComponent(component);
+	},
+	
+	buyComponent: function(component) {
+		var shipyardStock = game.p1ship.currentMap().town.amenities[2].stock
+		shipyardStock.splice(shipyardStock.indexOf(component),1);
+		view.refreshShipyardUI();
+		view.selectComponent(component);
+		view.panes.moving = true;
+		view.filterShipyardTargets(component.slotType);
+		game.p1ship.coin -= component.cost;
+	},
 
 }
 
