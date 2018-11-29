@@ -1,6 +1,8 @@
 var view = {
 	
 	gameTitle: 'Zeppel Endless',
+	supportLink: 'http://patreon.com/joshroby',
+	supportLinkLabel: 'Patreon',
 	
 	panes: {
 		minimap: 'minimized',
@@ -148,18 +150,38 @@ var view = {
 		var solarPanels = document.createElementNS('http://www.w3.org/2000/svg','g');
 		defs.appendChild(solarPanels);
 		solarPanels.id = 'solarPanels_t1';
-		solarPanels.setAttribute('width',1);
-		solarPanels.setAttribute('height',2);
 		solarPanels.setAttribute('fill','cadetblue');
 		solarPanels.setAttribute('stroke','black');
 		var panel1 = document.createElementNS('http://www.w3.org/2000/svg','rect');
 		solarPanels.appendChild(panel1);
 		panel1.setAttribute('x',0);
 		panel1.setAttribute('y',-1);
+		panel1.setAttribute('width',1);
+		panel1.setAttribute('height',2);
 		var panel2 = document.createElementNS('http://www.w3.org/2000/svg','rect');
 		solarPanels.appendChild(panel2);
 		panel2.setAttribute('x',-1);
 		panel2.setAttribute('y',-1);
+		panel2.setAttribute('width',1);
+		panel2.setAttribute('height',2);
+		
+		var garden = document.createElementNS('http://www.w3.org/2000/svg','g');
+		defs.appendChild(garden);
+		garden.id = 'garden_t1';
+		garden.setAttribute('fill','green');
+		garden.setAttribute('stroke','black');
+		var panel1 = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		garden.appendChild(panel1);
+		panel1.setAttribute('x',0);
+		panel1.setAttribute('y',-1);
+		panel1.setAttribute('width',1);
+		panel1.setAttribute('height',2);
+		var panel2 = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		garden.appendChild(panel2);
+		panel2.setAttribute('x',-1);
+		panel2.setAttribute('y',-1);
+		panel2.setAttribute('width',1);
+		panel2.setAttribute('height',2);
 		
 		var tailboom = document.createElementNS('http://www.w3.org/2000/svg','polygon');
 		tailboom.id = 'tailboom_t1';
@@ -506,6 +528,69 @@ var view = {
 		ropeMark.setAttribute('paint-order','stroke');
 		ropeMark.setAttribute('stroke-linejoin','round');
 		ropeMark.setAttribute('d',d);
+		
+		var mugGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+		defs.appendChild(mugGroup);
+		mugGroup.id = 'mug';
+		mugGroup.setAttribute('stroke-width',0.25);
+		mugGroup.setAttribute('transform','scale(1.25) rotate(-10)');
+		var handle = document.createElementNS('http://www.w3.org/2000/svg','path');
+		mugGroup.appendChild(handle);
+		handle.setAttribute('fill','white');
+		handle.setAttribute('stroke','black');
+		var d = 'M3,-3 q 2,0 2,2 v2 q 0,2 -2,2 v-1 h-0.5 q 1.5,0 1.5,-1.5 v-1 q 0,-1.5 -1.5,-1.5 z';
+		handle.setAttribute('d',d);
+		var path = document.createElementNS('http://www.w3.org/2000/svg','path');
+		mugGroup.appendChild(path);
+		path.setAttribute('fill','white');
+		path.setAttribute('stroke','black');
+		var d = 'M-3,-4 h6 v8 q -3,0.5 -6,0 v-8';
+		path.setAttribute('d',d);
+		var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		rect.setAttribute('fill','gold');
+		rect.setAttribute('stroke','black');
+		rect.setAttribute('x',-2.25);
+		rect.setAttribute('y',-3.25);
+		rect.setAttribute('width',4.5);
+		rect.setAttribute('height',6.5);
+		rect.setAttribute('rx',0.5);
+		rect.setAttribute('ry',0.5);
+		mugGroup.appendChild(rect);
+		var suds = [
+			{x:-1,y:-4.5,r:1.25,stroke:'black'},
+			{x:-2,y:-4.25,r:1,stroke:'black'},
+			{x:-2.25,y:-2.25,r:0.75,stroke:'black'},
+			{x:-2,y:-3.25,r:1,stroke:'black'},
+			{x:-2.25,y:-1.5,r:0.75,stroke:'black'},
+			{x:-2.5,y:-0.5,r:0.5,stroke:'black'},
+			{x:-3,y:0,r:0.4,stroke:'black'},
+			{x:-3,y:-1,r:0.5,stroke:'black'},
+			{x:-3,y:-2,r:0.6,stroke:'black'},
+			{x:-3,y:-3,r:0.75,stroke:'black'},
+			{x:2.75,y:-4,r:0.5,stroke:'black'},
+			{x:2,y:-4,r:0.6,stroke:'black'},
+			{x:1,y:-4.1,r:0.75,stroke:'black'},
+			{x:0,y:-4,r:1,stroke:'black'},
+			{x:-1,y:-3.9,r:0.75,stroke:'black'},
+			{x:-3,y:-4,r:1,stroke:'black'},
+			{x:0,y:-3.25,r:0.7,stroke:'black'},
+			{x:2,y:-3.25,r:0.7,stroke:'black'},
+			
+			{x:-2,y:-4,r:0.6,stroke:'none'},
+			{x:-0.25,y:-3.75,r:0.6,stroke:'none'},
+			{x:-2.5,y:-2.5,r:0.5,stroke:'none'},
+			{x:-2.75,y:-0.5,r:0.4,stroke:'none'},
+			{x:1.75,y:-3.75,r:0.5,stroke:'none'},
+		];
+		for (var bubble of suds) {
+			var circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+			mugGroup.appendChild(circle);
+			circle.setAttribute('cx',bubble.x);
+			circle.setAttribute('cy',bubble.y);
+			circle.setAttribute('r',bubble.r);
+			circle.setAttribute('fill','white');
+			circle.setAttribute('stroke',bubble.stroke);
+		};
 
 		// Layers
 		var titleGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
@@ -997,6 +1082,7 @@ var view = {
 		
 		var eotGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
 		controlsGroup.appendChild(eotGroup);
+		eotGroup.setAttribute('transform','translate(-1.9 -0.5) rotate(2 100 62)');
 		var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
 		rect.setAttribute('x',83.5);
 		rect.setAttribute('y',1);
@@ -1249,6 +1335,99 @@ var view = {
 		line.setAttribute('y2',windSockY-5);
 		line.setAttribute('stroke-linecap','round');
 		line.id = 'uiWindSock';
+		
+		var gaugesGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+		controlsGroup.appendChild(gaugesGroup);
+		gaugesGroup.setAttribute('transform','rotate(-2 -100 62)');
+		var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		rect.setAttribute('x',-101);
+		rect.setAttribute('y',30);
+		rect.setAttribute('width',19);
+		rect.setAttribute('height',35);
+		rect.setAttribute('fill','saddlebrown');
+		rect.setAttribute('stroke','black');
+		rect.setAttribute('rx',1);
+		rect.setAttribute('ry',1);
+		gaugesGroup.appendChild(rect);
+		var ids = ['provisionsGauge','chargeGauge','fuelGauge'];
+		for (var i=0;i<3;i++) {
+			var group = document.createElementNS('http://www.w3.org/2000/svg','g');
+			gaugesGroup.appendChild(group);
+			group.setAttribute('fill','lightslategray');
+			group.setAttribute('stroke','black');
+			group.setAttribute('stroke-width',0.5);
+			var circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+			group.appendChild(circle);
+			circle.setAttribute('cx',-98 + i * 5 + 1.5);
+			circle.setAttribute('cy',33);
+			circle.setAttribute('r',1);
+			var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+			rect.setAttribute('x',-98 + i * 5);
+			rect.setAttribute('y',33);
+			rect.setAttribute('width',3);
+			rect.setAttribute('height',25);
+			rect.setAttribute('rx',1.5);
+			rect.setAttribute('ry',6);
+			group.appendChild(rect);
+			var circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+			group.appendChild(circle);
+			circle.setAttribute('cx',-98 + i * 5 + 1.5);
+			circle.setAttribute('cy',58);
+			circle.setAttribute('r',1);
+			var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+			rect.setAttribute('x',-98 + i * 5 + 1.25);
+			rect.setAttribute('y',32.5);
+			rect.setAttribute('width',0.5);
+			rect.setAttribute('height',26);
+			rect.setAttribute('stroke','none');
+			group.appendChild(rect);
+			var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+			rect.id = ids[i];
+			rect.setAttribute('x',-98 + i * 5 + 0.75);
+			rect.setAttribute('y',38);
+			rect.setAttribute('width',1.5);
+			rect.setAttribute('height',15);
+			rect.setAttribute('rx',0.5);
+			rect.setAttribute('ry',0.5);
+			rect.setAttribute('stroke','none');
+			rect.setAttribute('fill','lime');
+			rect.setAttribute('opacity',0.8);
+			rect.setAttribute('transform','rotate(180 '+(-98 + i * 5 + 1.5)+' 45.5)');
+			group.appendChild(rect);
+			var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+			rect.setAttribute('x',-98 + i * 5 - 0.5);
+			rect.setAttribute('y',36);
+			rect.setAttribute('width',4);
+			rect.setAttribute('height',1);
+			rect.setAttribute('fill','gold');
+			group.appendChild(rect);
+			var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+			rect.setAttribute('x',-98 + i * 5 - 0.5);
+			rect.setAttribute('y',54);
+			rect.setAttribute('width',4);
+			rect.setAttribute('height',1);
+			rect.setAttribute('fill','gold');
+			group.appendChild(rect);
+			for (var l=0;l<5;l++) {
+				var line = document.createElementNS('http://www.w3.org/2000/svg','line')
+				group.appendChild(line);
+				line.setAttribute('x1',-98 + i * 5 + 1.5);
+				line.setAttribute('y1',38 + l * 15/4);
+				line.setAttribute('x2',-98 + i * 5 + 3);
+				line.setAttribute('y2',38 + l * 15/4);
+				line.setAttribute('stroke-width',0.25);
+			};
+			var text = document.createElementNS('http://www.w3.org/2000/svg','text');
+			group.appendChild(text);
+			text.setAttribute('x',-98 + i * 5 + 1.5);
+			text.setAttribute('y',61.5);
+			text.setAttribute('font-size',2.5);
+			text.setAttribute('text-anchor','middle');
+			text.setAttribute('fill','gold');
+			text.setAttribute('paint-order','stroke');
+			text.setAttribute('stroke-width',1);
+			text.innerHTML = ids[i].charAt(0);
+		};
 		
 		var soundGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
 		rumbleGroup.appendChild(soundGroup);
@@ -1593,6 +1772,54 @@ var view = {
 		
 		// Pane Bounds: x -85 to 85, y -33 to 50 (corrected)
 		
+		var rumorBacking = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		paneGroup.appendChild(rumorBacking);
+		rumorBacking.setAttribute('x',-78);
+		rumorBacking.setAttribute('y',-30);
+		rumorBacking.setAttribute('width',76);
+		rumorBacking.setAttribute('height',75);
+		rumorBacking.setAttribute('stroke','goldenrod');
+		rumorBacking.setAttribute('fill','lemonchiffon');
+		
+		var foreignObject = document.createElementNS('http://www.w3.org/2000/svg','foreignObject');
+		paneGroup.appendChild(foreignObject);
+		foreignObject.setAttribute('x',-75);
+		foreignObject.setAttribute('y',-20);
+		foreignObject.setAttribute('width',70);
+		foreignObject.setAttribute('height',63);
+		
+		var div = document.createElement('div');
+		foreignObject.appendChild(div);
+		div.id = 'rumorsDiv';
+		var headerP = document.createElement('p');
+		div.appendChild(headerP);
+		headerP.innerHTML = "Once tongues are lubricated, the talk begins to flow:";
+		for (var i=0;i<4;i++) {
+			var rumorP = document.createElement('p');
+			div.appendChild(rumorP);
+			rumorP.innerHTML = game.rumor();
+		};
+		
+		var rumorCover = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		paneGroup.appendChild(rumorCover);
+		rumorCover.setAttribute('x',-78);
+		rumorCover.setAttribute('y',-30);
+		rumorCover.setAttribute('width',76);
+		rumorCover.setAttribute('height',75);
+		rumorCover.setAttribute('stroke','lemonchiffon');
+		rumorCover.setAttribute('stroke-width',2);
+		rumorCover.setAttribute('fill','lemonchiffon');
+		var rumorCoverRollup = document.createElementNS('http://www.w3.org/2000/svg','animate');
+		rumorCover.appendChild(rumorCoverRollup);
+		rumorCoverRollup.id = 'rumorCoverRollup';
+		rumorCoverRollup.setAttribute('attributeType','XML');
+		rumorCoverRollup.setAttribute('attributeName','height');
+		rumorCoverRollup.setAttribute('from',75);
+		rumorCoverRollup.setAttribute('to',2);
+		rumorCoverRollup.setAttribute('dur',0.7);
+		rumorCoverRollup.setAttribute('fill','freeze');
+		rumorCoverRollup.setAttribute('begin','indefinite');
+		
 		var buyRoundButton = document.createElementNS('http://www.w3.org/2000/svg','g');
 		paneGroup.appendChild(buyRoundButton);
 		var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
@@ -1607,13 +1834,43 @@ var view = {
 		rect.setAttribute('stroke','black');
 		var text = document.createElementNS('http://www.w3.org/2000/svg','text');
 		buyRoundButton.appendChild(text);
-		text.setAttribute('x',-65);
+		text.setAttribute('x',-66);
 		text.setAttribute('y',44);
-		text.setAttribute('font-size',3.5);
-		text.innerHTML = "First Round's On Me, 'Mateys!";
+		text.setAttribute('font-size',3.25);
+		text.innerHTML = "First Round's On Me, 'Mateys! ($10)";
+		var mugUse = document.createElementNS('http://www.w3.org/2000/svg','use');
+		buyRoundButton.appendChild(mugUse);
+		view.setHref(mugUse,'mug');
+		mugUse.setAttribute('x',-74);
+		mugUse.setAttribute('y',43);
+		var buyRoundRise = document.createElementNS('http://www.w3.org/2000/svg','animateTransform');
+		buyRoundButton.appendChild(buyRoundRise);
+		buyRoundRise.setAttribute('attributeType','XML');
+		buyRoundRise.setAttribute('attributeName','transform');
+		buyRoundRise.setAttribute('type','translate');
+		buyRoundRise.setAttribute('from','0 0');
+		buyRoundRise.setAttribute('to','0 -71');
+		buyRoundRise.setAttribute('dur',0.7);
+		buyRoundRise.setAttribute('fill','freeze');
+		buyRoundRise.setAttribute('begin','rumorCoverRollup.begin');
+		buyRoundButton.addEventListener('click',handlers.firstRound);
+		var mugTip = document.createElementNS('http://www.w3.org/2000/svg','animateTransform');
+		mugUse.appendChild(mugTip);
+		mugTip.setAttribute('attributeType','XML');
+		mugTip.setAttribute('attributeName','transform');
+		mugTip.setAttribute('type','rotate');
+		mugTip.setAttribute('from','0 -74 43');
+		mugTip.setAttribute('to','30 -74 43');
+		mugTip.setAttribute('dur',0.7);
+		mugTip.setAttribute('fill','freeze');
+		mugTip.setAttribute('begin','rumorCoverRollup.begin');
+		
+		var recruitGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+		paneGroup.appendChild(recruitGroup);
+		recruitGroup.setAttribute('opacity',0.5);
 		
 		var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
-		paneGroup.appendChild(rect);
+		recruitGroup.appendChild(rect);
 		rect.setAttribute('x',8);
 		rect.setAttribute('y',-30);
 		rect.setAttribute('width',74);
@@ -1622,7 +1879,7 @@ var view = {
 		rect.setAttribute('stroke','goldenrod');
 		
 		var text = document.createElementNS('http://www.w3.org/2000/svg','text');
-		paneGroup.appendChild(text);
+		recruitGroup.appendChild(text);
 		text.setAttribute('x',45);
 		text.setAttribute('y',-20);
 		text.setAttribute('font-size',2);
@@ -1630,10 +1887,10 @@ var view = {
 		text.innerHTML = "A strange and unimplemented figure.";
 		
 		var buyDrinkButton = view.buildButton('Buy Drink',10,38);
-		paneGroup.appendChild(buyDrinkButton);
+		recruitGroup.appendChild(buyDrinkButton);
 		
 		var recruitButton = view.buildButton('Recruit',50,38);
-		paneGroup.appendChild(recruitButton);
+		recruitGroup.appendChild(recruitButton);
 		
 		return paneGroup;
 	},
@@ -1732,6 +1989,42 @@ var view = {
 			};
 		};
 		
+		var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		paneGroup.appendChild(rect);
+		rect.setAttribute('x',-82);
+		rect.setAttribute('y',40);
+		rect.setAttribute('width',74);
+		rect.setAttribute('height',5);
+		rect.setAttribute('fill','goldenrod');
+		rect.setAttribute('stroke','goldenrod');
+		
+		var reprovisionCost = game.reprovisionCost();
+		var refuelCost = game.refuelCost();
+		var rechargeCost = game.rechargeCost();
+		
+		var reprovisionButton = view.buildButton('Reprovision for $'+reprovisionCost,-79,40,42,0.5);
+		paneGroup.appendChild(reprovisionButton);
+		if (reprovisionCost > 0) {
+			reprovisionButton.addEventListener('click',handlers.reprovision);
+		} else {
+			reprovisionButton.setAttribute('opacity',0);
+		};
+		
+		var refuelButton = view.buildButton('Refuel for $'+refuelCost,-55,40,42,0.5);
+		paneGroup.appendChild(refuelButton);
+		if (refuelCost > 0) {
+			refuelButton.addEventListener('click',handlers.refuel);
+		} else {
+			refuelButton.setAttribute('opacity',0);
+		};
+		
+		var rechargeButton = view.buildButton('Recharge for $'+rechargeCost,-31,40,42,0.5);
+		paneGroup.appendChild(rechargeButton);
+		if (rechargeCost > 0) {
+			rechargeButton.addEventListener('click',handlers.recharge);
+		} else {
+			rechargeButton.setAttribute('opacity',0);
+		};
 		
 		// Cargo
 		
@@ -1849,6 +2142,24 @@ var view = {
 		paneGroup.setAttribute('transform','translate(0,100)');
 		
 		// Pane Bounds: x -85 to 85, y -33 to 50 (corrected)
+	
+		var externalLabel = document.createElementNS('http://www.w3.org/2000/svg','text');
+		paneGroup.appendChild(externalLabel);
+		externalLabel.setAttribute('x',-25);
+		externalLabel.setAttribute('y',-28);
+		externalLabel.setAttribute('font-size',2.75);
+		externalLabel.setAttribute('fill','goldenrod');
+// 		externalLabel.setAttribute('opacity',0.5);
+		externalLabel.innerHTML = 'External Schematic';
+		
+		var internalLabel = document.createElementNS('http://www.w3.org/2000/svg','text');
+		paneGroup.appendChild(internalLabel);
+		internalLabel.setAttribute('x',-25 - 50);
+		internalLabel.setAttribute('y',-28);
+		internalLabel.setAttribute('font-size',2.75);
+		internalLabel.setAttribute('fill','goldenrod');
+// 		internalLabel.setAttribute('opacity',0.4);
+		internalLabel.innerHTML = 'Internal Schematic';
 		
 		var schematicScale = 4;
 		
@@ -2010,7 +2321,7 @@ var view = {
 		rect.setAttribute('width',50);
 		rect.setAttribute('height',8);
 		rect.setAttribute('fill','lemonchiffon');
-		rect.setAttribute('stroke','saddlebrown');
+		rect.setAttribute('stroke','goldenrod');
 		rect.setAttribute('stroke-width',0.25);
 		
 		var buttonCoverLift = document.createElementNS('http://www.w3.org/2000/svg','animateTransform');
@@ -2044,7 +2355,7 @@ var view = {
 		rect.setAttribute('width',50);
 		rect.setAttribute('height',19);
 		rect.setAttribute('fill','lemonchiffon');
-		rect.setAttribute('stroke','saddlebrown');
+		rect.setAttribute('stroke','goldenrod');
 		rect.setAttribute('stroke-width',0.25);
 		
 		var selectedComponentGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
@@ -2065,7 +2376,7 @@ var view = {
 		rect.setAttribute('width',50);
 		rect.setAttribute('height',50);
 		rect.setAttribute('fill','lemonchiffon');
-		rect.setAttribute('stroke','saddlebrown');
+		rect.setAttribute('stroke','goldenrod');
 		rect.setAttribute('stroke-width',0.5);
 		row = 0;
 		var rowHeight = 50 / shipyard.stock.length;
@@ -2080,7 +2391,7 @@ var view = {
 			componentBox.setAttribute('y',-28 + 25 + row*rowHeight);
 			componentBox.setAttribute('width',50);
 			componentBox.setAttribute('height',rowHeight);
-			componentBox.setAttribute('stroke','saddlebrown');
+			componentBox.setAttribute('stroke','goldenrod');
 			componentBox.setAttribute('stroke-width',0.5);
 			componentBox.setAttribute('fill',component.color);
 			var componentLabel = document.createElementNS('http://www.w3.org/2000/svg','text');
@@ -2226,7 +2537,16 @@ var view = {
 			var componentDisplay = view.buildComponentDisplay(component);
 			componentDisplay.setAttribute('transform','translate(49 -23.5)');
 			selectedComponentGroup.appendChild(componentDisplay);
+			var installed = false;
+			for (var slot in game.p1ship.components) {
+				if (game.p1ship.components[slot] == component) {
+					installed = true;
+				};
+			};
+			if (installed == false) {
+			};
 		};
+		view.filterShipyardTargets();
 	},
 	
 	coverShipyardButtons: function() {
@@ -2236,7 +2556,11 @@ var view = {
 	filterShipyardTargets: function(type) {
 		if (type == undefined) {
 			for (var slot in view.panes.shipyardTargets) {
-				view.panes.shipyardTargets[slot].setAttribute('stroke','cyan');
+				if (game.p1ship.components[slot] !== undefined && game.p1ship.components[slot] == view.panes.selectedComponent) {
+					view.panes.shipyardTargets[slot].setAttribute('stroke','red');
+				} else {
+					view.panes.shipyardTargets[slot].setAttribute('stroke','cyan');
+				};
 				view.panes.shipyardTargets[slot].setAttribute('visibility','visible');
 			};
 		} else if (type == 'hull') {
@@ -2310,6 +2634,21 @@ var view = {
 	updatePurse: function(game) {
 		var purseText = document.getElementById('purseText');
 		purseText.innerHTML = "$"+game.p1ship.coin;
+	},
+	
+	updateGauges: function() {
+		for (var item of ['fuel','charge','provisions']) {
+			var gauge = document.getElementById(item+'Gauge');
+			var height = Math.max(0,game.p1ship[item]);
+			gauge.setAttribute('height',15 * height);
+			if (height < 0.25) {
+				gauge.setAttribute('fill','red');
+			} else if (height < 0.5) {
+				gauge.setAttribute('fill','yellow');
+			} else {
+				gauge.setAttribute('fill','lime');
+			};
+		};
 	},
 	
 	addShip: function(ship) {
@@ -2661,14 +3000,14 @@ var view = {
 			thrust: 'thrust',
 			stability: 'stability',
 			drag: 'drag',
-			power: 'power',
+			recharge: 'recharge',
 			cargo: 'cargo',
 			loadTime: 'load speed',
 			amenities: 'amenities',
+			harvest: 'harvest',
 			weight: 'weight',
 			chargeCapacity: 'capacity',
-			fuelCapacity:'fuel tank',
-			fuelConsumption: 'efficiency',
+			fuelEfficiency: 'efficiency',
 			internalSlots: 'bays',
 			externalSlots: 'pylons',
 			topSlots: 'top points',

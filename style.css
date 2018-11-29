@@ -20,3 +20,14 @@ svg {
 	font-style: italic;
 	color: 'red';
 }
+
+#rumorsDiv {
+	font-size: 2.5;
+	height: 63;
+	max-height: 63;
+	overflow-y: auto;
+}
+
+::-webkit-scrollbar {
+	width: 5px;
+}

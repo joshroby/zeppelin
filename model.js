@@ -61,6 +61,42 @@ function Game() {
 		return Math.floor(this.commodities[commodityKey].cost * this.p1ship.currentMap().town.amenities[1].localWares[commodityKey].demand);
 	};
 	
+	this.reprovisionCost = function() {
+		return Math.ceil((game.p1ship.currentMap().town.amenities[1].localWares.food.demand * game.commodities.food.cost) * (1 - game.p1ship.provisions));
+	};
+	
+	this.refuelCost = function() {
+		return Math.ceil((game.p1ship.currentMap().town.amenities[1].localWares.fuel.demand * game.commodities.fuel.cost) * (1 - game.p1ship.fuel));
+	};
+	
+	this.rechargeCost = function() {
+		return Math.ceil((game.p1ship.currentMap().town.amenities[1].localWares.charge.demand * game.commodities.charge.cost) * (1 - game.p1ship.charge));
+	};
+	
+	this.rumor = function() {
+		var town = this.townList[this.townList.length * Math.random() << 0];
+		var greatestDemand = 0, demandedCommodity;
+		var leastDemand = Infinity, surplusCommodity;
+		for (var commodityKey in town.amenities[1].localWares) {
+			if (town.amenities[1].localWares[commodityKey].demand > greatestDemand) {
+				greatestDemand = town.amenities[1].localWares[commodityKey].demand;
+				demandedCommodity = commodityKey;
+			};
+			if (town.amenities[1].localWares[commodityKey].demand < leastDemand) {
+				leastDemand = town.amenities[1].localWares[commodityKey].demand;
+				surplusCommodity = commodityKey;
+			};
+		};
+		var rumors = [];
+		rumors.push(town.name + ' harbors a great demand for ' + game.commodities[demandedCommodity].displayName + '.');
+		rumors.push(town.name + ' is overflowing with a surplus of ' + game.commodities[surplusCommodity].displayName + '.');
+		var adjectives = ['bedraggled','dashing','tipsy','gregarious','suspicious-looking','shady','prim','laughing','beautiful','plump','skinny','dreamy-eyed'];
+		var people = ['ship captain','street urchin','old biddy','bartender','waiter','piano player','wharf worker','miner','farmer','pilot','quartermaster'];
+		var verbs = ['opines','shares','confides','insists','speculates'];
+		var opener = "A "+adjectives[Math.random() * adjectives.length << 0] + " " + people[people.length * Math.random() << 0] + " " + verbs[verbs.length * Math.random() << 0] + ": ";
+		return opener+'"'+rumors[rumors.length * Math.random() << 0]+'"';
+	};
+	
 	// construction
 	
 	this.commodities = {};
@@ -74,6 +110,12 @@ function Game() {
 			cost: 10 + Math.pow(2,i),
 		};
 		this.commodities[commodity.key] = commodity;
+	};
+	this.commodities.charge = {
+		key: 'charge',
+		displayName: 'Charge',
+		weight: 0,
+		cost: this.commodities.fuel.cost,
 	};
 
 	this.clock = new Clock();
@@ -475,7 +517,7 @@ function SectionMap(x,y,game) {
 		var ware, inStock = 0;
 		for (var commodityKey in game.commodities) {
 			ware = {key:commodityKey,demand:Math.random() + 0.5};
-			if (ware.demand < 1 && inStock < 6 || (commodityKey == 'food' || commodityKey == 'fuel')) {
+			if (ware.demand < 1 && inStock < 6) {
 				ware.available = Math.random() * Math.random() * 100 << 0;
 				inStock++;
 			} else {
@@ -483,6 +525,7 @@ function SectionMap(x,y,game) {
 			};
 			wharf.localWares[commodityKey] = ware;
 		};
+		wharf.localWares.charge.available = 0;
 		this.town.amenities.push(wharf);
 		
 		var amenity = {
@@ -609,11 +652,21 @@ function Ship(id,tier) {
 	};
 	this.groundspeed = {};
 	
+	this.charge = 1;
+	this.fuel = 1;
+	this.provisions = 1;
+	
 	this.cargo = {
 		fuel: 1,
 		food: 1,
 	};
 	this.coin = 1000;
+	
+	this.crew = [];
+	for (var i=0;i<3;i++) {
+		this.crew.push(new Crewmate());
+	};
+		
 	this.components = {};
 	if (id == 'p1') {
 		this.components.keel = new Component('keel',1);
@@ -634,10 +687,10 @@ function Ship(id,tier) {
 		
 		this.components.hull0int1 = new Component('engine',1);
 		this.components.hull0int1.stats.fuelCapacity = 0.5;
-		this.components.hull0int1.stats.fuelConsumption = 0.5;
+		this.components.hull0int1.stats.fuelEfficiency = 0.5;
 		this.components.hull0int1.stats.thrust = 0.5;
 		this.components.hull0int1.stats.weight = 0.5;
-		
+				
 		this.components.hull0int2 = new Component('cargobay',1);
 		this.components.hull0int2.stats.cargo = 0.5;
 		this.components.hull0int2.stats.loadTime = 0.5;
@@ -684,11 +737,6 @@ function Ship(id,tier) {
 // 		this.sprite = 'defaultShip';
 		this.sprite = 'shipSprite_'+this.id;
 	
-		this.crew = [];
-		for (var i=0;i<3;i++) {
-			this.crew.push(new Crewmate());
-		};
-	
 		var componentType, componentTypes;
 		var keel = new Component('keel',tier);
 		this.components.keel = keel;
@@ -720,11 +768,11 @@ function Ship(id,tier) {
 			for (c=0;c<hull.stats.topSlots;c++) {
 				if (c == hull.stats.topSlots-1) {
 					componentTypes = ['tailboom','fin','topDeck'];
-					if (powerSystem == 'battery') {
-						componentTypes.push('solarPanels');
-					};
 				} else {
-					componentTypes = ['fin','topDeck'];
+					componentTypes = ['fin','topDeck','garden'];
+				};
+				if (powerSystem == 'battery') {
+					componentTypes.push('solarPanels');
 				};
 				componentType = componentTypes[componentTypes.length * Math.random() << 0];
 				this.components['hull'+h+'top'+c] = new Component(componentType,tier);
@@ -742,6 +790,9 @@ function Ship(id,tier) {
 		};
 		this.components[slot] = component;
 		view.refreshShipyardUI();
+		var airWrench = new Audio('audio/Air Wrench-SoundBible.com-111926242.mp3');
+		airWrench.play();
+		view.updateWharfUI();
 	};
 	
 	this.sellComponent = function(component) {
@@ -815,6 +866,27 @@ function Ship(id,tier) {
 		};
 	};
 	
+	this.reprovision = function() {
+		this.provisions = 1;
+		this.coin -= game.reprovisionCost();
+		view.updatePurse(game);
+		view.updateWharfUI();
+	};
+	
+	this.refuel = function() {
+		this.fuel = 1;
+		this.coin -= game.refuelCost();
+		view.updatePurse(game);
+		view.updateWharfUI();
+	};
+	
+	this.recharge = function() {
+		this.charge = 1;
+		this.coin -= game.rechargeCost();
+		view.updatePurse(game);
+		view.updateWharfUI();
+	};
+	
 	this.throttle = function(direction) {
 		var eot = this.eot * 20;
 		if (direction == 'forward') {
@@ -829,10 +901,13 @@ function Ship(id,tier) {
 	
 	this.steer = function(direction) {
 		var rudder = this.rudder * 30;
+		var magnitude = 1;
 		if (direction == 'left') {
 			rudder -= 1;
+			if (rudder > 10) { rudder -= 2 };
 		} else if (direction == 'right') {
 			rudder += 1;
+			if (rudder < -10) { rudder += 2 };
 		};
 		rudder = Math.round(rudder)/30;
 		rudder = Math.min(Math.max(rudder,-1.2),1.2);
@@ -937,6 +1012,18 @@ function Ship(id,tier) {
 	this.stressDamage = function() {
 	};
 	
+	this.outOfFuel = function() {
+		view.displayAlert('We have run out of fuel!');
+	};
+	
+	this.outOfCharge = function() {
+		view.displayAlert('Our batteries have run out of charge!');
+	};
+	
+	this.outOfProvisions = function() {
+		view.displayAlert('We have run out of provisions!');
+	};
+	
 	this.tick = function() {
 		
 		// AI
@@ -944,16 +1031,49 @@ function Ship(id,tier) {
 			this.ai();
 		};
 		
-		// Telemetry
-		this.heading += this.getTurn() * this.rudder * 0.1;
-		if (this.heading >= Math.PI * 2) {
-			this.heading -= Math.PI * 2;
-		} else if (this.heading < 0) {
-			this.heading = Math.PI * 2 - this.heading;
+		// Consumption
+		if (game.p1ship == this) {
+			var power = (Math.pow(Math.abs(this.eot),2) + Math.abs(this.rudder * 0.1)) * 0.0001;
+			var component, fuelConsumption=0, chargeConsumption=0, totalHarvest=0, totalRecharge=0;
+			for (var componentKey in this.components) {
+				component = this.components[componentKey];
+				if (component) {
+					if (component.stats.fuelEfficiency !== undefined) {
+						fuelConsumption += power / component.stats.fuelEfficiency;
+					};
+					if (component.stats.chargeCapacity !== undefined) {
+						chargeConsumption += power / component.stats.chargeCapacity;
+					};
+					if (component.stats.harvest !== undefined) {
+						totalHarvest += component.stats.harvest * 0.00001;
+					};
+					if (component.stats.recharge !== undefined) {
+						totalRecharge += component.stats.recharge * 0.0001;
+					};
+				};
+			};
+			this.fuel = Math.max(0,this.fuel - fuelConsumption);
+			this.charge = Math.min(1,Math.max(0,this.charge - chargeConsumption + totalRecharge));
+			this.provisions = Math.min(1,Math.max(0,this.provisions + totalHarvest - this.crew.length * 0.00001));
+			view.updateGauges();
+			if (this.fuel <= 0) {this.outOfFuel()};
+			if (this.charge <= 0) {this.outOfCharge()};
+			if (this.provisions <= 0) {this.outOfProvisions()};
 		};
+		
+		// Telemetry
 		var oldX = this.x, oldY = this.y;
-		this.x += Math.sin(this.heading) * this.getThrust() * this.eot * 0.1;
-		this.y -= Math.cos(this.heading) * this.getThrust() * this.eot * 0.1;
+		if (this.fuel > 0 && this.charge > 0) {
+			this.heading += this.getTurn() * this.rudder * 0.1;
+			if (this.heading >= Math.PI * 2) {
+				this.heading -= Math.PI * 2;
+			} else if (this.heading < 0) {
+				this.heading = Math.PI * 2 - this.heading;
+			};
+			this.x += Math.sin(this.heading) * this.getThrust() * this.eot * 0.1;
+			this.y -= Math.cos(this.heading) * this.getThrust() * this.eot * 0.1;
+		};
+		
 		this.x += Math.sin(this.airspeed.direction) * this.airspeed.speed;
 		this.y -= Math.cos(this.airspeed.direction) * this.airspeed.speed;
 		this.airspeed.speed = Math.pow(Math.pow(this.x - oldX,2)+Math.pow(this.y - oldY,2),0.5);
@@ -1225,7 +1345,7 @@ function Crewmate() {
 
 function Component(type,tier) {
 	if (type == undefined) {
-		var types = ['keel','hull','engine','battery','motor','gasbag','quarters','stabilizer','solarPanels','topDeck','fin','tailboom','cargobay','loader'];
+		var types = ['keel','hull','engine','battery','motor','gasbag','quarters','stabilizer','solarPanels','topDeck','fin','tailboom','garden','cargobay','loader'];
 		type = types[types.length * Math.random() << 0];
 	};
 	if (tier == undefined) {tier = 1 + Math.random() * 10 << 0};
@@ -1255,7 +1375,7 @@ function Component(type,tier) {
 		nouns = ['Courier Hull','Ultralight Hull','Yacht Hull','Corvette Hull','Akron Hull','Argosy Hull','Workhorse Hull','Thunderhead Hull','Titan Hull','Colossus Hull'];
 	} else if (type == 'engine') {
 		this.slotType = 'int';
-		stats.push('thrust','fuelCapacity','fuelConsumption');
+		stats.push('thrust','fuelEfficiency');
 		weight = 1;
 		cost = 500;
 		nouns = ['Two-Piston Engine','Four-Piston Engine','Six-Piston Engine','Eight-Piston Engine','Rotary Engine'];
@@ -1291,7 +1411,7 @@ function Component(type,tier) {
 		nouns = ['Stabilizer','Trimfin','Canard'];
 	} else if (type == 'solarPanels') {
 		this.slotType = 'top';
-		stats.push('power');
+		stats.push('recharge');
 		weight = 0.2;
 		cost = 1000;
 		nouns = ['Charge Panels','Solar Collectors','Solar Plant'];
@@ -1313,6 +1433,12 @@ function Component(type,tier) {
 		weight = 0.3;
 		cost = 150;
 		nouns = ['Tailboom'];
+	} else if (type == 'garden') {
+		this.slotType = 'top';
+		stats.push('harvest','amenities','drag');
+		weight = 0.5;
+		cost = 150;
+		nouns = ['Garden','Greenhouse','Hothouse','Terrace','Park'];
 	} else if (type == 'cargobay') {
 		this.slotType = 'int';
 		stats.push('cargo','loadTime');
