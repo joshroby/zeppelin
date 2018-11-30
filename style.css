@@ -28,6 +28,16 @@ svg {
 	overflow-y: auto;
 }
 
+#gameModalWindow {
+	font-size: 2.5;
+	height: 75;
+	overflow-y: auto;
+}
+
+#gameModalWindow h1 {
+	font-size: 7;
+}
+
 ::-webkit-scrollbar {
 	width: 5px;
 }

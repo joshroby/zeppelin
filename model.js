@@ -37,6 +37,13 @@ function Game() {
 		};
 		view.recenterMap();
 		this.soundtrack.tick();
+		for (var event of this.events) {
+			event.time -= this.clock.tick / 1000;
+			if (event.time < 0) {
+				events[event.eventKey].resolve(event);
+				this.removeEvent(event);
+			};
+		};
 	};
 	
 	this.windChange = function() {
@@ -123,6 +130,40 @@ function Game() {
 		return speaker+'"'+rumors[rumors.length * Math.random() << 0]+'"';
 	};
 	
+	this.eventIndex = 0;
+	this.newEvent = function(eventKey,time,icon) {
+		var duplicate = false;
+		for (var event of this.events) {
+			if (event.eventKey == eventKey) {
+				duplicate = true;
+			};
+		};
+		if (eventKey==undefined) {
+			console.log('Cannot log an event without an eventKey');
+		} else if (duplicate == false) {
+			if (time==undefined) {time = 100};
+			if (icon==undefined) {icon = 'defaultEventIcon'};
+			var lastEvent = this.events[this.events.length-1];
+			var event = {
+				id: this.eventIndex,
+				eventKey: eventKey,
+				time: time,
+				icon: icon,
+			};
+			this.events.push(event);
+			view.addEvent(event);
+			this.eventIndex++;
+		};
+	};
+	
+	this.removeEvent = function(event) {
+		var index = this.events.indexOf(event);
+		if (index !== -1) {
+			this.events.splice(index,1);
+		};
+		view.removeEvent(event);
+	};
+	
 	// construction
 	
 	this.commodities = {};
@@ -148,7 +189,6 @@ function Game() {
 
 	this.clock = new Clock();
 	this.clock.tick = 100;
-	this.clock.tick = 50;
 	this.clock.start();
 	this.clock.logEventIn(1,'tick');
 	this.clock.logEventIn(100,'windChange');
@@ -192,10 +232,14 @@ function Game() {
 	];
 	this.soundtrack.play();
 	
+	this.alerts = [];
+	
 	this.constants = {
 		topMooringSpeed: 3,
 		mooringTowerRange: 10,
 	};
+	
+	this.events = [];
 }
 
 function SectionMap(x,y,game) {
@@ -1084,15 +1128,15 @@ function Ship(id,tier) {
 	};
 	
 	this.outOfFuel = function() {
-		view.displayAlert('We have run out of fuel!');
+		game.newEvent('outOfFuel',10);
 	};
 	
 	this.outOfCharge = function() {
-		view.displayAlert('Our batteries have run out of charge!');
+		game.newEvent('outOfCharge',10);
 	};
 	
 	this.outOfProvisions = function() {
-		view.displayAlert('We have run out of provisions!');
+		game.newEvent('outOfProvisions',10);
 	};
 	
 	this.tick = function() {
@@ -1571,7 +1615,7 @@ function Component(type,tier) {
 	value /= stats.length;
 	value /= tier;
 	this.cost = Math.floor(cost * tier * value);
-}
+};
 
 var gamenEventPointers = {
 	tick: function() {
@@ -1583,4 +1627,140 @@ var gamenEventPointers = {
 		game.clock.logEventIn(Math.random() * 500000 + 500000,'windChange');
 		game.windChange();
 	},
-}
+};
+
+var events = {
+	outOfFuel: {
+		execute: function(event) {
+			game.removeEvent(event);
+			var buttonArray = [];
+			var div = document.createElement('div');
+			var h1 = document.createElement('h1');
+			h1.innerHTML = 'Out of Fuel!';
+			div.appendChild(h1);
+			var p = document.createElement('p');
+			div.appendChild(p);
+			p.innerHTML = "You have run out of fuel.  (Your fuel gauge is the one marked 'F' to the left.)";
+			var p = document.createElement('p');
+			div.appendChild(p);
+			if (game.p1ship.cargo.fuel !== undefined && game.p1ship.cargo.fuel > 0) {
+				p.innerHTML = "Luckily, you are hauling crates of fuel.  Without other options, you order your mates to head down into the cargo hold, break open a crate, and pour the contents into the fuel tanks.  You won't be able to sell that crate, of course, but at least you can make it into port!";
+				game.p1ship.cargo.fuel--;
+				game.p1ship.fuel = 1;
+				buttonArray.push({label:"Get Pourin'",execute:view.dismissWindow});
+			} else if (game.p1ship.coin >= 1000) {
+				p.innerHTML = "Without even the last-ditch option of breaking open crated fuel in the cargo bay, you have to moor on the first bit of solid ground you can find and send the crew out, <em>on foot</em>, to find a nearby town and hire somebody to bring you fuel by cart or possibly zeppelin.";
+				var p = document.createElement('p');
+				div.appendChild(p);
+				p.innerHTML = "It's a hideously expensive proposition, and by the end of the day, your purse is lighter by a grand.";
+				game.p1ship.fuel = 1;
+				game.p1ship.coin -= 1000;
+				buttonArray.push({label:"Embarassing!",execute:view.dismissWindow});
+			} else {
+				p.innerHTML = "With neither the option of breaking open crated fuel in the cargo bay nor funds to pay for fuel delivery, you'll have to moor on the first bit of solid ground you can find and send the crew out, <em>on foot</em>, to find a nearby town.";
+				var p = document.createElement('p');
+				div.appendChild(p);
+				p.innerHTML = "Somebody will eventually be along with a cart full of fuel, but they won't come to rescue you.  They'll be coming to buy your ship, and it will be the best offer, and the only offer, you get.";
+				var p = document.createElement('p');
+				div.appendChild(p);
+				p.innerHTML = "Your flying days are done.";
+			};
+			view.displayWindow(div,buttonArray);
+		},
+		resolve: function(event) {
+			events.outOfFuel.execute(event);
+		},
+	},
+	
+	outOfProvisions: {
+		execute: function(event) {
+			game.removeEvent(event);
+			var buttonArray = [];
+			var div = document.createElement('div');
+			var h1 = document.createElement('h1');
+			h1.innerHTML = 'Out of Provisions!';
+			div.appendChild(h1);
+			var p = document.createElement('p');
+			div.appendChild(p);
+			p.innerHTML = "You have run out of provisions.  (Your provisions gauge is the one marked 'P' to the left.)";
+			var p = document.createElement('p');
+			div.appendChild(p);
+			if (game.p1ship.cargo.food !== undefined && game.p1ship.cargo.food > 0) {
+				p.innerHTML = "Luckily, you are hauling crates of food.  Without other options, you order your mates to head down into the cargo hold, break open a crate, and eat like royalty.  You won't be able to sell that crate, of course, but at least you won't starve!";
+				game.p1ship.cargo.food--;
+				game.p1ship.provisions = 1;
+				buttonArray.push({label:"Let's Eat!",execute:view.dismissWindow});
+			} else if (game.p1ship.coin >= 500) {
+				p.innerHTML = "Without even the last-ditch option of breaking open crated food in the cargo bay, you have to moor on the first bit of solid ground you can find and send the crew out, <em>on foot</em>, to find a nearby town and hire somebody to bring you food by cart or possibly zeppelin.";
+				var p = document.createElement('p');
+				div.appendChild(p);
+				p.innerHTML = "It's a hideously expensive proposition, and the farmer who comes to bail you out happily takes $500 for his trouble... and produce.";
+				game.p1ship.provisions = 1;
+				game.p1ship.coin -= 500;
+				buttonArray.push({label:"Embarassing!",execute:view.dismissWindow});
+			} else {
+				p.innerHTML = "With neither the option of breaking open crated food in the cargo bay nor funds to pay for food delivery, you have to moor on the first bit of solid ground you can find and send the crew out, <em>on foot</em>, to whatever nearby town they can find.";
+				var p = document.createElement('p');
+				div.appendChild(p);
+				p.innerHTML = "They won't come back.";
+				var p = document.createElement('p');
+				div.appendChild(p);
+				p.innerHTML = "Somebody will eventually be along with a cart full of new crewmates and crates of provisions, but they won't come to rescue you.  They'll be coming to buy your ship, and it will be the best offer, and the only offer, you get.";
+				var p = document.createElement('p');
+				div.appendChild(p);
+				p.innerHTML = "Your flying days are done.";
+			};
+			view.displayWindow(div,buttonArray);
+		},
+		resolve: function(event) {
+			events.outOfProvisions.execute(event);
+		},
+	},
+	
+	outOfCharge: {
+		execute: function(event) {
+			game.removeEvent(event);
+			var buttonArray = [];
+			var div = document.createElement('div');
+			var h1 = document.createElement('h1');
+			h1.innerHTML = 'Out of Charge!';
+			div.appendChild(h1);
+			var p = document.createElement('p');
+			div.appendChild(p);
+			p.innerHTML = "Your batteries have run out of charge.  (Your charge gauge is the one marked 'C' to the left.)";
+			var p = document.createElement('p');
+			div.appendChild(p);
+			if (game.p1ship.getStat('recharge') > 0) {
+				p.innerHTML = "Luckily, you do have functioning solar panels, so all you really need to do is moor somewhere safe and wait until the batteries are charged up again.";
+				buttonArray.push({label:"Sunbathing Time",execute:view.dismissWindow});
+			} else if (game.p1ship.coin >= 2000) {
+				p.innerHTML = "Without functioning solar panels, you have to moor on the first bit of solid ground you can find and send the crew out, <em>on foot</em>, to find a nearby town and hire somebody to bring you charged-up batteries, either by cart or more probably by zeppelin.";
+				var p = document.createElement('p');
+				div.appendChild(p);
+				p.innerHTML = "It's a hideously expensive proposition, and when your rescuers arrive, you have to shell out $2000 to get back in the sky.";
+				game.p1ship.charge = 1;
+				game.p1ship.coin -= 2000;
+				buttonArray.push({label:"Embarassing!",execute:view.dismissWindow});
+			} else {
+				p.innerHTML = "With neither functioning solar panels nor funds to pay for battery delivery, you have to moor on the first bit of solid ground you can find and send the crew out, <em>on foot</em>, to whatever nearby town they can find.";
+				var p = document.createElement('p');
+				div.appendChild(p);
+				p.innerHTML = "They won't come back.";
+				var p = document.createElement('p');
+				div.appendChild(p);
+				p.innerHTML = "Somebody will eventually be along with a cart full of new crewmates and fresh batteries, but they won't come to rescue you.  They'll be coming to buy your ship, and it will be the best offer, and the only offer, you get.";
+				var p = document.createElement('p');
+				div.appendChild(p);
+				p.innerHTML = "Your flying days are done.";
+			};
+			view.displayWindow(div,buttonArray);
+		},
+		resolve: function(event) {
+			if (game.p1ship.charge == 0) {
+				events.outOfCharge.execute(event);
+			} else {
+				game.removeEvent(event);
+			};
+		},
+	},
+};

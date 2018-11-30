@@ -592,6 +592,21 @@ var view = {
 			circle.setAttribute('fill','white');
 			circle.setAttribute('stroke',bubble.stroke);
 		};
+		
+		var defaultEventIcon = document.createElementNS('http://www.w3.org/2000/svg','g');
+		defs.appendChild(defaultEventIcon);
+		defaultEventIcon.id = 'defaultEventIcon';
+		var text = document.createElementNS('http://www.w3.org/2000/svg','text');
+		defaultEventIcon.appendChild(text);
+		text.setAttribute('y',2);
+		text.setAttribute('x',0);
+		text.setAttribute('fill','red');
+		text.setAttribute('stroke','black');
+		text.setAttribute('paint-order','stroke');
+		text.setAttribute('text-anchor','middle');
+		text.setAttribute('font-size',6);
+		text.innerHTML = "!!";
+		
 
 		// Layers
 		var titleGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
@@ -1693,8 +1708,12 @@ var view = {
 		purseGroup.appendChild(text);
 		text.id = 'purseText';
 		
+		var eventsGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+		uiGroup.appendChild(eventsGroup);
+		eventsGroup.id = 'eventsGroup';
+		
 		var alertsGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
-		rumbleGroup.appendChild(alertsGroup);
+		uiGroup.appendChild(alertsGroup);
 		alertsGroup.id = 'alertsGroup';
 	},
 	
@@ -3124,7 +3143,7 @@ var view = {
 		alertsGroup.innerHTML = '';
 		var alertText = document.createElementNS('http://www.w3.org/2000/svg','text');
 		alertText.setAttribute('x',0);
-		alertText.setAttribute('y',-50);
+		alertText.setAttribute('y',-45);
 		alertText.setAttribute('text-anchor','middle');
 		alertText.setAttribute('font-size',3);
 		alertText.innerHTML = alert;
@@ -3253,6 +3272,150 @@ var view = {
 	
 	togglePersonnelPane: function() {
 		console.log('Personnel and Crew!');
+	},
+	
+	// Events
+	
+	addEvent: function(event) {
+		var eventsGroup = document.getElementById('eventsGroup');
+		var ordinal = eventsGroup.children.length;
+		var eventGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+		eventGroup.id = 'event_'+event.id;
+		eventsGroup.appendChild(eventGroup);
+		eventGroup.setAttribute('stroke','black');
+		eventGroup.setAttribute('stroke-width',0.5);
+		var center = {x:-59 + ordinal * 12+5,y:-55.5};
+		var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		rect.setAttribute('x',center.x-5.5);
+		rect.setAttribute('y',center.y-9);
+		rect.setAttribute('width',11);
+		rect.setAttribute('height',14);
+		rect.setAttribute('rx',2);
+		rect.setAttribute('ry',2);
+		rect.setAttribute('fill','saddlebrown');
+		eventGroup.appendChild(rect);
+		var totalSpines = event.time;
+		for (var i=0;i<totalSpines;i++) {
+			var x2 = center.x + Math.sin(Math.PI * 2 * i/totalSpines) * 4.5;
+			var y2 = center.y - Math.cos(Math.PI * 2 * i/totalSpines) * 4.5;
+			var line = document.createElementNS('http://www.w3.org/2000/svg','line');
+			eventGroup.appendChild(line);
+			line.setAttribute('x1',center.x);
+			line.setAttribute('y1',center.y);
+			line.setAttribute('x2',x2);
+			line.setAttribute('y2',y2);
+			line.setAttribute('stroke','red');
+			line.setAttribute('stroke-width',1);
+			line.setAttribute('stroke-linecap','round');
+			var fade = document.createElementNS('http://www.w3.org/2000/svg','animate');
+			fade.id = 'e'+event.id+'f'+i;
+			fade.setAttribute('attributeType','XML');
+			fade.setAttribute('attributeName','opacity');
+			fade.setAttribute('from',1);
+			fade.setAttribute('to',0);
+			fade.setAttribute('dur','1s');
+			fade.setAttribute('fill','freeze');
+			if (i==0) {
+				fade.setAttribute('begin','indefinite');
+				line.appendChild(fade);
+				var firstAnimate = fade;
+			} else {
+				fade.setAttribute('begin','e'+event.id+'f'+(i-1)+'.end');
+				line.appendChild(fade);
+			};
+		};
+		var circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+		eventGroup.appendChild(circle);
+		circle.setAttribute('cx',center.x);
+		circle.setAttribute('cy',center.y);
+		circle.setAttribute('r',4);
+		circle.setAttribute('fill','lemonchiffon');
+		circle.setAttribute('stroke','black');
+		circle.setAttribute('stroke-width',0.25);
+		var iconUse = document.createElementNS('http://www.w3.org/2000/svg','use');
+		eventGroup.appendChild(iconUse);
+		iconUse.setAttribute('x',center.x);
+		iconUse.setAttribute('y',center.y);
+		view.setHref(iconUse,event.icon);
+		firstAnimate.beginElement();
+		eventGroup.addEventListener('click',handlers.doEvent.bind(this,event));
+	},
+	
+	removeEvent: function(event) {
+		var eventGroup = document.getElementById('event_'+event.id);
+		var eventsGroup = document.getElementById('eventsGroup');
+		var eventNodes = eventsGroup.children;
+		var removed = false;
+		for (var i=0;i<eventNodes.length;i++) {
+			if (eventNodes[i] == eventGroup) {
+				eventNodes[i].remove();
+				removed = true;
+				i--;
+			} else if (removed) {
+				var slide = document.createElementNS('http://www.w3.org/2000/svg','animateTransform');
+				slide.setAttribute('attributeType','XML');
+				slide.setAttribute('attributeName','transform');
+				slide.setAttribute('type','translate');
+				slide.setAttribute('from',0);
+				slide.setAttribute('to',-12);
+				slide.setAttribute('dur','0.5s');
+				slide.setAttribute('fill','freeze');
+				slide.setAttribute('begin','indefinite');
+				slide.setAttribute('additive','sum');
+				eventNodes[i].appendChild(slide);
+				slide.beginElement();
+			};
+		};
+	},
+	
+	displayWindow: function(contents,buttonArray,image) {
+		var windowGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+		alertsGroup.appendChild(windowGroup);
+		var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		rect.setAttribute('x',-75);
+		rect.setAttribute('y',-50);
+		rect.setAttribute('width',150);
+		rect.setAttribute('height',100);
+		rect.setAttribute('fill','lemonchiffon');
+		rect.setAttribute('stroke','saddlebrown');
+		windowGroup.appendChild(rect);
+		var foreignObject = document.createElementNS('http://www.w3.org/2000/svg','foreignObject');
+		windowGroup.appendChild(foreignObject);
+		foreignObject.id = 'gameModalWindow';
+		foreignObject.setAttribute('x',-70);
+		foreignObject.setAttribute('y',-25);
+		foreignObject.setAttribute('width',140);
+		foreignObject.setAttribute('height',75);
+		foreignObject.appendChild(contents);
+		var fadeIn = document.createElementNS('http://www.w3.org/2000/svg','animate');
+		fadeIn.setAttribute('attributeType','XML');
+		fadeIn.setAttribute('attributeName','opacity');
+		fadeIn.setAttribute('from',0);
+		fadeIn.setAttribute('to',1);
+		fadeIn.setAttribute('dur','0.25s');
+		fadeIn.setAttribute('fill','freeze');
+		fadeIn.setAttribute('begin','indefinite');
+		windowGroup.appendChild(fadeIn);
+		fadeIn.beginElement();
+		setTimeout(view.pauseAnimations,1000);
+		var x = 35;
+		for (var button of buttonArray) {
+			var buttonGroup = view.buildButton(button.label,x,35);
+			windowGroup.appendChild(buttonGroup);
+			buttonGroup.addEventListener('click',button.execute);
+		};
+	},
+	
+	pauseAnimations: function() {
+		game.clock.paused = true;
+		document.getElementById('gameSVG').pauseAnimations();
+	},
+	
+	dismissWindow: function() {
+		document.getElementById('alertsGroup').innerHTML = '';
+		game.clock.paused = false;
+		game.clock.go();
+		document.getElementById('gameSVG').unpauseAnimations();
 	},
 
 };

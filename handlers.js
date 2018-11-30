@@ -200,6 +200,10 @@ var handlers = {
 		};
 
 	},
+	
+	doEvent: function(event) {
+		events[event.eventKey].execute(event);
+	},
 
 }
 
