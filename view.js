@@ -12,6 +12,7 @@ var view = {
 		tab3: 'minimized',
 		tab4: 'minimized',
 		selectedComponent: undefined,
+		course: undefined,
 	},
 	
 	r2d: function(radians) {
@@ -1036,8 +1037,8 @@ var view = {
 		rumbleAnimation.setAttribute('attributeType','XML');
 		rumbleAnimation.setAttribute('type','rotate');
 		rumbleAnimation.setAttribute('from','0');
-		rumbleAnimation.setAttribute('to','2');
-		rumbleAnimation.setAttribute('dur','0.01s');
+		rumbleAnimation.setAttribute('to','1');
+		rumbleAnimation.setAttribute('dur','0.1s');
 		rumbleAnimation.setAttribute('begin','indefinite');
 		var rumbleAnimation = document.createElementNS('http://www.w3.org/2000/svg','animateTransform');
 		rumbleGroup.appendChild(rumbleAnimation);
@@ -1045,10 +1046,30 @@ var view = {
 		rumbleAnimation.setAttribute('attributeName','transform');
 		rumbleAnimation.setAttribute('attributeType','XML');
 		rumbleAnimation.setAttribute('type','rotate');
-		rumbleAnimation.setAttribute('from','2');
+		rumbleAnimation.setAttribute('from','1');
 		rumbleAnimation.setAttribute('to','0');
-		rumbleAnimation.setAttribute('dur','0.01s');
+		rumbleAnimation.setAttribute('dur','0.1s');
 		rumbleAnimation.setAttribute('begin','rumbleAnimation.end');
+		var rumbleAnimation = document.createElementNS('http://www.w3.org/2000/svg','animateTransform');
+		rumbleGroup.appendChild(rumbleAnimation);
+		rumbleAnimation.id = 'rumbleAnimation3';
+		rumbleAnimation.setAttribute('attributeName','transform');
+		rumbleAnimation.setAttribute('attributeType','XML');
+		rumbleAnimation.setAttribute('type','rotate');
+		rumbleAnimation.setAttribute('from','0');
+		rumbleAnimation.setAttribute('to','1');
+		rumbleAnimation.setAttribute('dur','0.1s');
+		rumbleAnimation.setAttribute('begin','rumbleAnimation2.end');
+		var rumbleAnimation = document.createElementNS('http://www.w3.org/2000/svg','animateTransform');
+		rumbleGroup.appendChild(rumbleAnimation);
+		rumbleAnimation.id = 'rumbleAnimation4';
+		rumbleAnimation.setAttribute('attributeName','transform');
+		rumbleAnimation.setAttribute('attributeType','XML');
+		rumbleAnimation.setAttribute('type','rotate');
+		rumbleAnimation.setAttribute('from','1');
+		rumbleAnimation.setAttribute('to','0');
+		rumbleAnimation.setAttribute('dur','0.1s');
+		rumbleAnimation.setAttribute('begin','rumbleAnimation3.end');
 		
 		var navMarkersGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
 		navMarkersGroup.id = 'navMarkersGroup';
@@ -1058,7 +1079,6 @@ var view = {
 		controlsGroup.id = 'controlsGroup';
 		rumbleGroup.appendChild(controlsGroup);
 		var hideAnimation = document.createElementNS('http://www.w3.org/2000/svg','animateTransform');
-		controlsGroup.appendChild(hideAnimation);
 		hideAnimation.id = 'controlsHideAnimation';
 		hideAnimation.setAttribute('attributeName','transform');
 		hideAnimation.setAttribute('attributeType','XML');
@@ -1068,8 +1088,8 @@ var view = {
 		hideAnimation.setAttribute('dur','1s');
 		hideAnimation.setAttribute('begin','indefinite');
 		hideAnimation.setAttribute('fill','freeze');
+		controlsGroup.appendChild(hideAnimation);
 		var revealAnimation = document.createElementNS('http://www.w3.org/2000/svg','animateTransform');
-		controlsGroup.appendChild(revealAnimation);
 		revealAnimation.id = 'controlsRevealAnimation';
 		revealAnimation.setAttribute('attributeName','transform');
 		revealAnimation.setAttribute('attributeType','XML');
@@ -1079,6 +1099,7 @@ var view = {
 		revealAnimation.setAttribute('dur','1s');
 		revealAnimation.setAttribute('begin','indefinite');
 		revealAnimation.setAttribute('fill','freeze');
+		controlsGroup.appendChild(revealAnimation);
 		
 		var eotGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
 		controlsGroup.appendChild(eotGroup);
@@ -1192,6 +1213,7 @@ var view = {
 		var mapGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
 		rumbleGroup.appendChild(mapGroup);
 		mapGroup.id = 'mapGroup';
+		mapGroup.addEventListener('click',handlers.toggleMapPane);
 		var mapBoard = document.createElementNS('http://www.w3.org/2000/svg','rect')
 		mapGroup.appendChild(mapBoard);
 		mapBoard.setAttribute('fill','saddlebrown');
@@ -1791,14 +1813,6 @@ var view = {
 		var div = document.createElement('div');
 		foreignObject.appendChild(div);
 		div.id = 'rumorsDiv';
-		var headerP = document.createElement('p');
-		div.appendChild(headerP);
-		headerP.innerHTML = "Once tongues are lubricated, the talk begins to flow:";
-		for (var i=0;i<4;i++) {
-			var rumorP = document.createElement('p');
-			div.appendChild(rumorP);
-			rumorP.innerHTML = game.rumor();
-		};
 		
 		var rumorCover = document.createElementNS('http://www.w3.org/2000/svg','rect');
 		paneGroup.appendChild(rumorCover);
@@ -1845,6 +1859,7 @@ var view = {
 		mugUse.setAttribute('y',43);
 		var buyRoundRise = document.createElementNS('http://www.w3.org/2000/svg','animateTransform');
 		buyRoundButton.appendChild(buyRoundRise);
+		buyRoundRise.id = 'buyRoundRise';
 		buyRoundRise.setAttribute('attributeType','XML');
 		buyRoundRise.setAttribute('attributeName','transform');
 		buyRoundRise.setAttribute('type','translate');
@@ -1852,10 +1867,11 @@ var view = {
 		buyRoundRise.setAttribute('to','0 -71');
 		buyRoundRise.setAttribute('dur',0.7);
 		buyRoundRise.setAttribute('fill','freeze');
-		buyRoundRise.setAttribute('begin','rumorCoverRollup.begin');
+		buyRoundRise.setAttribute('begin','indefinite');
 		buyRoundButton.addEventListener('click',handlers.firstRound);
 		var mugTip = document.createElementNS('http://www.w3.org/2000/svg','animateTransform');
 		mugUse.appendChild(mugTip);
+		mugTip.id = 'mugTip';
 		mugTip.setAttribute('attributeType','XML');
 		mugTip.setAttribute('attributeName','transform');
 		mugTip.setAttribute('type','rotate');
@@ -1863,7 +1879,7 @@ var view = {
 		mugTip.setAttribute('to','30 -74 43');
 		mugTip.setAttribute('dur',0.7);
 		mugTip.setAttribute('fill','freeze');
-		mugTip.setAttribute('begin','rumorCoverRollup.begin');
+		mugTip.setAttribute('begin','indefinite');
 		
 		var recruitGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
 		paneGroup.appendChild(recruitGroup);
@@ -1892,7 +1908,26 @@ var view = {
 		var recruitButton = view.buildButton('Recruit',50,38);
 		recruitGroup.appendChild(recruitButton);
 		
+		view.panes.rumorsRevealed = false;
+		
 		return paneGroup;
+	},
+	
+	revealRumors: function() {
+		var rumorsDiv = document.getElementById('rumorsDiv');
+		rumorsDiv.innerHTML = '';
+		var headerP = document.createElement('p');
+		rumorsDiv.appendChild(headerP);
+		headerP.innerHTML = "Once tongues are lubricated, talk begins to flow:";
+		for (var i=0;i<4;i++) {
+			var rumorP = document.createElement('p');
+			rumorsDiv.appendChild(rumorP);
+			rumorP.innerHTML = game.rumor();
+		};
+		document.getElementById('rumorCoverRollup').beginElement();
+		document.getElementById('buyRoundRise').beginElement();
+		document.getElementById('mugTip').beginElement();
+		view.panes.rumorsRevealed = true;
 	},
 	
 	buildWharfUI: function(wharf) {
@@ -2307,7 +2342,7 @@ var view = {
 		moveButton.addEventListener('click',handlers.moveComponent);
 		var paintButton = view.buildButton('Paint',58,-13,20,0.5);
 		buttonGroup.appendChild(paintButton);
-		paintButton.addEventListener('click',handlers.paintComponent);
+		paintButton.addEventListener('click',view.revealPaintColors);
 		var sellButton = view.buildButton('Sell',70,-13,20,0.5);
 		buttonGroup.appendChild(sellButton);
 		sellButton.addEventListener('click',handlers.sellComponent);
@@ -2411,6 +2446,96 @@ var view = {
 			row++;
 		};
 		
+		// Paint Palette
+		
+		var paintGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+		paneGroup.appendChild(paintGroup);
+		paintGroup.id = 'paintPalette';
+		paintGroup.setAttribute('opacity',0);
+		paintGroup.setAttribute('visibility','hidden');
+		var paintFade = document.createElementNS('http://www.w3.org/2000/svg','animate');
+		paintFade.id = 'paintFade';
+		paintFade.setAttribute('attributeName','opacity');
+		paintFade.setAttribute('attributeType','XML');
+		paintFade.setAttribute('from','1');
+		paintFade.setAttribute('to','0');
+		paintFade.setAttribute('dur','0.5s');
+		paintFade.setAttribute('begin','indefinite');
+		paintFade.setAttribute('fill','freeze');
+		paintGroup.appendChild(paintFade);
+		var paintReveal = document.createElementNS('http://www.w3.org/2000/svg','animate');
+		paintReveal.id = 'paintReveal';
+		paintReveal.setAttribute('attributeName','opacity');
+		paintReveal.setAttribute('attributeType','XML');
+		paintReveal.setAttribute('from','0');
+		paintReveal.setAttribute('to','1');
+		paintReveal.setAttribute('dur','0.5s');
+		paintReveal.setAttribute('begin','indefinite');
+		paintReveal.setAttribute('fill','freeze');
+		paintGroup.appendChild(paintReveal);
+
+		var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		paintGroup.appendChild(rect);
+		rect.setAttribute('x',33);
+		rect.setAttribute('y',-7.5);
+		rect.setAttribute('width',50);
+		rect.setAttribute('height',54);
+		rect.setAttribute('fill','lemonchiffon');
+		rect.setAttribute('stroke','none');
+		rect.setAttribute('stroke-width',0.5);
+		var text = document.createElementNS('http://www.w3.org/2000/svg','text');
+		paintGroup.appendChild(text);
+		text.setAttribute('x',33);
+		text.setAttribute('y',-4);
+		text.setAttribute('font-size',3);
+		text.innerHTML = 'Painting';
+		var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		paintGroup.appendChild(rect);
+		rect.setAttribute('x',33);
+		rect.setAttribute('y',-3);
+		rect.setAttribute('width',50);
+		rect.setAttribute('height',50);
+		rect.setAttribute('fill','lemonchiffon');
+		rect.setAttribute('stroke','goldenrod');
+		rect.setAttribute('stroke-width',0.5);
+		var column = 0;
+		var row = 0;
+		var x,y;
+		for (var color of game.colors) {
+			x = 39 + column * 7.5;
+			y = 9 + row * 10.25;
+			var ellipse = document.createElementNS('http://www.w3.org/2000/svg','ellipse');
+			paintGroup.appendChild(ellipse);
+			ellipse.setAttribute('cx',x);
+			ellipse.setAttribute('cy',y);
+			ellipse.setAttribute('rx',3);
+			ellipse.setAttribute('ry',4);
+			ellipse.setAttribute('transform','rotate(20 '+x+' '+y+')');
+			ellipse.setAttribute('fill',color);
+			ellipse.setAttribute('stroke','black');
+			ellipse.setAttribute('stroke-width',0.25);
+			ellipse.addEventListener('click',handlers.paintComponent.bind(this,color));
+			if (column > 4) {
+				column = 0;
+				row++;
+			} else {
+				column++;
+			};
+		};
+		var text = document.createElementNS('http://www.w3.org/2000/svg','text');
+		paintGroup.appendChild(text);
+		text.id = 'paintCostText';
+		text.setAttribute('x',36);
+		text.setAttribute('y',2);
+		text.setAttribute('font-size',2);
+		text.innerHTML = 'It costs $X to paint a hull.';
+		
+		var cancelButton = view.buildButton('Cancel',66.5,37.5,25,0.5);
+		paintGroup.appendChild(cancelButton);
+		cancelButton.addEventListener('click',view.hidePaintColors);
+		
+		// Readout
+		
 		var readoutGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
 		paneGroup.appendChild(readoutGroup);
 		readoutGroup.setAttribute('paint-order','stroke');
@@ -2511,6 +2636,7 @@ var view = {
 		var townTab2Content = document.getElementById('townTab2Content');
 		townTab2Content.innerHTML = '';
 		townTab2Content.appendChild(view.buildShipyardUI(game.p1ship.currentMap().town.amenities[2]));
+		view.filterShipyardTargets();
 	},
 	
 	displayComponent: function(component,x,y) {
@@ -2538,13 +2664,7 @@ var view = {
 			componentDisplay.setAttribute('transform','translate(49 -23.5)');
 			selectedComponentGroup.appendChild(componentDisplay);
 			var installed = false;
-			for (var slot in game.p1ship.components) {
-				if (game.p1ship.components[slot] == component) {
-					installed = true;
-				};
-			};
-			if (installed == false) {
-			};
+			document.getElementById('paintCostText').innerHTML = "It costs $"+component.paintCost+" to paint a "+component.type+".";
 		};
 		view.filterShipyardTargets();
 	},
@@ -2557,6 +2677,8 @@ var view = {
 		if (type == undefined) {
 			for (var slot in view.panes.shipyardTargets) {
 				if (game.p1ship.components[slot] !== undefined && game.p1ship.components[slot] == view.panes.selectedComponent) {
+					view.panes.shipyardTargets[slot].setAttribute('stroke','blue');
+				} else if (game.p1ship.components[slot].condition < 1) {
 					view.panes.shipyardTargets[slot].setAttribute('stroke','red');
 				} else {
 					view.panes.shipyardTargets[slot].setAttribute('stroke','cyan');
@@ -2582,6 +2704,18 @@ var view = {
 				};
 			};
 		};
+	},
+	
+	revealPaintColors: function() {
+		var component = view.panes.selectedComponent;
+		document.getElementById('paintCostText').innerHTML = "It costs $"+component.paintCost+" to paint a "+component.type+".";
+		document.getElementById('paintPalette').setAttribute('visibility','visible');
+		document.getElementById('paintReveal').beginElement();
+	},
+	
+	hidePaintColors: function() {
+		document.getElementById('paintFade').beginElement();
+		document.getElementById('paintPalette').setAttribute('visibility','hidden');
 	},
 	
 	buildHospitalUI: function(town) {
@@ -2750,11 +2884,26 @@ var view = {
 	updateNavMarkers: function() {
 		var navMarkersGroup = document.getElementById('navMarkersGroup');
 		navMarkersGroup.innerHTML = '';
-		var markers = [];
+		var markers = [], candidates = [];
+		if (view.panes.course !== undefined) {
+			var courseMarker = {
+				x: view.panes.course.x,
+				y: view.panes.course.y,
+				name: view.panes.course.name,
+				type: 'course',
+			};
+			candidates.push(courseMarker);
+		};
 		for (var town of game.townList) {
 			dist = Math.pow(Math.pow(game.p1ship.x - town.x,2)+Math.pow(game.p1ship.y - town.y,2),0.5);
 			if (dist < 500 && dist > 55) {
-				markers.push(town);
+				candidates.push(town);
+			};
+		};
+		for (var marker of candidates) {
+			dist = Math.pow(Math.pow(game.p1ship.x - marker.x,2)+Math.pow(game.p1ship.y - marker.y,2),0.5);
+			if (dist > 55) {
+				markers.push(marker);
 			};
 		};
 		var direction, dist, x, y;
@@ -2783,6 +2932,8 @@ var view = {
 				markerUse.setAttribute('fill','silver');
 				var opacity = (500 - dist)/500;
 				markerGroup.setAttribute('opacity',opacity);
+			} else if (marker.type == 'course') {
+				markerUse.setAttribute('fill','yellow');
 			};
 		};
 	},
@@ -2814,6 +2965,7 @@ var view = {
 					text.setAttribute('font-size',80);
 					text.setAttribute('text-anchor','middle');
 					text.innerHTML = map.town.name;
+					text.addEventListener('click',handlers.setCourse.bind(this,map.town));
 				};
 			};
 		};
@@ -2926,7 +3078,7 @@ var view = {
 	townToShip: function() {
 		for (var i=0;i<5;i++) {
 			if (view.panes['tab'+i] == 'maximized') {
-				view.toggleTownTab(i);
+				view.minimizeTownTab(i);
 			};
 		};
 		document.getElementById('controlsRevealAnimation').beginElement();
@@ -2934,17 +3086,37 @@ var view = {
 	},
 	
 	toggleTownTab: function(tabIndex) {
+		for (var i=0;i<5;i++) {
+			if (i !== parseInt(tabIndex) && document.getElementById('townTab'+i)) {
+				document.getElementById('tabsGroup').appendChild(document.getElementById('townTab'+i));
+				if (view.panes['tab'+i] == 'maximized') {
+					view.minimizeTownTab(i);
+				};
+			};
+		};
 		if (view.panes['tab'+tabIndex] == 'maximized') {
-			document.getElementById('townTab'+tabIndex+'HideAnimation').beginElement();
-			view.panes['tab'+tabIndex] = 'minimized';
+			view.minimizeTownTab(tabIndex);
 		} else {
-			document.getElementById('townTab'+tabIndex+'RevealAnimation').beginElement();
-			view.panes['tab'+tabIndex] = 'maximized';
+			view.maximizeTownTab(tabIndex);
 		};
 	},
 	
+	maximizeTownTab: function(tabIndex) {
+		if (game.p1ship.currentMap().town.amenities[tabIndex].name == "Shipyard") {
+			view.refreshShipyardUI();
+		};
+		document.getElementById('townTab'+tabIndex+'RevealAnimation').beginElement();
+		view.panes['tab'+tabIndex] = 'maximized';
+	},
+	
+	minimizeTownTab: function(tabIndex) {
+		document.getElementById('townTab'+tabIndex+'HideAnimation').beginElement();
+		view.panes['tab'+tabIndex] = 'minimized';
+	},
+	
 	rumble: function() {
-		document.getElementById('rumbleAnimation').beginElement();
+		var rumbleAnimation = document.getElementById('rumbleAnimation');
+		rumbleAnimation.beginElement();
 	},
 	
 	displayAlert: function(alert) {
@@ -3050,10 +3222,23 @@ var view = {
 		var statText = document.createElementNS('http://www.w3.org/2000/svg','text');
 		componentGroup.appendChild(statText);
 		statText.setAttribute('x',13);
-		statText.setAttribute('y',6.5);
+		statText.setAttribute('y',4.5);
 		statText.setAttribute('font-size',1.8);
 		statText.setAttribute('text-anchor','end');
-		statText.innerHTML = "$" + component.cost;
+		statText.innerHTML = "$" + Math.floor(component.cost*component.condition);
+		
+		if (component.condition < 1) {
+			var statText = document.createElementNS('http://www.w3.org/2000/svg','text');
+			componentGroup.appendChild(statText);
+			statText.setAttribute('x',13);
+			statText.setAttribute('y',6.5);
+			statText.setAttribute('font-size',1.8);
+			statText.setAttribute('text-anchor','end');
+			statText.setAttribute('fill','red');
+			statText.setAttribute('stroke','white');
+			statText.setAttribute('paint-order','stroke');
+			statText.innerHTML = "Repairs: $" + Math.ceil(component.cost*(1-component.condition));
+		}
 				
 		return componentGroup
 	},

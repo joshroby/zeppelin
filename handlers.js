@@ -40,6 +40,16 @@ var handlers = {
 		if (this.keyMap[32]) {handlers.pauseUnpause();};
 		var timedEvent = setTimeout(handlers.keyInput.bind(handlers),100);
 	},
+	
+	toggleMapPane: function() {
+		if (view.panes.minimap == 'minimized') {
+			view.maximizeMapPane();
+		};
+	},
+	
+	setCourse: function(town) {
+		view.panes.course = town;
+	},
 
 	soundtrackPlayPause: function() {
 		if (game.soundtrack.paused) {
@@ -77,9 +87,11 @@ var handlers = {
 	},
 	
 	firstRound: function() {
-		document.getElementById('rumorCoverRollup').beginElement()
-		game.p1ship.coin -= 10;
-		view.updatePurse(game);
+		if (view.panes.rumorsRevealed == false) {
+			view.revealRumors();
+			game.p1ship.coin -= 10;
+			view.updatePurse(game);
+		};
 	},
 	
 	recruitBuyDrink: function() {
@@ -142,7 +154,7 @@ var handlers = {
 	
 	repairComponent: function() {
 		view.filterShipyardTargets();
-		view.displayAlert("This component is already at 100% condition.");
+		game.p1ship.repair(view.panes.selectedComponent);
 	},
 	
 	moveComponent: function() {
@@ -151,9 +163,12 @@ var handlers = {
 		view.panes.moving = true;
 	},
 	
-	paintComponent: function() {
-		view.filterShipyardTargets();
-		view.displayAlert("Coming soon to a browser game near you!.");
+	paintComponent: function(color) {
+		if (view.panes.selectedComponent.paintCost <= game.p1ship.coin) {
+			view.filterShipyardTargets();
+			game.p1ship.paintComponent(view.panes.selectedComponent,color);
+			view.refreshShipyardUI();
+		};
 	},
 	
 	sellComponent: function() {
@@ -161,6 +176,7 @@ var handlers = {
 		var component = view.panes.selectedComponent;
 		game.p1ship.sellComponent(component);
 		view.panes.moving = false;
+		view.panes.selectedComponent = undefined;
 	},
 	
 	buyComponent: function(component) {
@@ -168,7 +184,6 @@ var handlers = {
 		for (var slot in game.p1ship.components) {
 			if (view.panes.selectedComponent !== undefined && game.p1ship.components[slot] == view.panes.selectedComponent) {
 				selectedComponentInstalled = true;
-				console.log(slot);
 			};
 		};
 		if (selectedComponentInstalled == true || view.panes.selectedComponent == undefined) {

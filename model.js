@@ -74,27 +74,53 @@ function Game() {
 	};
 	
 	this.rumor = function() {
+		var rumors = [];
+		// Town Rumors
 		var town = this.townList[this.townList.length * Math.random() << 0];
 		var greatestDemand = 0, demandedCommodity;
 		var leastDemand = Infinity, surplusCommodity;
 		for (var commodityKey in town.amenities[1].localWares) {
-			if (town.amenities[1].localWares[commodityKey].demand > greatestDemand) {
-				greatestDemand = town.amenities[1].localWares[commodityKey].demand;
-				demandedCommodity = commodityKey;
-			};
-			if (town.amenities[1].localWares[commodityKey].demand < leastDemand) {
-				leastDemand = town.amenities[1].localWares[commodityKey].demand;
-				surplusCommodity = commodityKey;
+			if (commodityKey !== 'charge') {
+				if (town.amenities[1].localWares[commodityKey].demand > greatestDemand) {
+					greatestDemand = town.amenities[1].localWares[commodityKey].demand;
+					demandedCommodity = commodityKey;
+				};
+				if (town.amenities[1].localWares[commodityKey].demand < leastDemand) {
+					leastDemand = town.amenities[1].localWares[commodityKey].demand;
+					surplusCommodity = commodityKey;
+				};
 			};
 		};
-		var rumors = [];
 		rumors.push(town.name + ' harbors a great demand for ' + game.commodities[demandedCommodity].displayName + '.');
 		rumors.push(town.name + ' is overflowing with a surplus of ' + game.commodities[surplusCommodity].displayName + '.');
+		
+		// Commodity Rumors
+		var mostCommodity, greatestQty = 0;
+		for (commodityKey in game.p1ship.cargo) {
+			if (game.p1ship.cargo[commodityKey] > greatestQty) {
+				greatestQty = game.p1ship.cargo[commodityKey];
+				mostCommodity = commodityKey;
+			};
+		};
+		if (mostCommodity !== undefined) {
+			var demandingTown, greatestDemand = 1;
+			for (var town of game.townList) {
+				if (town.amenities[1].localWares[mostCommodity].demand > greatestDemand) {
+					greatestDemand = town.amenities[1].localWares[mostCommodity].demand;
+					demandingTown = town;
+				};
+			};
+		};
+		if (demandingTown) {
+			rumors.push("Best market I know for "+game.commodities[mostCommodity].displayName+" is "+demandingTown.name+".");
+		};
+		
+		// Speaker
 		var adjectives = ['bedraggled','dashing','tipsy','gregarious','suspicious-looking','shady','prim','laughing','beautiful','plump','skinny','dreamy-eyed'];
 		var people = ['ship captain','street urchin','old biddy','bartender','waiter','piano player','wharf worker','miner','farmer','pilot','quartermaster'];
 		var verbs = ['opines','shares','confides','insists','speculates'];
-		var opener = "A "+adjectives[Math.random() * adjectives.length << 0] + " " + people[people.length * Math.random() << 0] + " " + verbs[verbs.length * Math.random() << 0] + ": ";
-		return opener+'"'+rumors[rumors.length * Math.random() << 0]+'"';
+		var speaker = "A "+adjectives[Math.random() * adjectives.length << 0] + " " + people[people.length * Math.random() << 0] + " " + verbs[verbs.length * Math.random() << 0] + ": ";
+		return speaker+'"'+rumors[rumors.length * Math.random() << 0]+'"';
 	};
 	
 	// construction
@@ -117,6 +143,8 @@ function Game() {
 		weight: 0,
 		cost: this.commodities.fuel.cost,
 	};
+	
+	this.colors = ['gainsboro','lightgray','silver','darkgray','gray','dimgray','azure','aliceblue','powderblue','lightsteelblue','lightslategray','slategray','mintcream','ghostwhite','whitesmoke','ivory','beige','cornsilk','oldlace','wheat','burlywood','tan'];
 
 	this.clock = new Clock();
 	this.clock.tick = 100;
@@ -561,6 +589,15 @@ function SectionMap(x,y,game) {
 			adjectives = adjectives.concat(['Mount','Snow','Cold','Wind']);
 			townNouns = townNouns.concat([' Aerie',' Vista','view']);
 		};
+		var founder = new Crewmate();
+		if (Math.random() < 0.25) {
+			adjectives = [founder.name.split(' ')[0]];
+		} else if (Math.random() < 0.33) {
+			adjectives = ['','','','','','Great','Little'];
+			townNouns = [founder.name.split(' ')[1]];
+		} else if (Math.random() < 0.33) {
+			adjectives = [founder.name.split(' ')[1]];
+		};
 		this.town.name = adjectives[adjectives.length * Math.random() << 0]+townNouns[townNouns.length * Math.random() << 0];
 		game.townList.push(this.town);
 	};
@@ -660,7 +697,7 @@ function Ship(id,tier) {
 		fuel: 1,
 		food: 1,
 	};
-	this.coin = 1000;
+	this.coin = 500;
 	
 	this.crew = [];
 	for (var i=0;i<3;i++) {
@@ -680,6 +717,7 @@ function Ship(id,tier) {
 		this.components.hull0.stats.topSlots = 1;
 		this.components.hull0.stats.drag = 0.2;
 		this.components.hull0.stats.weight = 0.75;
+		this.components.hull0.length = 8;
 		
 		this.components.hull0int0 = new Component('gasbag',1);
 		this.components.hull0int0.stats.lift = 0.5;
@@ -795,6 +833,13 @@ function Ship(id,tier) {
 		view.updateWharfUI();
 	};
 	
+	this.paintComponent = function(component,color) {
+		component.color = color;
+		view.buildShipDef(this);
+		this.coin -= view.panes.selectedComponent.paintCost;
+		view.updatePurse(game);
+	};
+	
 	this.sellComponent = function(component) {
 		var slotKey;
 		var price = component.cost;
@@ -824,7 +869,7 @@ function Ship(id,tier) {
 		for (var slot in this.components) {
 			if (this.components[slot]) {
 				if (this.components[slot].stats[statName] !== undefined) {
-					total += this.components[slot].stats[statName];
+					total += this.components[slot].stats[statName] * this.components[slot].condition;
 				};
 				if (statName == 'thrust' && this.components[slot].stats.drag !== undefined) {
 					total = Math.max(total - this.components[slot].stats.drag,0);
@@ -995,6 +1040,9 @@ function Ship(id,tier) {
 					this.anchor.y = nosePoint.y;
 					this.anchor.d = 5;
 				};
+				if (this == game.p1ship && view.panes.course !== undefined && this.currentMap().town !== undefined && view.panes.course.x == this.currentMap().town.x && view.panes.course.y == this.currentMap().town.y) {
+					view.panes.course = undefined;
+				};
 			};
 		};
 	};
@@ -1010,6 +1058,29 @@ function Ship(id,tier) {
 	};
 	
 	this.stressDamage = function() {
+		if (Math.random() < 0.2) {
+			view.rumble();
+			var componentsArray = Object.keys(this.components);
+			var damagedComponent = componentsArray[componentsArray.length * Math.random() << 0];
+			this.components[damagedComponent].condition -= 0.01 * Math.random();
+			if (this.components[damagedComponent].condition < 0) {
+				view.displayAlert("We've lost the "+this.components[damagedComponent].name+"!");
+			};
+		};
+	};
+	
+	this.repair = function(component) {
+		var cost = Math.ceil(component.cost*(1-component.condition));
+		if (cost <= this.coin) {
+			component.condition = 1;
+			var airWrench = new Audio('audio/Air Wrench-SoundBible.com-111926242.mp3');
+			airWrench.play();
+			this.coin -= cost;
+			view.updatePurse();
+			view.refreshShipyardUI();
+		} else {
+			view.displayAlert("Repairing the "+component.name+" costs $"+cost+", and you only have $"+game.p1ship.coin+"!");
+		};
 	};
 	
 	this.outOfFuel = function() {
@@ -1054,7 +1125,9 @@ function Ship(id,tier) {
 			};
 			this.fuel = Math.max(0,this.fuel - fuelConsumption);
 			this.charge = Math.min(1,Math.max(0,this.charge - chargeConsumption + totalRecharge));
-			this.provisions = Math.min(1,Math.max(0,this.provisions + totalHarvest - this.crew.length * 0.00001));
+			if (this.moored == false) {
+				this.provisions = Math.min(1,Math.max(0,this.provisions + totalHarvest - this.crew.length * 0.00001));
+			};
 			view.updateGauges();
 			if (this.fuel <= 0) {this.outOfFuel()};
 			if (this.charge <= 0) {this.outOfCharge()};
@@ -1153,7 +1226,6 @@ function Ship(id,tier) {
 			view.updateNavMarkers();
 			if (this.eot > 1 || this.eot < -0.75 || this.airspeed.speed > this.getTopSpeed() ) {
 				this.stressDamage();
-				view.rumble();
 			};
 			this.checkMapUpdate();
 		};
@@ -1344,9 +1416,15 @@ function Crewmate() {
 }
 
 function Component(type,tier) {
+	var commonComponents = ['hull','engine','motor','gasbag','quarters','stabilizer','topDeck','fin','tailboom','cargobay'];
+	var rareComponents = ['keel','battery','solarPanels','garden','loader'];
+	var allComponents = commonComponents.concat(rareComponents.concat(commonComponents));
 	if (type == undefined) {
-		var types = ['keel','hull','engine','battery','motor','gasbag','quarters','stabilizer','solarPanels','topDeck','fin','tailboom','garden','cargobay','loader'];
-		type = types[types.length * Math.random() << 0];
+		type = allComponents[allComponents.length * Math.random() << 0];
+	} else if (type == 'common') {
+		type = commonComponents[commonComponents.length * Math.random() << 0];
+	} else if (type == 'rare') {
+		type = rareComponents[rareComponents.length * Math.random() << 0];
 	};
 	if (tier == undefined) {tier = 1 + Math.random() * 10 << 0};
 	this.name = 'Placeholder';
@@ -1365,91 +1443,91 @@ function Component(type,tier) {
 		this.slotType = 'keel';
 		stats.push('hulls','drag');
 		weight = 1;
-		cost = 1000;
+		cost = 2000;
 		nouns = ['Aluminum Keel','Duralumin Keel','Aerogel Keel','Graphene Keel','Aerographite Keel','Carbon Nanotube Keel','Diamond Nanothread Keel'];
 	} else if (type == 'hull') {
 		this.slotType = 'hull';
 		stats.push('internalSlots','externalSlots','topSlots','drag');
 		weight = 1.5;
-		cost = 1000;
+		cost = 2000;
 		nouns = ['Courier Hull','Ultralight Hull','Yacht Hull','Corvette Hull','Akron Hull','Argosy Hull','Workhorse Hull','Thunderhead Hull','Titan Hull','Colossus Hull'];
 	} else if (type == 'engine') {
 		this.slotType = 'int';
 		stats.push('thrust','fuelEfficiency');
 		weight = 1;
-		cost = 500;
+		cost = 1000;
 		nouns = ['Two-Piston Engine','Four-Piston Engine','Six-Piston Engine','Eight-Piston Engine','Rotary Engine'];
 	} else if (type == 'battery') {
 		this.slotType = 'int';
 		stats.push('thrust','chargeCapacity');
 		weight = 1;
-		cost = 500;
+		cost = 1000;
 		nouns = ['Nickel-Cadmium Battery','Lithium Ion Battery','Dual Carbon Battery','Germanium Air Battery','Molten Salt Battery','Polymer Battery','Flow Battery','Organic Radical Battery','Fuel Cell','Ultrabattery'];
 	} else if (type == 'motor') {
 		this.slotType = 'ext';
 		stats.push('thrust','turn','lift','drag');
 		weight = 0.8;
-		cost = 150;
+		cost = 300;
 		nouns = ['Prop','Contraprop','Proprotor','Ducted Fan','Turboprop','Turbojet','Turbofan','Propfan','Ramjet','Scramjet'];
 	} else if (type == 'gasbag') {
 		this.slotType = 'int';
 		stats.push('lift');
 		weight = 0.1;
-		cost = 100;
+		cost = 200;
 		nouns = ['Tarbag','Rubberbag','Silk Bag','Spidersilk Bag'];
 	} else if (type == 'quarters') {
 		this.slotType = 'int';
 		stats.push('amenities');
 		weight = 0.5;
-		cost = 1000;
+		cost = 2000;
 		nouns = ['Bunks','Cells','Cabins','Suites'];
 	} else if (type == 'stabilizer') {
 		this.slotType = 'ext';
 		stats.push('stability','drag');
 		weight = 0.2;
-		cost = 50;
+		cost = 100;
 		nouns = ['Stabilizer','Trimfin','Canard'];
 	} else if (type == 'solarPanels') {
 		this.slotType = 'top';
 		stats.push('recharge');
 		weight = 0.2;
-		cost = 1000;
+		cost = 2000;
 		nouns = ['Charge Panels','Solar Collectors','Solar Plant'];
 	} else if (type == 'topDeck') {
 		this.slotType = 'top';
 		stats.push('amenities');
 		weight = 0.1;
-		cost = 100;
+		cost = 300;
 		nouns = ['Deck','Observation Dome'];
 	} else if (type == 'fin') {
 		this.slotType = 'top';
 		stats.push('stability','drag');
 		weight = 0.2;
-		cost = 50;
+		cost = 100;
 		nouns = ['Fin','Rudder','Dorsal'];
 	} else if (type == 'tailboom') {
 		this.slotType = 'top';
 		stats.push('lift','stability','drag');
 		weight = 0.3;
-		cost = 150;
+		cost = 300;
 		nouns = ['Tailboom'];
 	} else if (type == 'garden') {
 		this.slotType = 'top';
 		stats.push('harvest','amenities','drag');
 		weight = 0.5;
-		cost = 150;
+		cost = 300;
 		nouns = ['Garden','Greenhouse','Hothouse','Terrace','Park'];
 	} else if (type == 'cargobay') {
 		this.slotType = 'int';
 		stats.push('cargo','loadTime');
 		weight = 0.1;
-		cost = 100;
+		cost = 500;
 		nouns = ['Cargo Bay'];
 	} else if (type == 'loader') {
 		this.slotType = 'int';
 		stats.push('cargo','loadTime');
 		weight = 0.1;
-		cost = 50;
+		cost = 100;
 		nouns = ['Winch','Crane'];
 	};
 	stats.push('weight');
@@ -1487,6 +1565,8 @@ function Component(type,tier) {
 	this.name = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.charAt((tier-1)*2.6+Math.random()*2.6 << 0);
 	this.name += '-'+Math.ceil(Math.random()*100)+' ';
 	this.name += nouns[nouns.length*(tier-1)/10 << 0];
+	
+	this.paintCost = cost;
 	
 	value /= stats.length;
 	value /= tier;
