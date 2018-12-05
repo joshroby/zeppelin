@@ -11,6 +11,7 @@ var view = {
 		tab2: 'minimized',
 		tab3: 'minimized',
 		tab4: 'minimized',
+		crew: 'minimized',
 		selectedComponent: undefined,
 		course: undefined,
 	},
@@ -55,52 +56,7 @@ var view = {
 		hex.setAttribute('points','0,100 87.5,50 87.5,-50 0,-100 -87.5,-50 -87.5,50');
 		hex.setAttribute('transform','scale(2.01)');
 		
-		// Ship Defs
-
-		var defaultShip = document.createElementNS('http://www.w3.org/2000/svg','g')
-		defs.appendChild(defaultShip);
-		defaultShip.id = 'defaultShip';
-		defaultShip.setAttribute('stroke-width',0.25);
-		var ellipse = document.createElementNS('http://www.w3.org/2000/svg','ellipse');
-		ellipse.setAttribute('cx',0);
-		ellipse.setAttribute('cy',0);
-		ellipse.setAttribute('rx',0.75);
-		ellipse.setAttribute('ry',2);
-		ellipse.setAttribute('fill','inherit');
-		ellipse.setAttribute('stroke','black');
-		defaultShip.appendChild(ellipse);
-		var tailboom = document.createElementNS('http://www.w3.org/2000/svg','polygon');
-		var points = "0,1 1.725,1.5 1.75,2.125 0,2 -1.75,2.125 -1.725,1.5";
-		tailboom.setAttribute('points',points);
-		tailboom.setAttribute('fill','inherit');
-		tailboom.setAttribute('stroke','black');
-		defaultShip.appendChild(tailboom);	
-		var ellipse = document.createElementNS('http://www.w3.org/2000/svg','ellipse');
-		ellipse.setAttribute('cx',1);
-		ellipse.setAttribute('cy',1.5);
-		ellipse.setAttribute('rx',0.25);
-		ellipse.setAttribute('ry',0.75);
-		ellipse.setAttribute('fill','inherit');
-		ellipse.setAttribute('stroke','black');
-		defaultShip.appendChild(ellipse);
-		var ellipse = document.createElementNS('http://www.w3.org/2000/svg','ellipse');
-		ellipse.setAttribute('cx',-1);
-		ellipse.setAttribute('cy',1.5);
-		ellipse.setAttribute('rx',0.25);
-		ellipse.setAttribute('ry',0.75);
-		ellipse.setAttribute('fill','inherit');
-		ellipse.setAttribute('stroke','black');
-		defaultShip.appendChild(ellipse);
-
-		var hull = document.createElementNS('http://www.w3.org/2000/svg','ellipse');
-		hull.id = 'hull_t1';
-		hull.setAttribute('cx',0);
-		hull.setAttribute('cy',0);
-		hull.setAttribute('rx',0.75);
-		hull.setAttribute('ry',2);
-		hull.setAttribute('fill','inherit');
-		hull.setAttribute('stroke','black');
-		defaultShip.appendChild(hull);
+		// Component Defs
 		
 		var stabilizer = document.createElementNS('http://www.w3.org/2000/svg','polygon');
 		stabilizer.id = 'stabilizer_t1';
@@ -593,6 +549,31 @@ var view = {
 			circle.setAttribute('stroke',bubble.stroke);
 		};
 		
+		var heart = document.createElementNS('http://www.w3.org/2000/svg','g');
+		defs.appendChild(heart);
+		heart.id = 'UIheart';
+		var path = document.createElementNS('http://www.w3.org/2000/svg','path');
+		heart.appendChild(path);
+		var d = 'M 0,4 C 1,3 4,1.1 4,0 C 4,-1.1 3.1,-2 2,-2 C 0.9,-2 0,-1.1 0,0 C 0,-1.1 -0.9,-2 -2,-2 C -3.1,-2 -4,-1.1 -4,0 C -4,1.1 -1,3 0,4 Z';
+		path.setAttribute('d',d);
+		heart.setAttribute('transform','translate(0,-1.25)');
+		
+		var xp = document.createElementNS('http://www.w3.org/2000/svg','g');
+		defs.appendChild(xp);
+		xp.id = 'UIxp';
+		xp.setAttribute('stroke-width',0.25);
+		var circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+		xp.appendChild(circle);
+		circle.setAttribute('r',3);
+		circle.setAttribute('fill','limegreen');
+		circle.setAttribute('stroke','black');
+		var path = document.createElementNS('http://www.w3.org/2000/svg','path');
+		xp.appendChild(path);
+		path.setAttribute('fill','white');
+		path.setAttribute('stroke','black');
+		path.setAttribute('d','M0,-2 L2,0 L1,0 L1,2 L-1,2 L-1,0 L-2,0 Z');
+		path.setAttribute('stroke-linejoin','round');
+		
 		var defaultEventIcon = document.createElementNS('http://www.w3.org/2000/svg','g');
 		defs.appendChild(defaultEventIcon);
 		defaultEventIcon.id = 'defaultEventIcon';
@@ -605,7 +586,21 @@ var view = {
 		text.setAttribute('paint-order','stroke');
 		text.setAttribute('text-anchor','middle');
 		text.setAttribute('font-size',6);
-		text.innerHTML = "!!";
+		text.innerHTML = "!";
+		
+		var helpEventIcon = document.createElementNS('http://www.w3.org/2000/svg','g');
+		defs.appendChild(helpEventIcon);
+		helpEventIcon.id = 'helpEventIcon';
+		var text = document.createElementNS('http://www.w3.org/2000/svg','text');
+		helpEventIcon.appendChild(text);
+		text.setAttribute('y',2);
+		text.setAttribute('x',0);
+		text.setAttribute('fill','red');
+		text.setAttribute('stroke','black');
+		text.setAttribute('paint-order','stroke');
+		text.setAttribute('text-anchor','middle');
+		text.setAttribute('font-size',6);
+		text.innerHTML = "?";
 		
 
 		// Layers
@@ -625,6 +620,10 @@ var view = {
 		uiGroup.id = 'uiGroup';
 		svg.appendChild(uiGroup);
 		
+		var alertsGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+		svg.appendChild(alertsGroup);
+		alertsGroup.id = 'alertsGroup';
+		
 		// Title Screen
 		
 		var text = document.createElementNS('http://www.w3.org/2000/svg','text');
@@ -632,8 +631,35 @@ var view = {
 		text.innerHTML = "Zeppel Endless";
 		text.setAttribute('text-anchor','middle');
 		
+		var newGameButton = view.buildButton('New Game',-33,10,30,0.5);
+		titleGroup.appendChild(newGameButton);
+		newGameButton.addEventListener('click',handlers.newGame);
+		
+		var loadGameButton = view.buildButton('Load Game',-16,10,30,0.5);
+		titleGroup.appendChild(loadGameButton);
+		loadGameButton.setAttribute('opacity',0.5);
+// 		loadGameButton.addEventListener('click',handlers.newGame);
+		
+		var helpButton = view.buildButton('Controls',1,10,30,0.5);
+		titleGroup.appendChild(helpButton);
+		helpButton.addEventListener('click',events.help.execute);
+		
+		var supportButton = view.buildButton('Support',18,10,30,0.5);
+		titleGroup.appendChild(supportButton);
+		supportButton.addEventListener('click',view.patreon);
+		
+		// Controls
+		
+		svgDiv.addEventListener('mousedown',handlers.mouseDown);
+		svgDiv.addEventListener('mouseup',handlers.mouseUp);
+		
 		return [svgDiv];
 	},
+	
+	patreon: function() {
+		window.open('http://patreon.com/joshroby');
+	},
+
 	
 	getHullCenters: function(ship) {
 		var hullCenters;
@@ -1118,6 +1144,7 @@ var view = {
 		
 		var eotGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
 		controlsGroup.appendChild(eotGroup);
+		var eotControlsGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
 		eotGroup.setAttribute('transform','translate(-1.9 -0.5) rotate(2 100 62)');
 		var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
 		rect.setAttribute('x',83.5);
@@ -1139,8 +1166,6 @@ var view = {
 		eotGroup.appendChild(rect);
 		var speedNames = ['Flank Speed','Full Ahead','Half Ahead','Slow Ahead','Full Stop','Slow Astern','Half Astern','Full Astern'];
 		for (var i=0;i<speedNames.length;i++) {
-			var speedGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
-			eotGroup.appendChild(speedGroup);
 			var text = document.createElementNS('http://www.w3.org/2000/svg','text');
 			text.setAttribute('x',93);
 			text.setAttribute('y',7 + i*7);
@@ -1148,7 +1173,18 @@ var view = {
 			text.setAttribute('paint-order','stroke');
 			text.setAttribute('text-anchor','middle');
 			text.innerHTML = speedNames[i];
-			speedGroup.appendChild(text);
+			eotGroup.appendChild(text);
+			var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+			rect.setAttribute('x',83);
+			rect.setAttribute('y',2 + i*7);
+			rect.setAttribute('width',20);
+			rect.setAttribute('height',7);
+			rect.setAttribute('fill','green');
+			rect.setAttribute('stroke','none');
+			rect.setAttribute('opacity',0);
+			rect.addEventListener('mouseenter',handlers.eotEnter.bind(this,i));
+			rect.addEventListener('mouseleave',handlers.eotLeave);
+			eotControlsGroup.appendChild(rect);
 		};
 		var eotBracket = document.createElementNS('http://www.w3.org/2000/svg','use');
 		eotBracket.id = 'uiEOTBracket';
@@ -1156,6 +1192,7 @@ var view = {
 		eotBracket.setAttribute('x',85);
 		eotBracket.setAttribute('y',34);
 		view.setHref(eotBracket,'eotBracket');
+		eotGroup.appendChild(eotControlsGroup);
 
 		var wheel = document.createElementNS('http://www.w3.org/2000/svg','use');
 		view.setHref(wheel,'shipsWheel');
@@ -1163,6 +1200,26 @@ var view = {
 		controlsGroup.appendChild(wheel);
 		wheel.setAttribute('y',62);
 		wheel.setAttribute('transform','translate(0 62) rotate('+view.r2d(ship.rudder)+') translate(0 -62)');
+		var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		controlsGroup.appendChild(rect);
+		rect.setAttribute('x',0);
+		rect.setAttribute('y',30);
+		rect.setAttribute('width',35);
+		rect.setAttribute('height',35);
+		rect.setAttribute('fill','lime');
+		rect.setAttribute('opacity',0);
+		rect.addEventListener('mouseenter',handlers.wheelEnter.bind(this,'right'));
+		rect.addEventListener('mouseleave',handlers.wheelLeave);
+		var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		controlsGroup.appendChild(rect);
+		rect.setAttribute('x',-35);
+		rect.setAttribute('y',30);
+		rect.setAttribute('width',35);
+		rect.setAttribute('height',35);
+		rect.setAttribute('fill','lime');
+		rect.setAttribute('opacity',0);
+		rect.addEventListener('mouseenter',handlers.wheelEnter.bind(this,'left'));
+		rect.addEventListener('mouseleave',handlers.wheelLeave);
 		
 		var airspeedCasingRect = document.createElementNS('http://www.w3.org/2000/svg','rect');
 		controlsGroup.appendChild(airspeedCasingRect);
@@ -1708,13 +1765,90 @@ var view = {
 		purseGroup.appendChild(text);
 		text.id = 'purseText';
 		
+		var crewGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+		uiGroup.appendChild(crewGroup);
+		crewGroup.id='crewGroup';
+		crewGroup.setAttribute('transform','translate(-120 0)');
+		var crewGroupReveal = document.createElementNS('http://www.w3.org/2000/svg','animateTransform');
+		crewGroupReveal.id = 'crewGroupReveal';
+		crewGroupReveal.setAttribute('attributeType','XML');
+		crewGroupReveal.setAttribute('attributeName','transform');
+		crewGroupReveal.setAttribute('type','translate');
+		crewGroupReveal.setAttribute('from','-120 0');
+		crewGroupReveal.setAttribute('to','0 0');
+		crewGroupReveal.setAttribute('dur','0.3s');
+		crewGroupReveal.setAttribute('begin','indefinite');
+		crewGroupReveal.setAttribute('fill','freeze');
+		crewGroup.appendChild(crewGroupReveal);
+		var crewGroupHide = document.createElementNS('http://www.w3.org/2000/svg','animateTransform');
+		crewGroupHide.id = 'crewGroupHide';
+		crewGroupHide.setAttribute('attributeType','XML');
+		crewGroupHide.setAttribute('attributeName','transform');
+		crewGroupHide.setAttribute('type','translate');
+		crewGroupHide.setAttribute('from','-0 0');
+		crewGroupHide.setAttribute('to','-120 0');
+		crewGroupHide.setAttribute('dur','0.3s');
+		crewGroupHide.setAttribute('begin','indefinite');
+		crewGroupHide.setAttribute('fill','freeze');
+		crewGroup.appendChild(crewGroupHide);
+		var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		crewGroup.appendChild(rect);
+		rect.setAttribute('x',-105);
+		rect.setAttribute('y',-50);
+		rect.setAttribute('width',120);
+		rect.setAttribute('height',100);
+		rect.setAttribute('fill','saddlebrown');
+		rect.setAttribute('stroke','black');
+		rect.setAttribute('stroke-width',0.5);
+		var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		crewGroup.appendChild(rect);
+		rect.setAttribute('x',12.5);
+		rect.setAttribute('y',-5);
+		rect.setAttribute('rx',0.5);
+		rect.setAttribute('ry',0.5);
+		rect.setAttribute('width',1);
+		rect.setAttribute('height',10);
+		rect.setAttribute('fill','black');
+		rect.setAttribute('stroke','black');
+		rect.setAttribute('stroke-width',0.5);
+		rect.setAttribute('opacity',0.5);
+		var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		crewGroup.appendChild(rect);
+		rect.setAttribute('x',10);
+		rect.setAttribute('y',-50);
+		rect.setAttribute('width',5);
+		rect.setAttribute('height',100);
+		rect.setAttribute('fill','lime');
+		rect.setAttribute('opacity',0);
+		rect.addEventListener('click',view.minimizeCrewPane);
+		var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		crewGroup.appendChild(rect);
+		rect.setAttribute('x',-50);
+		rect.setAttribute('y',-48);
+		rect.setAttribute('width',60);
+		rect.setAttribute('height',96);
+		rect.setAttribute('fill','lemonchiffon');
+		rect.setAttribute('stroke','black');
+		rect.setAttribute('stroke-width',0.5);
+		var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		crewGroup.appendChild(rect);
+		rect.setAttribute('x',-92);
+		rect.setAttribute('y',-48);
+		rect.setAttribute('width',40);
+		rect.setAttribute('height',96);
+		rect.setAttribute('fill','lemonchiffon');
+		rect.setAttribute('stroke','black');
+		rect.setAttribute('stroke-width',0.5);
+		var crewListGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+		crewGroup.appendChild(crewListGroup);
+		crewListGroup.id='crewListGroup';
+		var crewWindowGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+		crewGroup.appendChild(crewWindowGroup);
+		crewWindowGroup.id='crewWindowGroup';
+		
 		var eventsGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
 		uiGroup.appendChild(eventsGroup);
 		eventsGroup.id = 'eventsGroup';
-		
-		var alertsGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
-		uiGroup.appendChild(alertsGroup);
-		alertsGroup.id = 'alertsGroup';
 	},
 	
 	buildTownUI: function(town) {
@@ -1940,6 +2074,7 @@ var view = {
 		headerP.innerHTML = "Once tongues are lubricated, talk begins to flow:";
 		for (var i=0;i<4;i++) {
 			var rumorP = document.createElement('p');
+			rumorP.className = 'rumorP';
 			rumorsDiv.appendChild(rumorP);
 			rumorP.innerHTML = game.rumor();
 		};
@@ -2033,7 +2168,7 @@ var view = {
 				
 				var cost = game.localPrice(commodityKey);
 				var canAfford = game.p1ship.coin > cost;
-				var buyButton = view.buildButton('Buy for $'+cost,-28,-30 + 7.5 + row * 10,30,0.5);
+				var buyButton = view.buildButton('Buy for $'+Math.floor(cost*game.p1ship.discount('commodity')),-28,-30 + 7.5 + row * 10,30,0.5);
 				wareGroup.appendChild(buyButton);
 				if (canLoad && canAfford) {
 					buyButton.addEventListener('click',handlers.buyCommodity.bind(this,commodityKey));
@@ -2172,10 +2307,14 @@ var view = {
 				text.setAttribute('text-anchor','middle');
 				text.innerHTML = "Price";
 				
-				var cost = game.localPrice(commodityKey);
-				var sellButton = view.buildButton('Sell for $'+cost,62,-30 + 7.5 + row * 10,30,0.5);
-				wareGroup.appendChild(sellButton);
-				sellButton.addEventListener('click',handlers.sellCommodity.bind(this,commodityKey));
+				if (wharf.localWares[commodityKey].available > 0) {
+				} else {
+					var cost = game.localPrice(commodityKey);
+					var sellButton = view.buildButton('Sell for $'+cost,62,-30 + 7.5 + row * 10,30,0.5);
+					wareGroup.appendChild(sellButton);
+					sellButton.addEventListener('click',handlers.sellCommodity.bind(this,commodityKey));
+				};
+				
 			};
 		};
 		
@@ -2455,7 +2594,7 @@ var view = {
 			componentLabel.setAttribute('font-size',2);
 			componentLabel.innerHTML = component.name;
 			var buyPrice = Math.floor(component.cost);
-			var buyButton = view.buildButton('Buy for $'+buyPrice,65,-28 + 25 - 4 + (row+0.6)*rowHeight,30,0.5);
+			var buyButton = view.buildButton('Buy for $'+Math.floor(buyPrice*game.p1ship.discount('shipyard')),65,-28 + 25 - 4 + (row+0.6)*rowHeight,30,0.5);
 			componentGroup.appendChild(buyButton);
 			if (buyPrice > game.p1ship.coin) {
 				buyButton.setAttribute('opacity',0.5);
@@ -2575,7 +2714,7 @@ var view = {
 		readoutGroup.appendChild(liftReadout);
 		liftReadout.setAttribute('x',-60);
 		liftReadout.setAttribute('y',40);
-		liftReadout.innerHTML = Math.floor(100*ship.getStat('lift'))/100 + " (" + Math.floor(100*(ship.getStat('lift')+ship.getStat('weight')))/100 + " lift - "+Math.floor(100*ship.getStat('weight'))/100+" weight )";
+		liftReadout.innerHTML = Math.floor(100*ship.getStat('lift',false))/100 + " (" + Math.floor(100*(ship.getStat('lift',false)+ship.getStat('weight',false)))/100 + " lift - "+Math.floor(100*ship.getStat('weight',false))/100+" weight )";
 		
 		var spaceLabel = document.createElementNS('http://www.w3.org/2000/svg','text');
 		readoutGroup.appendChild(spaceLabel);
@@ -2588,7 +2727,7 @@ var view = {
 		readoutGroup.appendChild(spaceReadout);
 		spaceReadout.setAttribute('x',-60);
 		spaceReadout.setAttribute('y',43);
-		spaceReadout.innerHTML = Math.floor(ship.getStat('cargo')*10*100)/100 + ' Crates';
+		spaceReadout.innerHTML = Math.floor(ship.getStat('cargo',false)*10*100)/100 + ' Crates';
 		
 		var amenitiesLabel = document.createElementNS('http://www.w3.org/2000/svg','text');
 		readoutGroup.appendChild(amenitiesLabel);
@@ -2601,47 +2740,60 @@ var view = {
 		readoutGroup.appendChild(amenitiesReadout);
 		amenitiesReadout.setAttribute('x',-60);
 		amenitiesReadout.setAttribute('y',46);
-		amenitiesReadout.innerHTML = Math.floor(ship.getStat('amenities')*10*100)/100 + ' Stars';
+		amenitiesReadout.innerHTML = Math.floor(ship.getStat('amenities',false)*100)/100 + ' Stars';
 		
 		// Right Column
+		var profileLabel = document.createElementNS('http://www.w3.org/2000/svg','text');
+		readoutGroup.appendChild(profileLabel);
+		profileLabel.setAttribute('x',-7);
+		profileLabel.setAttribute('y',40);
+		profileLabel.setAttribute('text-anchor','end');
+		profileLabel.innerHTML = "Aero Profile: ";
+		
+		var profileReadout = document.createElementNS('http://www.w3.org/2000/svg','text');
+		readoutGroup.appendChild(profileReadout);
+		profileReadout.setAttribute('x',-5);
+		profileReadout.setAttribute('y',40);
+		profileReadout.innerHTML = Math.floor(ship.getStat('profile',false)*100)/100 + " (hull lengths summed)";
+
 		var thrustLabel = document.createElementNS('http://www.w3.org/2000/svg','text');
 		readoutGroup.appendChild(thrustLabel);
 		thrustLabel.setAttribute('x',-7);
-		thrustLabel.setAttribute('y',40);
+		thrustLabel.setAttribute('y',43);
 		thrustLabel.setAttribute('text-anchor','end');
 		thrustLabel.innerHTML = "Total Thrust: ";
 		
 		var thrustReadout = document.createElementNS('http://www.w3.org/2000/svg','text');
 		readoutGroup.appendChild(thrustReadout);
 		thrustReadout.setAttribute('x',-5);
-		thrustReadout.setAttribute('y',40);
-		thrustReadout.innerHTML = Math.floor(100*ship.getStat('thrust'))/100 + " (" + Math.floor(100*(ship.getStat('thrust')+ship.getStat('drag')))/100 + " thrust - "+Math.floor(100*ship.getStat('drag'))/100+" drag )";
+		thrustReadout.setAttribute('y',43);
+		thrustReadout.innerHTML = Math.floor(100*ship.getStat('thrust',false))/100 + " (" + Math.floor(100*(ship.getStat('thrust',false)+ship.getStat('drag',false)))/100 + " thrust - "+Math.floor(100*ship.getStat('drag',false))/100+" drag )";
 		
 		var turnLabel = document.createElementNS('http://www.w3.org/2000/svg','text');
 		readoutGroup.appendChild(turnLabel);
 		turnLabel.setAttribute('x',-7);
-		turnLabel.setAttribute('y',43);
+		turnLabel.setAttribute('y',46);
 		turnLabel.setAttribute('text-anchor','end');
 		turnLabel.innerHTML = "Total Turn: ";
 		
 		var turnReadout = document.createElementNS('http://www.w3.org/2000/svg','text');
 		readoutGroup.appendChild(turnReadout);
 		turnReadout.setAttribute('x',-5);
-		turnReadout.setAttribute('y',43);
-		turnReadout.innerHTML = Math.floor(100*ship.getStat('turn'))/100 + " (" + Math.floor(100*(ship.getStat('turn')+ship.getStat('drag')))/100 + " turn - "+Math.floor(100*ship.getStat('drag'))/100+" drag )";
+		turnReadout.setAttribute('y',46);
+		turnReadout.innerHTML = Math.floor(100*ship.getStat('turn'))/100 + " (" + Math.floor(100*(ship.getStat('turn',false)+ship.getStat('drag',false)))/100 + " turn - "+Math.floor(100*ship.getStat('drag',false))/100+" drag )";
 		
 		var stabilityLabel = document.createElementNS('http://www.w3.org/2000/svg','text');
 		readoutGroup.appendChild(stabilityLabel);
 		stabilityLabel.setAttribute('x',-7);
-		stabilityLabel.setAttribute('y',46);
+		stabilityLabel.setAttribute('y',49);
 		stabilityLabel.setAttribute('text-anchor','end');
-		stabilityLabel.innerHTML = "Stability: ";
+		stabilityLabel.innerHTML = "Wind Effect: ";
 		
 		var stabilityReadout = document.createElementNS('http://www.w3.org/2000/svg','text');
 		readoutGroup.appendChild(stabilityReadout);
 		stabilityReadout.setAttribute('x',-5);
-		stabilityReadout.setAttribute('y',46);
-		stabilityReadout.innerHTML = Math.floor(100*ship.getStat('stability'))/100;
+		stabilityReadout.setAttribute('y',49);
+		stabilityReadout.innerHTML = "x" + Math.max(0,Math.floor((ship.getStat('profile',false)-ship.getStat('stability',false))*100)/100) + " ("+Math.floor(100*ship.getStat('profile',false))/100+" profile - "+Math.floor(100*ship.getStat('stability',false))/100+" stability)";
 
 		var floatGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
 		floatGroup.id = 'shipyardFloatGroup';
@@ -2697,7 +2849,7 @@ var view = {
 			for (var slot in view.panes.shipyardTargets) {
 				if (game.p1ship.components[slot] !== undefined && game.p1ship.components[slot] == view.panes.selectedComponent) {
 					view.panes.shipyardTargets[slot].setAttribute('stroke','blue');
-				} else if (game.p1ship.components[slot].condition < 1) {
+				} else if (game.p1ship.components[slot] !== undefined && game.p1ship.components[slot].condition < 1) {
 					view.panes.shipyardTargets[slot].setAttribute('stroke','red');
 				} else {
 					view.panes.shipyardTargets[slot].setAttribute('stroke','cyan');
@@ -2770,13 +2922,25 @@ var view = {
 		rect.setAttribute('height',10);
 		rect.setAttribute('fill','goldenrod');
 		rect.setAttribute('stroke','black');
-		var text = document.createElementNS('http://www.w3.org/2000/svg','text');
-		buttonGroup.appendChild(text);
-		text.setAttribute('x',x+width/2);
-		text.setAttribute('y',y+6);
-		text.setAttribute('font-size',3.5);
-		text.setAttribute('text-anchor','middle');
-		text.innerHTML = label;
+		if (typeof label == 'string') {
+			var text = document.createElementNS('http://www.w3.org/2000/svg','text');
+			buttonGroup.appendChild(text);
+			text.setAttribute('x',x+width/2);
+			text.setAttribute('y',y+6);
+			text.setAttribute('font-size',3.5);
+			text.setAttribute('text-anchor','middle');
+			text.innerHTML = label;
+		} else {
+			for (var i=0;i<label.length;i++) {
+				var text = document.createElementNS('http://www.w3.org/2000/svg','text');
+				buttonGroup.appendChild(text);
+				text.setAttribute('x',x+width/2);
+				text.setAttribute('y',y+4.5 + i * 7 / label.length);
+				text.setAttribute('font-size',3.5);
+				text.setAttribute('text-anchor','middle');
+				text.innerHTML = label[i];
+			};
+		};
 		if (size !== undefined) {
 			buttonGroup.setAttribute('transform','translate('+x+' '+y+') scale('+size+') translate('+(x*-1)+' '+(y*-1)+')');
 		};
@@ -2973,16 +3137,21 @@ var view = {
 				mapTileGroup.appendChild(mapTileUse);
 				if (map.town !== undefined) {
 					var circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
-					mapLegendsGroup.appendChild(circle);
+					mapTileGroup.appendChild(circle);
 					circle.setAttribute('cx',map.town.x);
 					circle.setAttribute('cy',map.town.y);
 					circle.setAttribute('r',20);
+					circle.setAttribute('stroke','white');
+					circle.setAttribute('stroke-width',15);
 					var text = document.createElementNS('http://www.w3.org/2000/svg','text');
 					mapLegendsGroup.appendChild(text);
 					text.setAttribute('x',map.town.x);
 					text.setAttribute('y',map.town.y+80);
 					text.setAttribute('font-size',80);
 					text.setAttribute('text-anchor','middle');
+					text.setAttribute('stroke','white');
+					text.setAttribute('stroke-width',15);
+					text.setAttribute('paint-order','stroke');
 					text.innerHTML = map.town.name;
 					text.addEventListener('click',handlers.setCourse.bind(this,map.town));
 				};
@@ -3001,6 +3170,9 @@ var view = {
 		
 		var uiGroup = document.getElementById('uiGroup');
 		uiGroup.setAttribute('transform','translate('+(center.x)+" "+(center.y)+')');
+		
+		var alertsGroup = document.getElementById('alertsGroup');
+		alertsGroup.setAttribute('transform','translate('+(center.x)+" "+(center.y)+')');
 	},
 	
 	displayMooring: function(tower) {
@@ -3062,24 +3234,21 @@ var view = {
 			view.maximizeMapPane();
 		} else if (view.panes.minimap == 'maximized') {
 			view.minimizeMapPane();
-		} else {
-			view.panes.minimap = 'minimized';
-			view.fadeMapPane();
 		};
 	},
 	
 	maximizeMapPane: function() {
-			document.getElementById('mapLegendsGroup').setAttribute('opacity',1);
-			document.getElementById('maximizeMap').beginElement();
-			document.getElementById('maximizeMapSlide').beginElement();
-			view.panes.minimap = 'maximized';
+		document.getElementById('mapLegendsGroup').setAttribute('opacity',1);
+		document.getElementById('maximizeMap').beginElement();
+		document.getElementById('maximizeMapSlide').beginElement();
+		view.panes.minimap = 'maximized';
 	},
 	
 	minimizeMapPane: function() {
-			document.getElementById('mapLegendsGroup').setAttribute('opacity',0);
-			document.getElementById('minimizeMap').beginElement();
-			document.getElementById('minimizeMapSlide').beginElement();
-			view.panes.minimap = 'minimized';
+		document.getElementById('mapLegendsGroup').setAttribute('opacity',0);
+		document.getElementById('minimizeMap').beginElement();
+		document.getElementById('minimizeMapSlide').beginElement();
+		view.panes.minimap = 'minimized';
 	},
 	
 	fadeMapPane: function() {
@@ -3133,12 +3302,261 @@ var view = {
 		view.panes['tab'+tabIndex] = 'minimized';
 	},
 	
+	toggleCrewPane: function() {
+		if (view.panes.crew == 'minimized') {
+			view.maximizeCrewPane();
+		} else {
+			view.minimizeCrewPane();
+		};
+	},
+	
+	maximizeCrewPane: function() {
+		document.getElementById('crewWindowGroup').innerHTML = '';
+		view.populateCrewList();
+		document.getElementById('crewGroupReveal').beginElement();
+		view.panes.crew = 'maximized';
+	},
+	
+	minimizeCrewPane: function() {
+		document.getElementById('crewGroupHide').beginElement();
+		view.panes.crew = 'minimized';
+	},
+	
+	populateCrewList: function() {
+		var crewListGroup = document.getElementById('crewListGroup');
+		crewListGroup.innerHTML = '';
+		var fo = document.createElementNS('http://www.w3.org/2000/svg','foreignObject');
+		fo.setAttribute('x',-91);
+		fo.setAttribute('y',-47);
+		fo.setAttribute('width',38);
+		fo.setAttribute('height',94);
+		crewListGroup.appendChild(fo);
+		var div = document.createElement('div');
+		div.id = 'crewListDiv';
+		fo.appendChild(div);
+		var h2 = document.createElement('h2');
+		div.appendChild(h2);
+		h2.innerHTML = 'Crew Roster';
+		var crewList = [];
+		for (var crewmate of game.p1ship.crew) {
+			crewList.push(crewmate);
+		}
+		crewList.sort(function(a,b) {if (game.postings[a.posting].i < game.postings[b.posting].i) {return -1} else if (game.postings[a.posting].i > game.postings[b.posting].i) {return 1} });
+		for (crewmate of crewList) {
+			div.appendChild(view.buildCrewListItem(crewmate));
+		};
+	},
+	
+	buildCrewListItem: function(crewmate) {
+		var div = document.createElement('div');
+		var p = document.createElement('p');
+		p.className = 'crewListName';
+		div.appendChild(p);
+		p.innerHTML = crewmate.name;
+		var p = document.createElement('p');
+		p.className = 'crewListPost';
+		div.appendChild(p);
+		p.innerHTML = game.postings[crewmate.posting].displayName;
+		div.addEventListener('click',view.displayCrewmate.bind(this,crewmate));
+		return div;
+	},
+	
+	displayCrewmate: function(crewmate) {
+		crewmate.traitPose();
+		var crewWindowGroup = document.getElementById('crewWindowGroup')
+		crewWindowGroup.innerHTML = '';
+		var heartCenter = {x:-40,y:-36};
+		var heartGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+		crewWindowGroup.appendChild(heartGroup);
+		heartGroup.addEventListener('click',view.happinessWindow.bind(this,crewmate));
+		heartGroup.setAttribute('stroke-width',0.25);
+		var heartOutlineUse = document.createElementNS('http://www.w3.org/2000/svg','use');
+		heartGroup.appendChild(heartOutlineUse)
+		heartOutlineUse.setAttribute('x',heartCenter.x);
+		heartOutlineUse.setAttribute('y',heartCenter.y);
+		heartOutlineUse.setAttribute('stroke','black');
+		heartOutlineUse.setAttribute('fill','grey');
+		view.setHref(heartOutlineUse,'UIheart');
+		var heartFillUse = document.createElementNS('http://www.w3.org/2000/svg','use');
+		heartGroup.appendChild(heartFillUse)
+		heartFillUse.setAttribute('x',heartCenter.x);
+		heartFillUse.setAttribute('y',heartCenter.y);
+		heartFillUse.setAttribute('stroke','black');
+		heartFillUse.setAttribute('fill','red');
+		heartFillUse.setAttribute('transform','translate('+heartCenter.x+' '+heartCenter.y+') scale('+crewmate.happiness()+') translate('+(-1*heartCenter.x)+' '+(-1*heartCenter.y)+') ');
+		view.setHref(heartFillUse,'UIheart');
+		var xpCenter = {x:-30,y:-36};
+		var xpGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+		crewWindowGroup.appendChild(xpGroup);
+		xpGroup.setAttribute('stroke-width',0.25);
+		var nextLevel = crewmate.nextLevel();
+		for (var i=0;i<nextLevel;i++) {
+			var angle = i/nextLevel * Math.PI*2
+			var circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+			xpGroup.appendChild(circle);
+			circle.setAttribute('cx',xpCenter.x + Math.cos(angle) * 3);
+			circle.setAttribute('cy',xpCenter.y - Math.sin(angle) * 3);
+			circle.setAttribute('r',1);
+			circle.setAttribute('stroke','black');
+			if (i < crewmate.xp) {
+				circle.setAttribute('fill','limegreen');
+			} else {
+				circle.setAttribute('fill','#803030');
+			};
+		};
+		var xpUse = document.createElementNS('http://www.w3.org/2000/svg','use');
+		xpGroup.appendChild(xpUse)
+		xpUse.setAttribute('x',xpCenter.x);
+		xpUse.setAttribute('y',xpCenter.y);
+		xpUse.setAttribute('stroke','black');
+		xpUse.setAttribute('fill','limegreen');
+		view.setHref(xpUse,'UIxp');
+		var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+		crewWindowGroup.appendChild(rect);
+		rect.setAttribute('x',-20);
+		rect.setAttribute('y',-46);
+		rect.setAttribute('width',28);
+		rect.setAttribute('height',28);
+		rect.setAttribute('fill','skyblue');
+		rect.setAttribute('stroke','black');
+		rect.setAttribute('stroke-width',0.25);
+		var headshot = crewmate.body.draw(500,750,'head');
+		headshot.setAttribute('x',-20);
+		headshot.setAttribute('y',-46);
+		headshot.setAttribute('width',28);
+		headshot.setAttribute('height',28);
+		crewWindowGroup.appendChild(headshot);
+		var crewmateFirstName = document.createElementNS('http://www.w3.org/2000/svg','text');
+		crewmateFirstName.setAttribute('x',-48);
+		crewmateFirstName.setAttribute('y',-25);
+		crewmateFirstName.setAttribute('font-size',5);
+		crewmateFirstName.innerHTML = crewmate.name.split(' ')[0];
+		crewmateFirstName.setAttribute('stroke','lemonchiffon');
+		crewmateFirstName.setAttribute('stroke-linejoin','round');
+		crewmateFirstName.setAttribute('paint-order','stroke');
+		crewWindowGroup.appendChild(crewmateFirstName);
+		var crewmateSurname = document.createElementNS('http://www.w3.org/2000/svg','text');
+		crewmateSurname.setAttribute('x',-48);
+		crewmateSurname.setAttribute('y',-19);
+		crewmateSurname.setAttribute('font-size',5);
+		crewmateSurname.innerHTML = crewmate.name.split(' ')[1];
+		crewmateSurname.setAttribute('stroke','lemonchiffon');
+		crewmateSurname.setAttribute('stroke-linejoin','round');
+		crewmateSurname.setAttribute('paint-order','stroke');
+		crewWindowGroup.appendChild(crewmateSurname);
+		var traits = document.createElementNS('http://www.w3.org/2000/svg','text');
+		traits.setAttribute('x',-48);
+		traits.setAttribute('y',-14);
+		traits.setAttribute('font-size',3);
+		var string = '';
+		var traitArray = Object.keys(crewmate.traits);
+		for (var i=0;i<traitArray.length;i++) {
+			string += data.traits[traitArray[i]].displayName;
+			if (i < traitArray.length - 1) {
+				string += " ~ ";
+			};
+		};
+		traits.innerHTML = string;
+		crewWindowGroup.appendChild(traits);
+		var postings = game.postings;
+		var posting = document.createElementNS('http://www.w3.org/2000/svg','text');
+		posting.setAttribute('x',-48);
+		posting.setAttribute('y',-8);
+		posting.setAttribute('font-size',3.5);
+		posting.innerHTML = postings[crewmate.posting].displayName;
+		crewWindowGroup.appendChild(posting);
+		var y = -4;
+		for (var statName in crewmate.stats) {
+			var statLabel = document.createElementNS('http://www.w3.org/2000/svg','text');
+			statLabel.setAttribute('x',-22);
+			statLabel.setAttribute('y',y);
+			statLabel.setAttribute('font-size',3);
+			statLabel.setAttribute('text-anchor','end');
+			statLabel.innerHTML = statName + ": ";
+			crewWindowGroup.appendChild(statLabel);
+			var stat = document.createElementNS('http://www.w3.org/2000/svg','text');
+			stat.setAttribute('x',-21);
+			stat.setAttribute('y',y);
+			stat.setAttribute('font-size',3);
+			stat.innerHTML = crewmate.stats[statName];
+			crewWindowGroup.appendChild(stat);
+			var benefit = document.createElementNS('http://www.w3.org/2000/svg','text');
+			benefit.setAttribute('class','statBenefit');
+			benefit.setAttribute('x',-17);
+			benefit.setAttribute('y',y-0.5);
+			benefit.setAttribute('font-size',2);
+			crewWindowGroup.appendChild(benefit);
+			if (crewmate.stats[statName] > 0) {
+				var benefitNum = crewmate.stats[statName];
+				if (statName == 'piloting' && crewmate.posting == 'pilot') {
+					benefit.innerHTML = "(+"+benefitNum+"% thrust & turn)";
+				} else if (statName == 'loadmastery' && crewmate.posting == 'pilot') {
+					benefit.innerHTML = "(+"+benefitNum+"% lift)";
+				} else if (statName == 'engineering' && crewmate.posting == 'chiefEngineer') {
+					benefit.innerHTML = "(+"+benefitNum+"% fuel efficiency & capacity)";
+				} else if (statName == 'haggling' && crewmate.posting == 'chiefEngineer') {
+					benefit.innerHTML = "("+benefitNum+"% discount at shipyards)";
+				} else if (statName == 'haggling' && crewmate.posting == 'supercargo') {
+					benefit.innerHTML = "("+benefitNum+"% discount on commodities)";
+				} else if (statName == 'loadmastery' && crewmate.posting == 'supercargo') {
+					benefit.innerHTML = "(+"+benefitNum+"% cargo capacity)";
+				} else if (statName == 'haggling' && crewmate.posting == 'quartermaster') {
+					benefit.innerHTML = "("+benefitNum+"% discount to resupply)";
+				} else if (statName == 'hospitality' && crewmate.posting == 'quartermaster') {
+					benefit.innerHTML = "(+"+benefitNum+"% amenities & harvest)";
+				} else if (statName == 'piloting' && crewmate.posting == 'operations') {
+					benefit.innerHTML = "(+"+benefitNum+"% stability)";
+				} else if (statName == 'hospitality' && crewmate.posting == 'operations') {
+					benefit.innerHTML = "(+"+benefitNum+"% harvest)";
+				} else if (statName == 'loadmastery' && crewmate.posting == 'engineering') {
+					benefit.innerHTML = "(+"+benefitNum+"% recharge)";
+				} else if (statName == 'engineering' && crewmate.posting == 'engineering') {
+					benefit.innerHTML = "(+"+benefitNum+" damage control)";
+				} else if (statName == 'hospitality' && crewmate.posting == 'morale') {
+					benefit.innerHTML = "(+"+benefitNum+"% amenities)";
+				};
+			};
+			y += 4;		
+		};
+		var change = document.createElementNS('http://www.w3.org/2000/svg','text');
+		change.setAttribute('x',-48);
+		change.setAttribute('y',29);
+		change.setAttribute('font-size',3);
+		change.innerHTML = 'Post '+crewmate.name.split(' ')[0]+' To:';
+		crewWindowGroup.appendChild(change);
+		var x = -46, y = 31;
+		for (var posting in postings) {
+			var postingButton = view.buildButton(postings[posting].buttonName,x,y,30,0.4);
+			postingButton.addEventListener('click',handlers.changePosting.bind(this,crewmate,posting));
+			crewWindowGroup.appendChild(postingButton);
+			if (x > -10) {x = -46;y += 6} else {x += 13};
+		}
+	},
+	
+	happinessWindow: function(crewmate) {
+		var div = view.windowObjectToDiv({title:crewmate.name + "'s Happiness",paragraphs:[]});
+		var ul = document.createElement('ul');
+		div.appendChild(ul);
+		var log = crewmate.happiness(true);
+		for (var item of log) {
+			var li = document.createElement('li');
+			ul.appendChild(li);
+			li.innerHTML = "+" + Math.floor(item.value) + " " + item.label;
+		};
+		var li = document.createElement('li');
+		ul.appendChild(li);
+		li.innerHTML = Math.floor(crewmate.happiness() * 100) + " Total";
+		var buttonArray = [{label:'OK',execute:view.dismissWindow}];
+		view.displayWindow(div,buttonArray);
+	},
+	
 	rumble: function() {
 		var rumbleAnimation = document.getElementById('rumbleAnimation');
 		rumbleAnimation.beginElement();
 	},
 	
-	displayAlert: function(alert) {
+	displayAlert: function(alert,color) {
+		if (color == undefined) { color = 'red' };
 		var alertsGroup = document.getElementById('alertsGroup');
 		alertsGroup.innerHTML = '';
 		var alertText = document.createElementNS('http://www.w3.org/2000/svg','text');
@@ -3148,7 +3566,7 @@ var view = {
 		alertText.setAttribute('font-size',3);
 		alertText.innerHTML = alert;
 		alertText.setAttribute('class','alert');
-		alertText.setAttribute('fill','red');
+		alertText.setAttribute('fill',color);
 		alertText.setAttribute('stroke','black');
 		alertText.setAttribute('paint-order','stroke');
 		alertsGroup.appendChild(alertText);
@@ -3256,22 +3674,10 @@ var view = {
 			statText.setAttribute('fill','red');
 			statText.setAttribute('stroke','white');
 			statText.setAttribute('paint-order','stroke');
-			statText.innerHTML = "Repairs: $" + Math.ceil(component.cost*(1-component.condition));
+			statText.innerHTML = "Repairs: $" + Math.ceil(component.cost*(1-component.condition)*game.p1ship.discount('shipyard'));
 		}
 				
 		return componentGroup
-	},
-	
-	toggleInventoryPane: function() {
-		console.log('Inventory and Cargo!');
-	},
-	
-	toggleOutfittingPane: function() {
-		console.log('Outfitting and Ship Guts!');
-	},
-	
-	togglePersonnelPane: function() {
-		console.log('Personnel and Crew!');
 	},
 	
 	// Events
@@ -3371,6 +3777,9 @@ var view = {
 	displayWindow: function(contents,buttonArray,image) {
 		var windowGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
 		alertsGroup.appendChild(windowGroup);
+		if (image !== undefined) {
+			console.log('images in windows not yet code');
+		};
 		var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
 		rect.setAttribute('x',-75);
 		rect.setAttribute('y',-50);
@@ -3385,7 +3794,7 @@ var view = {
 		foreignObject.setAttribute('x',-70);
 		foreignObject.setAttribute('y',-25);
 		foreignObject.setAttribute('width',140);
-		foreignObject.setAttribute('height',75);
+		foreignObject.setAttribute('height',65);
 		foreignObject.appendChild(contents);
 		var fadeIn = document.createElementNS('http://www.w3.org/2000/svg','animate');
 		fadeIn.setAttribute('attributeType','XML');
@@ -3397,24 +3806,48 @@ var view = {
 		fadeIn.setAttribute('begin','indefinite');
 		windowGroup.appendChild(fadeIn);
 		fadeIn.beginElement();
-		setTimeout(view.pauseAnimations,1000);
 		var x = 35;
 		for (var button of buttonArray) {
 			var buttonGroup = view.buildButton(button.label,x,35);
 			windowGroup.appendChild(buttonGroup);
 			buttonGroup.addEventListener('click',button.execute);
+			x -= 32;
 		};
+		setTimeout(view.pauseAnimations,500);
+	},
+	
+	windowObjectToDiv: function(object) {
+		var div = document.createElement('div');
+		if (object.image !== undefined) {
+			console.log('code the image part of this.');
+		};
+		if (object.title !== undefined) {
+			var h1 = document.createElement('h1');
+			div.appendChild(h1);
+			h1.innerHTML = object.title;
+		};
+		for (var string of object.paragraphs) {
+			var p = document.createElement('p');
+			div.appendChild(p);
+			p.innerHTML = string;
+		};
+		
+		return div;
 	},
 	
 	pauseAnimations: function() {
-		game.clock.paused = true;
+		if (game !== undefined) {
+			game.clock.paused = true;
+		};
 		document.getElementById('gameSVG').pauseAnimations();
 	},
 	
 	dismissWindow: function() {
 		document.getElementById('alertsGroup').innerHTML = '';
-		game.clock.paused = false;
-		game.clock.go();
+		if (game !== undefined) {
+			game.clock.paused = false;
+			game.clock.go();
+		};
 		document.getElementById('gameSVG').unpauseAnimations();
 	},
 

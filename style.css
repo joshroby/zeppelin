@@ -19,6 +19,7 @@ svg {
 .alert {
 	font-style: italic;
 	color: 'red';
+	pointer-events: none;
 }
 
 #rumorsDiv {
@@ -28,14 +29,57 @@ svg {
 	overflow-y: auto;
 }
 
+.rumorP {
+	font-family: 'EB Garamond', serif;
+}
+
+#crewListDiv {
+	width: 38;
+	height: 94;
+	overflow-y: auto;
+}
+
+#crewListDiv h2 {
+	font-size: 4;
+}
+
+#crewListDiv p {
+	font-size: 2;
+}
+
+.crewListName {
+	margin-bottom: 0;
+}
+
+.crewListPost {
+	font-family: 'EB Garamond', serif;
+	margin-bottom: 0;
+	margin-top: 0;
+	margin-left: 2;
+}
+
+.statBenefit {
+	font-family: 'EB Garamond', serif;
+}
+
 #gameModalWindow {
 	font-size: 2.5;
-	height: 75;
+	height: 60;
 	overflow-y: auto;
 }
 
 #gameModalWindow h1 {
-	font-size: 7;
+	font-size: 6;
+}
+
+#gameModalWindow p {
+	font-family: 'EB Garamond', serif;
+	font-weight: 400;
+}
+
+#gameModalWindow strong {
+	font-family: 'Cinzel', serif;
+	font-weight: 900;
 }
 
 ::-webkit-scrollbar {

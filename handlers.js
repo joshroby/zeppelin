@@ -1,6 +1,10 @@
 var handlers = {
 
 	keyMap: {},
+	
+	mouseMap: {},
+	
+	stutterStamps: {},
 
 	newGame: function() {
 	
@@ -28,27 +32,42 @@ var handlers = {
 	},
 	
 	keyInput: function() {
+		var timedEvent = setTimeout(handlers.keyInput.bind(handlers),100);
+		
 		if (this.keyMap[39] || this.keyMap[68]) {game.p1ship.steer('right')};
 		if (this.keyMap[37] || this.keyMap[65]) {game.p1ship.steer('left')};
 		if (this.keyMap[87] || this.keyMap[38]) {game.p1ship.throttle('forward')};
 		if (this.keyMap[83] || this.keyMap[40]) {game.p1ship.throttle('reverse')};
-		if (this.keyMap[73]) {view.toggleInventoryPane();};
-		if (this.keyMap[76]) {game.p1ship.moor();};
-		if (this.keyMap[77]) {view.toggleMapPane();};
-		if (this.keyMap[79]) {view.toggleOutfittingPane();};
-		if (this.keyMap[80]) {view.togglePersonnelPane();};
+		if (this.keyMap[76] || this.keyMap[88]) {game.p1ship.moor();};
+		if (this.keyMap[77]) {handlers.toggleMapPane();};
+		if (this.keyMap[67]) {view.toggleCrewPane();};
 		if (this.keyMap[32]) {handlers.pauseUnpause();};
-		var timedEvent = setTimeout(handlers.keyInput.bind(handlers),100);
+		
+		if (this.mouseMap.down !== undefined) {
+			if (this.mouseMap.wheel !== undefined) {game.p1ship.steer(this.mouseMap.wheel)};
+			if (this.mouseMap.eot !== undefined) {
+				var direction;
+				if (this.mouseMap.eot > game.p1ship.eot) {
+					direction = 'forward';
+				} else if (this.mouseMap.eot < game.p1ship.eot) {
+					direction = 'reverse';
+				};
+				game.p1ship.throttle(direction);
+			};
+		};
 	},
 	
 	toggleMapPane: function() {
-		if (view.panes.minimap == 'minimized') {
-			view.maximizeMapPane();
+		if (handlers.stutterStamps.mapPane == undefined || new Date() - handlers.stutterStamps.mapPane > 1000 ) {
+			handlers.stutterStamps.mapPane = new Date();
+			view.toggleMapPane();
 		};
 	},
 	
 	setCourse: function(town) {
 		view.panes.course = town;
+		view.displayAlert('Course laid in for '+town.name+", Cap'n!",'cyan');
+		view.toggleMapPane();
 	},
 
 	soundtrackPlayPause: function() {
@@ -81,9 +100,37 @@ var handlers = {
 	},
 	
 	pauseUnpause: function() {
-		if (game !== undefined && game.clock !== undefined) {
-			game.pauseUnpauseGame();
+		if (handlers.stutterStamps.pause == undefined || new Date() - handlers.stutterStamps.pause > 1000 ) {
+			handlers.stutterStamps.pause = new Date();
+			if (game !== undefined && game.clock !== undefined) {
+				game.pauseUnpauseGame();
+			};
 		};
+	},
+	
+	mouseDown: function() {
+		handlers.mouseMap.down = new Date();
+	},
+	
+	mouseUp: function() {
+		handlers.mouseMap.down = undefined;
+	},
+	
+	eotEnter: function(index) {
+		var input = (4 - index) / 3 ;
+		handlers.mouseMap.eot = input;
+	},
+	
+	eotLeave: function() {
+		handlers.mouseMap.eot = undefined;
+	},
+	
+	wheelEnter: function(direction) {
+		handlers.mouseMap.wheel = direction;
+	},
+	
+	wheelLeave: function() {
+		handlers.mouseMap.wheel = undefined;
 	},
 	
 	firstRound: function() {
@@ -91,6 +138,9 @@ var handlers = {
 			view.revealRumors();
 			game.p1ship.coin -= 10;
 			view.updatePurse(game);
+		};
+		for (var crewmate of game.p1ship.crew) {
+			crewmate.drink();
 		};
 	},
 	
@@ -193,12 +243,18 @@ var handlers = {
 			view.selectComponent(component);
 			view.panes.moving = true;
 			view.filterShipyardTargets(component.slotType);
-			game.p1ship.coin -= component.cost;
+			game.p1ship.coin -= Math.floor(component.cost*game.p1ship.discount('shipyard'));
 			view.updatePurse(game);
 		} else {
 			view.displayAlert('You must sell or install the '+view.panes.selectedComponent.name+' first.');
 		};
 
+	},
+	
+	changePosting: function(crewmate,posting) {
+		game.p1ship.postCrewmate(crewmate,posting);
+		view.populateCrewList();
+		view.displayCrewmate(crewmate);
 	},
 	
 	doEvent: function(event) {
