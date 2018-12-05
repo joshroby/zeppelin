@@ -2034,12 +2034,8 @@ var view = {
 		mugTip.setAttribute('fill','freeze');
 		mugTip.setAttribute('begin','indefinite');
 		
-		var recruitGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
-		paneGroup.appendChild(recruitGroup);
-		recruitGroup.setAttribute('opacity',0.5);
-		
 		var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
-		recruitGroup.appendChild(rect);
+		paneGroup.appendChild(rect);
 		rect.setAttribute('x',8);
 		rect.setAttribute('y',-30);
 		rect.setAttribute('width',74);
@@ -2047,23 +2043,156 @@ var view = {
 		rect.setAttribute('fill','none');
 		rect.setAttribute('stroke','goldenrod');
 		
-		var text = document.createElementNS('http://www.w3.org/2000/svg','text');
-		recruitGroup.appendChild(text);
-		text.setAttribute('x',45);
-		text.setAttribute('y',-20);
-		text.setAttribute('font-size',2);
-		text.setAttribute('text-anchor','middle');
-		text.innerHTML = "A strange and unimplemented figure.";
-		
-		var buyDrinkButton = view.buildButton('Buy Drink',10,38);
-		recruitGroup.appendChild(buyDrinkButton);
-		
-		var recruitButton = view.buildButton('Recruit',50,38);
-		recruitGroup.appendChild(recruitButton);
+		var recruitGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+		paneGroup.appendChild(recruitGroup);
+		recruitGroup.id = 'recruitGroup';
+		view.updateRecruitment(tavern,recruitGroup);
 		
 		view.panes.rumorsRevealed = false;
 		
 		return paneGroup;
+	},
+	
+	updateRecruitment: function(tavern,node) {
+		if (node == undefined) {
+			var recruitGroup = document.getElementById('recruitGroup');
+		} else {
+			var recruitGroup = node;
+		};
+		
+		recruitGroup.innerHTML = '';
+		
+		if (tavern.atTheBar == undefined) {
+			recruitGroup.setAttribute('opacity',0.5);
+			var text = document.createElementNS('http://www.w3.org/2000/svg','text');
+			recruitGroup.appendChild(text);
+			text.setAttribute('x',45);
+			text.setAttribute('y',-20);
+			text.setAttribute('font-size',2);
+			text.setAttribute('text-anchor','middle');
+			text.innerHTML = "No one seems to be looking for work.";
+		} else {
+			var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+			recruitGroup.appendChild(rect);
+			rect.setAttribute('x',52);
+			rect.setAttribute('y',-28);
+			rect.setAttribute('width',28);
+			rect.setAttribute('height',28);
+			rect.setAttribute('fill','brown');
+			rect.setAttribute('stroke','black');
+			rect.setAttribute('stroke-width',0.25);
+		
+			tavern.atTheBar.npc.traitPose();
+			var pic = tavern.atTheBar.npc.body.draw(500,750,'head');
+			recruitGroup.appendChild(pic);
+			pic.setAttribute('x',52);
+			pic.setAttribute('y',-28);
+			pic.setAttribute('width',28);
+			pic.setAttribute('height',28);
+		
+			if (Object.keys(tavern.atTheBar.revelations).length == 0) {
+				var text = document.createElementNS('http://www.w3.org/2000/svg','text');
+				recruitGroup.appendChild(text);
+				text.innerHTML = "An intriguing figure sits at the bar as if waiting.";
+				text.setAttribute('x',45);
+				text.setAttribute('y',12);
+				text.setAttribute('font-size',2);
+				text.setAttribute('text-anchor','middle');
+				var buyDrinkButton = view.buildButton(['May I Buy You','a Drink? ($2)'],35,38,40,0.5);	
+				recruitGroup.appendChild(buyDrinkButton);
+				buyDrinkButton.addEventListener('click',handlers.atTheBarDrink.bind(this,tavern));
+			} else if (tavern.atTheBar.lastDialogue !== undefined) {
+				var fo = document.createElementNS('http://www.w3.org/2000/svg','foreignObject');
+				recruitGroup.appendChild(fo);
+				fo.setAttribute('x',12);
+				fo.setAttribute('y',18);
+				fo.setAttribute('width',67)
+				fo.setAttribute('height',18);
+				var dialogueDiv = document.createElement('div');
+				dialogueDiv.id = 'dialogueDiv';
+				fo.appendChild(dialogueDiv);
+				dialogueDiv.innerHTML = '"'+tavern.atTheBar.lastDialogue+'"';
+			};
+		
+			if (tavern.atTheBar.type == 'recruitable' && Object.keys(tavern.atTheBar.revelations).length > 0) {
+				if (tavern.atTheBar.revelations.name) {
+					var crewmateFirstName = document.createElementNS('http://www.w3.org/2000/svg','text');
+					crewmateFirstName.setAttribute('x',12);
+					crewmateFirstName.setAttribute('y',-6);
+					crewmateFirstName.setAttribute('font-size',5);
+					crewmateFirstName.innerHTML = tavern.atTheBar.npc.name.split(' ')[0];
+					crewmateFirstName.setAttribute('stroke','lemonchiffon');
+					crewmateFirstName.setAttribute('stroke-linejoin','round');
+					crewmateFirstName.setAttribute('paint-order','stroke');
+					recruitGroup.appendChild(crewmateFirstName);
+					var crewmateSurname = document.createElementNS('http://www.w3.org/2000/svg','text');
+					crewmateSurname.setAttribute('x',12);
+					crewmateSurname.setAttribute('y',-1);
+					crewmateSurname.setAttribute('font-size',5);
+					crewmateSurname.innerHTML = tavern.atTheBar.npc.name.split(' ')[1];
+					crewmateSurname.setAttribute('stroke','lemonchiffon');
+					crewmateSurname.setAttribute('stroke-linejoin','round');
+					crewmateSurname.setAttribute('paint-order','stroke');
+					recruitGroup.appendChild(crewmateSurname);
+				};
+				var traitList = Object.keys(tavern.atTheBar.npc.traits);
+				var string = '';
+				for (var i in traitList) {
+					if (tavern.atTheBar.revelations[traitList[i]]) {
+						string += traitList[i];
+					} else {
+						string += "???";
+					};
+					if (i < traitList.length-1) {
+						string += " ~ ";
+					};
+				};
+				var text = document.createElementNS('http://www.w3.org/2000/svg','text');
+				recruitGroup.appendChild(text);
+				text.innerHTML = string;
+				text.setAttribute('x',45);
+				text.setAttribute('y',4);
+				text.setAttribute('font-size',3);
+				text.setAttribute('text-anchor','middle');
+			
+				var num, x=26, y=8;
+				for (var statName in tavern.atTheBar.npc.stats) {
+					if (tavern.atTheBar.revelations[statName]) {
+						num = tavern.atTheBar.npc.stats[statName];
+					} else {
+						num = "???";
+					};
+					var text = document.createElementNS('http://www.w3.org/2000/svg','text');
+					recruitGroup.appendChild(text);
+					text.innerHTML = statName + ":";
+					text.setAttribute('x',x-0.5);
+					text.setAttribute('y',y);
+					text.setAttribute('font-size',2);
+					text.setAttribute('text-anchor','end');
+					var text = document.createElementNS('http://www.w3.org/2000/svg','text');
+					recruitGroup.appendChild(text);
+					text.innerHTML = num;
+					text.setAttribute('x',x+0.5);
+					text.setAttribute('y',y);
+					text.setAttribute('font-size',2);
+					text.setAttribute('text-anchor','start');
+					if (x==70) {x=26,y+=4} else {x+=22};
+				};
+		
+				var anotherRoundButton = view.buildButton(["Let's Have",'Another ($2)'],12,38,40,0.5);	
+				recruitGroup.appendChild(anotherRoundButton);
+				anotherRoundButton.addEventListener('click',handlers.atTheBarAnother.bind(this,tavern));
+		
+				var chatButton = view.buildButton('Chat',35,38,40,0.5);	
+				recruitGroup.appendChild(chatButton);
+				chatButton.addEventListener('click',handlers.atTheBarChat.bind(this,tavern));
+		
+				var hireCost = tavern.atTheBar.npc.hireCost(tavern);
+				var recruitButton = view.buildButton('Hire ($'+hireCost+')',58,38,40,0.5);
+				recruitGroup.appendChild(recruitButton);
+				recruitButton.addEventListener('click',handlers.atTheBarHire.bind(this,tavern));
+			};
+		};	
 	},
 	
 	revealRumors: function() {

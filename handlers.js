@@ -144,10 +144,24 @@ var handlers = {
 		};
 	},
 	
-	recruitBuyDrink: function() {
+	atTheBarDrink: function(tavern) {
+		game.atTheBarDrink(tavern);
+		view.updateRecruitment(tavern);
 	},
 	
-	recruit: function() {
+	atTheBarAnother: function(tavern) {
+		game.atTheBarAnother(tavern);
+		view.updateRecruitment(tavern);
+	},
+	
+	atTheBarChat: function(tavern) {
+		game.atTheBarChat(tavern);
+		view.updateRecruitment(tavern);
+	},
+	
+	atTheBarHire: function(tavern) {
+		tavern.atTheBar.npc.hire(tavern);
+		view.updateRecruitment(tavern);
 	},
 	
 	buyCommodity: function(commodityKey) {

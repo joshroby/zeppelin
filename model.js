@@ -179,6 +179,27 @@ function Game() {
 		view.removeEvent(event);
 	};
 	
+	this.atTheBarDrink = function(tavern) {
+		game.p1ship.coin -= 2;
+		view.updatePurse(game);
+		tavern.atTheBar.drinkCount++;
+		tavern.atTheBar.revelations.name = true;
+		if (tavern.atTheBar.type == 'recruitable') {
+			tavern.atTheBar.lastDialogue = tavern.atTheBar.npc.recruitDialogue(tavern,true);
+		};
+	};
+	
+	this.atTheBarAnother = function(tavern) {
+		tavern.atTheBar.drinkCount++;
+		game.p1ship.coin -= 2;
+		view.updatePurse(game);
+		tavern.atTheBar.lastDialogue = tavern.atTheBar.npc.recruitDialogue(tavern,true);
+	};
+	
+	this.atTheBarChat = function(tavern) {
+		tavern.atTheBar.lastDialogue = tavern.atTheBar.npc.recruitDialogue(tavern);
+	};
+	
 	// construction
 	
 	this.commodities = {};
@@ -275,6 +296,8 @@ function SectionMap(x,y,game) {
 	this.id = 'sectionMap_'+x+'_'+y;
 	this.hexGridX = x;
 	this.hexGridY = y;
+	
+	this.level = Math.round(Math.pow(Math.pow(x*7,2)+Math.pow(y*6,2),0.5)/7);
 	
 	this.x = x * 350;
 	this.y = y * 300;
@@ -609,7 +632,15 @@ function SectionMap(x,y,game) {
 		};
 		var tavern = {
 			name: 'Tavern',
+			atTheBar: {
+				npc: new Crewmate(10+this.level),
+				type: 'recruitable',
+				revelations: {},
+				drinkCount: 0,
+				lastDialogue: undefined,
+			},
 		};
+		this.town.tavern = tavern;
 		this.town.amenities.push(tavern);
 		
 		var wharf = {
@@ -628,6 +659,7 @@ function SectionMap(x,y,game) {
 			wharf.localWares[commodityKey] = ware;
 		};
 		wharf.localWares.charge.available = 0;
+		this.town.wharf = wharf;
 		this.town.amenities.push(wharf);
 		
 		var amenity = {
@@ -635,14 +667,17 @@ function SectionMap(x,y,game) {
 		};
 		if (true) {
 			amenity.name = 'Shipyard';
+			this.town.shipyard = amenity;
 			amenity.stock = [];
 			for (var i=0;i<5;i++) {
 				amenity.stock.push(new Component(undefined,1+Math.random() * 10 << 0));
 			};
 		} else if (false) {
 			amenity.name = 'Temple';
+			this.town.temple = amenity;
 		} else if (false) {
 			amenity.name = 'Hospital';
+			this.town.hospital = amenity;
 		};
 		this.town.amenities.push(amenity);
 		var adjectives = ['Little','Big','Great','Friendly','Prudence','Percival','Gas','Alum'];
@@ -1601,11 +1636,11 @@ function Ship(id,tier) {
 function Crewmate(level) {
 	if (level == undefined) {level = 10};
 	
-	var firstbits = ['jon','tom','will','rich','rick','rob','edw','hen','jame','fran','nich','mat','christ','anton','sam','an','liz','beth','jo','al','marg','ell','isab','mar','prud','perc'];
+	var firstbits = ['jon','tom','will','rich','rick','rob','edw','hen','jame','fran','nich','mat','christ','ant','sam','an','liz','beth','jo','al','marg','ell','isab','mar','prud','perc'];
 	var middlebits = ['a','e','o','s','z'];
 	var lastbits = ['bell','bella','bello','ice','en','ence','ival','aret','as','iam','ard','ert','in','ry','rietta','son','dottir','skid','cis','las','thew','ia','uel','iel','ael','und','drew','a','beth','bett','betta','ann','anna','et','ette','etta','ta','tha','ua'];
 	var prefices = ['sher','cald','col','blake','til','grant','lang','blan','nor','north','rad','rud','south','su','sut','somer','wes','west','whit','guil','brew','church','cros','bran','brand','brin','haw','hay','kings','mel','mil','pres','gar','strat','sedg','stock','wain','wal','war','ash','bere','bark','birk','elm','farn','oak','ry','rye','saf','sal','salf','sel','wil','will','willough','york','ive','cov','dig','how','law','hol','mar','wad','sea','ather','car','fen','bever','bor','ever','cran','buck','swin','har','ram','shep','ship','wether','hart','sted','newt','ald','cad','ed','eld','ew','fitz','hal']
-	var suffices = ['castle','cott','croft','court','by','worth','ham','ford','shire','bury','ton','vell','berry','hurst','bert','olf','et','don','tle','ey','key','sey','more','land','wood','ell','man','mon','ond','rich','rick','son','und','web','wright','son','dottir','skid']
+	var suffices = ['castle','cott','croft','court','by','worth','ham','ford','shire','bury','ton','vell','berry','hurst','bert','olf','et','don','tle','ey','key','sey','more','land','wood','ell','man','mon','ond','rich','rick','son','und','web','wright','son','dottir','skid','ton','on']
 	var middles = ['by','rock','rox','stan','cam','brad','bridg','bridge','brig','chester','kirk','burg','wick','bed','swain','well','thorn','thorne','drake','cok','bram','bain','water','beck','borne','burn','clay','cliff','burl','dun','hill','lake','ley','mont','brent','lin','ridge','ridg','dale','del','den','fisk','hund','hard','ward','win']
 	prefices = prefices.concat(middles);
 	suffices = suffices.concat(suffices);
@@ -1645,6 +1680,7 @@ function Crewmate(level) {
 	};
 	
 	this.posting = 'operations';
+	this.pay = 0;
 	
 	this.xp = 0;
 	this.mooringLog = [];
@@ -1749,6 +1785,74 @@ function Crewmate(level) {
 			num = 1;
 		};
 		this.addToHappylog('Captain recently bought a round',num);
+	};
+	
+	this.recruitDialogue = function(tavern,drink) {
+		var dialogue;
+		if (tavern.atTheBar.lastDialogue == undefined) {
+			dialogue = "Hello, my name is "+this.name+", and I am interested in signing onto a zeppelin.  Might you know of one that is hiring crew?";
+			dialogue += "  I'd need a ship that offers at least $"+this.hireCost(tavern)+" pay up front.";
+		} else {
+			var revealChance = 0.2 + tavern.atTheBar.drinkCount * 0.1;
+			if (drink) {revealChance = 1};
+			var dialogueOptions = [];
+			if (Math.random() < revealChance) {
+				var revealOptions = Object.keys(this.stats).concat(Object.keys(this.traits));
+				for (key in tavern.atTheBar.revelations) {
+					if (revealOptions.indexOf(key) !== -1) {
+						revealOptions.splice(revealOptions.indexOf(key),1);
+					};
+				};
+				var revelation = revealOptions[revealOptions.length * Math.random() << 0];
+				tavern.atTheBar.revelations[revelation] = true;
+				if (Object.keys(this.stats).indexOf(revelation) !== -1 && this.stats[revelation] == 0) {
+					dialogueOptions = ["I should tell you now that I have zero experience in "+revelation+"."];
+				} else if (Object.keys(this.stats).indexOf(revelation) !== -1) {
+					dialogueOptions = [
+						"I've trained for working in "+revelation+".",
+						"I have some experience with "+revelation+".",
+					];
+				} else {
+					if (data.traits[revelation].pos == 'noun') {
+						dialogueOptions = ["Gotta tell you, I'm a bit of a "+data.traits[revelation].displayName+".  I hope that won't be a problem.",];
+					} else {
+						dialogueOptions = ["Gotta tell you, I'm a bit "+data.traits[revelation].displayName+".  I trust that won't be a problem.",];
+					};
+				};
+			} else {
+				var randomTown = game.townList[game.townList.length * Math.random() << 0].name;
+				dialogueOptions = [
+					"Have you ever noticed that the secret to pronouncing most people's names is knowing which letters to pretend aren't there?",
+					"Have you ever been to "+randomTown+"?  Lovely place.",
+					"Have you ever been to "+randomTown+"?  Nice place to visit; wouldn't want to live there.",
+					"Do you have any plans to head towards "+randomTown+"?",
+					"Honestly, I'm just eager to get out of this town.",
+					"You seem like you run a pleasant crew.",
+				];
+			};
+			dialogue = dialogueOptions[dialogueOptions.length * Math.random() << 0];
+		};
+		return dialogue;
+	};
+	
+	this.hireCost = function(tavern) {
+		var hireCost = this.nextLevel() * 10;
+		if (this.traits.tippler) {
+			hireCost -= tavern.atTheBar.drinkCount * 10
+		};
+		return Math.max(0,hireCost);
+	};
+	
+	this.hire = function(tavern) {
+		var hireCost = this.hireCost(tavern);
+		this.pay -= hireCost;
+		game.p1ship.coin -= hireCost;
+		view.updatePurse(game);
+		game.p1ship.crew.push(this);
+		this.addToHappylog('Recently joined the crew',50);
+		tavern.atTheBar = undefined;
+		view.maximizeCrewPane();
+		view.displayCrewmate(this);
 	};
 }
 
@@ -1925,21 +2029,21 @@ var gamenEventPointers = {
 var data = {
 
 	traits: {
-		curious: {displayName: 'Curious'},
-		gamer: {displayName: 'Gamer'},
-		gregarious: {displayName: 'Gregarious'},
-		greenThumb: {displayName: 'Green Thumb'},
-		hothead: {displayName: 'Hothead'},
-		hunter: {displayName: 'Hunter'},
-		painter: {displayName: 'Painter'},
-		pious: {displayName: 'Pious'},
-		poet: {displayName: 'Poet'},
-		rake: {displayName: 'Rake'},
-		scholar: {displayName: 'Scholar'},
-		skeptic: {displayName: 'Skeptic'},
-		tinker: {displayName: 'Tinker'},
-		teetotaler: {displayName: 'Teetotaler'},
-		tippler: {displayName: 'Tippler'},
+		curious: {displayName: 'Curious',pos:'adjective'},
+		gamer: {displayName: 'Gamer',pos:'noun'},
+		gregarious: {displayName: 'Gregarious',pos:'adjective'},
+		greenThumb: {displayName: 'Green Thumb',pos:'noun'},
+		hothead: {displayName: 'Hothead',pos:'noun'},
+		hunter: {displayName: 'Hunter',pos:'noun'},
+		painter: {displayName: 'Painter',pos:'noun'},
+		pious: {displayName: 'Pious',pos:'adjective'},
+		poet: {displayName: 'Poet',pos:'noun'},
+		rake: {displayName: 'Rake',pos:'noun'},
+		scholar: {displayName: 'Scholar',pos:'noun'},
+		skeptic: {displayName: 'Skeptic',pos:'noun'},
+		tinker: {displayName: 'Tinker',pos:'noun'},
+		teetotaler: {displayName: 'Teetotaler',pos:'noun'},
+		tippler: {displayName: 'Tippler',pos:'noun'},
 	}
 };
 

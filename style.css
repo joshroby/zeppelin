@@ -33,6 +33,11 @@ svg {
 	font-family: 'EB Garamond', serif;
 }
 
+#dialogueDiv {
+	font-family: 'EB Garamond', serif;
+	font-size: 2.5;
+}
+
 #crewListDiv {
 	width: 38;
 	height: 94;
